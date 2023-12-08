@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/cloud-barista/cm-cicada/api/echo"
 	"github.com/cloud-barista/cm-cicada/common"
+	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
 	"github.com/jollaman999/utils/syscheck"
@@ -28,6 +29,8 @@ func init() {
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	airflow.Init()
 
 	echo.Init()
 }

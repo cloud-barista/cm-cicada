@@ -1,3 +1,10 @@
 cm-cicada:
+    airflow-server:
+        address: 127.0.0.1:8080
+        use_tls: false
+        # skip_tls_verify: true
+        timeout: 10
+        username: "airflow"
+        password: "airflow"
     listen:
         port: 8083
