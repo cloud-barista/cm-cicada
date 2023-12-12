@@ -4,8 +4,18 @@ import (
 	"context"
 	"errors"
 	"github.com/apache/airflow-client-go/airflow"
+	"github.com/cloud-barista/cm-cicada/model"
 	"github.com/jollaman999/utils/logger"
 )
+
+func (conn *Connection) CreateDAG(DAG *model.DAG) error {
+	err := CreateDAGFactoryYAML(DAG)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (conn *Connection) GetDAGs() (airflow.DAGCollection, error) {
 	ctx, cancel := context.WithTimeout(conn.ctx, conn.timeout)

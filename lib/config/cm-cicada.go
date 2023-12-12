@@ -24,7 +24,9 @@ type cmCicadaConfig struct {
 			Username      string `yaml:"username"`
 			Password      string `yaml:"password"`
 		} `yaml:"airflow-server"`
-		Listen struct {
+		DAGDirectoryHost    string `yaml:"dag_directory_host"`
+		DAGDirectoryAirflow string `yaml:"dag_directory_airflow"`
+		Listen              struct {
 			Port string `yaml:"port"`
 		} `yaml:"listen"`
 	} `yaml:"cm-cicada"`
@@ -80,6 +82,19 @@ func checkCMCicadaConfigFile() error {
 	}
 	if CMCicadaConfig.CMCicada.AirflowServer.Password == "" {
 		return errors.New("config error: cm-cicada.airflow-server.password is empty")
+	}
+
+	dagDirectoryHost := CMCicadaConfig.CMCicada.DAGDirectoryHost
+	if dagDirectoryHost == "" {
+		return errors.New("config error: cm-cicada.dag_directory_host is empty")
+	}
+	if !fileutil.IsExist(dagDirectoryHost) {
+		return errors.New("DAG directory (" + dagDirectoryHost + ") is not exist")
+	}
+
+	dagDirectoryAirflow := CMCicadaConfig.CMCicada.DAGDirectoryAirflow
+	if dagDirectoryAirflow == "" {
+		CMCicadaConfig.CMCicada.DAGDirectoryAirflow = dagDirectoryHost
 	}
 
 	if CMCicadaConfig.CMCicada.Listen.Port == "" {

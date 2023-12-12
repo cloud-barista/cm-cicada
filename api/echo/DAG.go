@@ -2,14 +2,31 @@ package echo
 
 import (
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
+	"github.com/cloud-barista/cm-cicada/model"
 	"github.com/labstack/echo/v4"
+	"github.com/mitchellh/mapstructure"
 	"net/http"
 )
 
 func CreateDAG(c echo.Context) error {
-	// TODO
+	var DAG model.DAG
 
-	return c.JSONPretty(http.StatusOK, "TODO", " ")
+	data, err := getJSONRawBody(c)
+	if err != nil {
+		return returnErrorMsg(c, err.Error())
+	}
+
+	err = mapstructure.Decode(data, &DAG)
+	if err != nil {
+		return returnErrorMsg(c, err.Error())
+	}
+
+	err = airflow.Conn.CreateDAG(&DAG)
+	if err != nil {
+		return returnErrorMsg(c, err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, DAG, " ")
 }
 
 func GetDAGs(c echo.Context) error {

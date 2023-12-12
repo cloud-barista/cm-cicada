@@ -1,36 +1,36 @@
 package model
 
+type DAGDefaultArgs struct {
+	Owner         string `json:"owner"`
+	StartDate     string `json:"start_date"`
+	Retries       int    `json:"retries"`
+	RetryDelaySec int    `json:"retry_delay_sec"`
+}
+
 type DAGOperatorOption struct {
 	Name  string `json:"name"`
-	Value any    `json:"value"`
+	Value string `json:"value"`
+}
+
+type DAGTaskGroup struct {
+	TaskGroupName string `json:"task_group_name"`
+	Tooltip       string `yaml:"tooltip"`
 }
 
 type DAGTask struct {
 	TaskName        string              `json:"task_name"`
 	Operator        string              `json:"operator"`
 	OperatorOptions []DAGOperatorOption `json:"operator_options"`
+	TaskGroupName   string              `json:"task_group_name"`
 	Dependencies    []string            `json:"dependencies"`
 }
 
 type DAG struct {
-	DAGId       string `json:"dag_name"`
-	DefaultArgs struct {
-		Owner         string `json:"owner"`
-		StartDate     string `json:"start_date"`
-		EndDate       string `json:"end_date"`
-		Retries       int    `json:"retries"`
-		RetryDelaySec int    `json:"retry_delay_sec"`
-	} `json:"default_args"`
-	ScheduleInterval      string    `json:"schedule_interval"`
-	Concurrency           int       `json:"concurrency"`
-	MaxActiveRuns         int       `json:"max_active_runs"`
-	DagrunTimeoutSec      int       `json:"dagrun_timeout_sec"`
-	DefaultView           string    `json:"default_view"`
-	Orientation           string    `json:"orientation"`
-	Description           string    `json:"description"`
-	OnSuccessCallbackName string    `json:"on_success_callback_name"`
-	OnSuccessCallbackFile string    `json:"on_success_callback_file"`
-	OnFailureCallbackName string    `json:"on_failure_callback_name"`
-	OnFailureCallbackFile string    `json:"on_failure_callback_file"`
-	Tasks                 []DAGTask `json:"tasks"`
+	DAGId       string         `json:"dag_id"`
+	DefaultArgs DAGDefaultArgs `json:"default_args"`
+	DefaultView string         `json:"default_view"` // default: 'graph', or 'tree', 'duration', 'gantt', 'landing_times'
+	Orientation string         `json:"orientation"`  // default: 'LR', or 'TB', 'RL', 'BT'
+	Description string         `json:"description"`
+	TaskGroups  []DAGTaskGroup `json:"task_groups"`
+	Tasks       []DAGTask      `json:"tasks"`
 }

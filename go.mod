@@ -6,6 +6,7 @@ require (
 	github.com/apache/airflow-client-go/airflow v0.0.0-20230210234754-8ce0b39cfbb2
 	github.com/jollaman999/utils v1.0.10
 	github.com/labstack/echo/v4 v4.11.3
+	github.com/mitchellh/mapstructure v1.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
