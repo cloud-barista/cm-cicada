@@ -63,9 +63,14 @@ exit
 ## How to run
 
 1. Build the binary
-     ```shell
-     make
-     ```
+   - Run on Linux.
+      ```shell
+      make
+      ```
+   - Run on Linux for build Windows binary or run on Windows where make command is available.
+      ```shell
+      make windows
+      ```
 
 2. Write the configuration file.
    - Configuration file name is 'cm-cicada.yaml'
