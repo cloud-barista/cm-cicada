@@ -11,15 +11,15 @@ import (
 
 func changeModelDAGToYAMLString(DAG *model.DAG) (string, error) {
 	if DAG.DAGId == "" {
-		return "", errors.New("DAG ID is not set")
+		return "", errors.New("dag_id is not set")
 	}
 
-	if DAG.DefaultArgs.StartDate == "" {
+	if DAG.DefaultArgs.Owner == "" {
 		return "", errors.New("owner is not set")
 	}
 
 	if DAG.DefaultArgs.StartDate == "" {
-		return "", errors.New("start date is not set")
+		return "", errors.New("start_date is not set")
 	}
 
 	retries := 1
