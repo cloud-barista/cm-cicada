@@ -2,11 +2,14 @@ package echo
 
 import (
 	"fmt"
+	"strconv"
+
+	_ "github.com/cloud-barista/cm-cicada/docs"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"strconv"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 var e *echo.Echo
@@ -47,7 +50,7 @@ func Init() {
 	}))
 
 	DAG()
-
+	e.GET("/cicada/swagger/*", echoSwagger.WrapHandler)
 	err := e.Start(":" + config.CMCicadaConfig.CMCicada.Listen.Port)
 	logger.Panicln(logger.ERROR, true, err)
 }

@@ -1,12 +1,17 @@
 package echo
 
 import (
+	"net/http"
+
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/model"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
 )
+
+type GetDAGResponse struct {
+	model.DAG
+}
 
 func CreateDAG(c echo.Context) error {
 	var DAG model.DAG
@@ -29,6 +34,15 @@ func CreateDAG(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, DAG, " ")
 }
 
+// GetDAG godoc
+//	@Summary		Get a list of DAG in Workflow Engine
+//	@Description	Get information of DAG.
+//	@Tags			[Sample] Get DAG
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	GetDAGResponse	"(This is a sample description for success response in Swagger UI"
+//	@Failure		404	{object}	GetDAGResponse	"Failed to get DAG"
+//	@Router			/dag/dags [get]
 func GetDAGs(c echo.Context) error {
 	dags, err := airflow.Conn.GetDAGs()
 	if err != nil {
