@@ -120,5 +120,41 @@ exit
 
 3. Run with privileges
      ```shell
-     sudo ./cm-grasshopper
+     sudo ./cm-cicada
      ```
+
+#### Download source code
+
+Clone CM-Cicada repository
+
+```bash
+git clone https://github.com/cloud-barista/cm-cicada.git ${HOME}/cm-cicada
+```
+
+#### Build CM-Cicada
+
+Build CM-Cicada source code
+
+```bash
+cd ${HOME}/cm-cicada
+make build
+```
+
+(Optional) Update Swagger API document
+```bash
+cd ${HOME}/cm-cicada
+make swag
+```
+
+Access to Swagger UI
+(Default link) http://localhost:8056/cicada/swagger/index.html
+
+#### Run CM-Cicada binary
+
+Run CM-Cicada server
+
+```bash
+cd ${HOME}/cm-cicada
+make build
+./cm-cicada
+```
