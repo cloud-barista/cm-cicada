@@ -1,23 +1,15 @@
-package echo
+package middlewares
 
 import (
 	"fmt"
-	"strconv"
-
-	_ "github.com/cloud-barista/cm-cicada/docs"
-	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"strconv"
 )
 
-var e *echo.Echo
-
-func Init() {
-	e = echo.New()
-
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+func CustomLogger() echo.MiddlewareFunc {
+	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogMethod:    true,
 		LogURI:       true,
 		LogHost:      true,
@@ -47,10 +39,5 @@ func Init() {
 
 			return nil
 		},
-	}))
-
-	DAG()
-	e.GET("/cicada/swagger/*", echoSwagger.WrapHandler)
-	err := e.Start(":" + config.CMCicadaConfig.CMCicada.Listen.Port)
-	logger.Panicln(logger.ERROR, true, err)
+	})
 }

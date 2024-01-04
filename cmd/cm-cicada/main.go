@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/cloud-barista/cm-cicada/api/echo"
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/server"
 	"github.com/jollaman999/utils/logger"
 	"github.com/jollaman999/utils/syscheck"
 	"log"
@@ -32,7 +32,7 @@ func init() {
 
 	airflow.Init()
 
-	echo.Init()
+	server.Init()
 }
 
 func end() {

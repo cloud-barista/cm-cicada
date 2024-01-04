@@ -2,7 +2,7 @@ package airflow
 
 import (
 	"fmt"
-	"github.com/cloud-barista/cm-cicada/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"testing"
 )
 

@@ -3,7 +3,7 @@ package airflow
 import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/lib/config"
-	"github.com/cloud-barista/cm-cicada/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
 	"strings"

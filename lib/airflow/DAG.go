@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/apache/airflow-client-go/airflow"
-	"github.com/cloud-barista/cm-cicada/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
 )
 
