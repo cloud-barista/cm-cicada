@@ -147,7 +147,7 @@ make swag
 ```
 
 Access to Swagger UI
-(Default link) http://localhost:8056/cicada/swagger/index.html
+(Default link) http://localhost:8083/cicada/swagger/index.html
 
 #### Run CM-Cicada binary
 
@@ -157,4 +157,15 @@ Run CM-Cicada server
 cd ${HOME}/cm-cicada
 make build
 ./cm-cicada
+```
+
+#### Health-check CM-Cicada
+
+Check if CM-Cicada is running
+
+```bash
+curl http://localhost:8083/cicada/health
+
+# Output if it's running successfully
+# {"message":"CM-Cicada API server is running"}
 ```
