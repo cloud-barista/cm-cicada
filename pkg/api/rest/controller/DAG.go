@@ -49,7 +49,7 @@ func CreateDAG(c echo.Context) error {
 // @Tags			[DAG] Get DAGs
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	model.DAG	"Successfully get DAGs."
+// @Success		200	{object}	airflow.DAGCollection	"Successfully get DAGs."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get DAGs."
 // @Router			/dag/dags [get]
