@@ -155,8 +155,7 @@ Run CM-Cicada server
 
 ```bash
 cd ${HOME}/cm-cicada
-make build
-./cm-cicada
+make run
 ```
 
 #### Health-check CM-Cicada
