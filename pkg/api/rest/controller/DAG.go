@@ -9,10 +9,18 @@ import (
 	"net/http"
 )
 
-type GetDAGResponse struct {
-	model.DAG
-}
-
+// CreateDAG godoc
+//
+// @Summary		Create a DAG in Airflow
+// @Description	Create a DAG.
+// @Tags			[DAG] Create DAG
+// @Accept			json
+// @Produce		json
+// @Param			request body model.DAG true "query params"
+// @Success		200	{object}	model.DAG	"Successfully get DAGs."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get DAGs."
+// @Router			/dag/create [post]
 func CreateDAG(c echo.Context) error {
 	var DAG model.DAG
 
@@ -36,14 +44,15 @@ func CreateDAG(c echo.Context) error {
 
 // GetDAGs godoc
 //
-//	@Summary		Get a list of DAG in Workflow Engine
-//	@Description	Get information of DAG.
-//	@Tags			[Sample] Get DAG
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	GetDAGResponse	"Successfully get DAGs"
-//	@Failure		404	{object}	GetDAGResponse	"Failed to get DAGs"
-//	@Router			/dag/dags [get]
+// @Summary		Get a list of DAGs from Airflow
+// @Description	Get a list of DAGs.
+// @Tags			[DAG] Get DAGs
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	model.DAG	"Successfully get DAGs."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get DAGs."
+// @Router			/dag/dags [get]
 func GetDAGs(c echo.Context) error {
 	dags, err := airflow.Conn.GetDAGs()
 	if err != nil {
@@ -53,6 +62,18 @@ func GetDAGs(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, dags, " ")
 }
 
+// RunDAG godoc
+//
+// @Summary		Run the DAG in Airflow
+// @Description	Run the DAG.
+// @Tags			[DAG] Run DAG
+// @Accept			json
+// @Produce		json
+// @Param			dag_id query string true "DAG ID"
+// @Success		200	{object}	model.DAG	"Successfully run the DAG."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to run DAG"
+// @Router			/dag/run [post]
 func RunDAG(c echo.Context) error {
 	dagID := c.QueryParam("dag_id")
 	if dagID == "" {
