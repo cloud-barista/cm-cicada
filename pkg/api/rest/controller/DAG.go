@@ -28,7 +28,7 @@ func CreateDAG(c echo.Context) error {
 
 	err = airflow.Conn.CreateDAG(&DAG)
 	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
+		return common.ReturnInternalError(c, err, "Failed to create DAG.")
 	}
 
 	return c.JSONPretty(http.StatusOK, DAG, " ")
@@ -61,7 +61,7 @@ func RunDAG(c echo.Context) error {
 
 	dagRun, err := airflow.Conn.RunDAG(dagID)
 	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
+		return common.ReturnInternalError(c, err, "Failed to run DAG.")
 	}
 
 	return c.JSONPretty(http.StatusOK, dagRun, " ")
