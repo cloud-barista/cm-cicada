@@ -8,7 +8,7 @@ GOPROXY_OPTION := GOPROXY=direct GOSUMDB=off
 GO_COMMAND := ${GOPROXY_OPTION} go
 GOPATH := $(shell go env GOPATH)
 
-.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build start_airflow stop_airflow start stop clean help
+.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build start_airflow stop_airflow start stop clean_dags clean help
 
 all: build
 
@@ -91,6 +91,9 @@ start: stop start_airflow ## Start Airflow server and the built binary
 
 stop: ## Stop the built binary
 	@sudo killall ${MODULE_NAME} | true
+
+clean_dags: ## Clean DAGs folder
+	@sudo rm -rf _airflow/airflow-home/dags/*-*-*-*
 
 clean: ## Remove previous build
 	@echo Cleaning build...
