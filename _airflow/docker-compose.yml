@@ -42,5 +42,6 @@ services:
             - airflow-mysql
         volumes:
                 - ./airflow-home:/usr/local/airflow
+                - /var/run/docker.sock:/var/run/docker.sock
         ports:
             - "8080:8080"
