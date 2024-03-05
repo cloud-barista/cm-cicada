@@ -4,157 +4,138 @@ import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
-	"strings"
 )
 
-func changeModelDAGToYAMLString(DAG *model.DAG) (string, error) {
-	if DAG.DAGId == "" {
-		return "", errors.New("dag_id is not set")
+func checkDAG(dag *model.DAG) error {
+	if dag.DefaultArgs.Owner == "" {
+		return errors.New("owner is not set")
 	}
 
-	if DAG.DefaultArgs.Owner == "" {
-		return "", errors.New("owner is not set")
+	if dag.DefaultArgs.StartDate == "" {
+		return errors.New("start_date is not set")
 	}
 
-	if DAG.DefaultArgs.StartDate == "" {
-		return "", errors.New("start_date is not set")
-	}
+	var taskNames []string
 
-	retries := 1
-	retryDelaySec := 300
-
-	if DAG.DefaultArgs.Retries > 0 {
-		retries = DAG.DefaultArgs.Retries
-	} else {
-		DAG.DefaultArgs.Retries = retries
-	}
-	if DAG.DefaultArgs.RetryDelaySec > 0 {
-		retryDelaySec = DAG.DefaultArgs.RetryDelaySec
-	} else {
-		DAG.DefaultArgs.RetryDelaySec = retryDelaySec
-	}
-
-	defaultView := "graph"
-	orientation := "LR"
-
-	if DAG.DefaultView != "" {
-		defaultView = DAG.DefaultView
-	} else {
-		DAG.DefaultView = defaultView
-	}
-	if DAG.Orientation != "" {
-		orientation = DAG.Orientation
-	} else {
-		DAG.Orientation = orientation
-	}
-
-	var taskGroups []model.DAGFactoryDAGTaskGroup
-	for _, tg := range DAG.TaskGroups {
+	for _, tg := range dag.TaskGroups {
 		if tg.TaskGroupName == "" {
-			return "", errors.New("task group name should not be empty")
+			return errors.New("task group name should not be empty")
 		}
 
-		taskGroups = append(taskGroups, model.DAGFactoryDAGTaskGroup{
-			DAGFactoryDAGTaskGroupStruct: model.DAGFactoryDAGTaskGroupStruct{
-				Tooltip: tg.Tooltip,
-			}})
+		for _, t := range tg.Tasks {
+			if t.TaskName == "" {
+				return errors.New("task name should not be empty")
+			}
+
+			taskNames = append(taskNames, t.TaskName)
+		}
 	}
 
-	var tasks []model.DAGFactoryDAGTask
-	for _, t := range DAG.Tasks {
-		if t.TaskName == "" {
-			return "", errors.New("task name should not be empty")
+	for _, tg := range dag.TaskGroups {
+		for _, t := range tg.Tasks {
+			for _, dep := range t.Dependencies {
+				var depFound bool
+				for _, tName := range taskNames {
+					if tName == dep {
+						depFound = true
+						break
+					}
+				}
+				if !depFound {
+					return errors.New("wrong dependency found in " + tg.TaskGroupName + "." + t.TaskName + " (" + dep + ")")
+				}
+			}
 		}
-
-		taskOptions := make(map[string]any)
-
-		taskOptions["operator"] = t.Operator
-		taskOptions["task_group_name"] = t.TaskGroupName
-		taskOptions["dependencies"] = t.Dependencies
-
-		for _, operatorOption := range t.OperatorOptions {
-			taskOptions[operatorOption.Name] = operatorOption.Value
-		}
-
-		tasks = append(tasks, model.DAGFactoryDAGTask{
-			DAGTaskStruct: taskOptions,
-		})
 	}
 
-	template := model.DAGFactory{
-		DAGStruct: model.DAGFactoryDAGStruct{
-			DefaultArgs: model.DAGFactoryDAGDefaultArgs{
-				Owner:         DAG.DefaultArgs.Owner,
-				StartDate:     DAG.DefaultArgs.StartDate,
-				Retries:       retries,
-				RetryDelaySec: retryDelaySec,
-			},
-			DefaultView: defaultView,
-			Orientation: orientation,
-			Description: DAG.Description,
-			TaskGroups:  taskGroups,
-			Tasks:       tasks,
-		}}
+	return nil
+}
 
-	bytes, err := yaml.Marshal(template)
+func writeModelToYAMLFile(model any, filePath string) error {
+	bytes, err := yaml.Marshal(model)
 	if err != nil {
-		return "", err
+		return err
 	}
 	parsed := string(bytes)
 
-	parsed = strings.Replace(parsed,
-		"'###dag_struct###'",
-		DAG.DAGId,
-		1)
-
-	for _, tg := range DAG.TaskGroups {
-		parsed = strings.Replace(parsed,
-			"- '###dag_factory_dag_task_group_struct###'",
-			tg.TaskGroupName,
-			1)
-	}
-
-	for _, t := range DAG.Tasks {
-		parsed = strings.Replace(parsed,
-			"- '###dag_task_struct###'",
-			t.TaskName,
-			1)
-	}
-
-	return parsed, nil
+	return fileutil.WriteFile(filePath, parsed)
 }
 
-func writeDAGFactoryPythonCode(DAGFactoryYAMLAirflowPath string, DAGFactoryPythonCodeHostPath string) error {
-	pythonCode := "from airflow import DAG\n" +
-		"import dagfactory\n" +
-		"\n" +
-		"dag_factory = dagfactory.DagFactory(\"" + DAGFactoryYAMLAirflowPath + "\")\n" +
-		"\n" +
-		"dag_factory.clean_dags(globals())\n" +
-		"dag_factory.generate_dags(globals())"
-
-	return fileutil.WriteFile(DAGFactoryPythonCodeHostPath, pythonCode)
-}
-
-func CreateDAGFactoryYAML(DAG *model.DAG) error {
-	yamlString, err := changeModelDAGToYAMLString(DAG)
+func writeGustyYAMLs(dag *model.DAG) error {
+	err := checkDAG(dag)
 	if err != nil {
 		return err
 	}
 
-	DAGFactoryYAMLHostPath := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + DAG.DAGId + ".yml"
-	DAGFactoryYAMLAirflowPath := config.CMCicadaConfig.CMCicada.DAGDirectoryAirflow + "/" + DAG.DAGId + ".yml"
-	DAGFactoryPythonCodeHostPath := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + DAG.DAGId + ".py"
-	err = fileutil.WriteFile(DAGFactoryYAMLHostPath, yamlString)
+	dag.DagID = uuid.New().String()
+
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.DagID
+	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
-		return err
+		return errors.New("failed to create the DAG directory (DAG ID=" + dag.DagID +
+			", Description: " + dag.Description)
 	}
 
-	err = writeDAGFactoryPythonCode(DAGFactoryYAMLAirflowPath, DAGFactoryPythonCodeHostPath)
+	if dag.DefaultArgs.Retries < 0 {
+		dag.DefaultArgs.Retries = 1
+	}
+	if dag.DefaultArgs.RetryDelaySec < 0 {
+		dag.DefaultArgs.RetryDelaySec = 300
+	}
+
+	var dagInfo struct {
+		DefaultArgs model.DefaultArgs `yaml:"default_args"`
+		Description string            `yaml:"description"`
+	}
+
+	dagInfo.DefaultArgs = dag.DefaultArgs
+	dagInfo.Description = dag.Description
+
+	filePath := dagDir + "/METADATA.yml"
+
+	err = writeModelToYAMLFile(dagInfo, filePath)
 	if err != nil {
-		return err
+		return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
+	}
+
+	for _, tg := range dag.TaskGroups {
+		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.TaskGroupName)
+		if err != nil {
+			return err
+		}
+
+		var taskGroup struct {
+			Tooltip string `yaml:"tooltip"`
+		}
+
+		taskGroup.Tooltip = tg.Description
+
+		filePath = dagDir + "/" + tg.TaskGroupName + "/METADATA.yml"
+
+		err = writeModelToYAMLFile(taskGroup, filePath)
+		if err != nil {
+			return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
+		}
+
+		for _, t := range tg.Tasks {
+			taskOptions := make(map[string]any)
+
+			taskOptions["operator"] = t.Operator
+			taskOptions["dependencies"] = t.Dependencies
+			for _, operatorOption := range t.OperatorOptions {
+				taskOptions[operatorOption.Name] = operatorOption.Value
+			}
+
+			filePath = dagDir + "/" + tg.TaskGroupName + "/" + t.TaskName + ".yml"
+
+			err = writeModelToYAMLFile(taskOptions, filePath)
+			if err != nil {
+				return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
+			}
+		}
 	}
 
 	return nil

@@ -1,36 +1,36 @@
 package model
 
-type DAGDefaultArgs struct {
-	Owner         string `json:"owner" mapstructure:"owner"`
-	StartDate     string `json:"start_date" mapstructure:"start_date"`
-	Retries       int    `json:"retries" mapstructure:"retries"`
-	RetryDelaySec int    `json:"retry_delay_sec" mapstructure:"retry_delay_sec"`
+type DefaultArgs struct {
+	Owner          string `json:"owner" mapstructure:"owner"`
+	StartDate      string `json:"start_date" mapstructure:"start_date"`
+	Retries        int    `json:"retries" mapstructure:"retries"`                 // default: 1
+	RetryDelaySec  int    `json:"retry_delay_sec" mapstructure:"retry_delay_sec"` // default: 300
+	Email          string `json:"email" mapstructure:"email"`
+	EmailOnFailure bool   `json:"email_on_failure" mapstructure:"email_on_failure"`
+	EmailOnRetry   bool   `json:"email_on_retry" mapstructure:"email_on_retry"`
 }
 
-type DAGOperatorOption struct {
+type OperatorOptions []struct {
 	Name  string `json:"name" mapstructure:"name"`
 	Value string `json:"value" mapstructure:"value"`
 }
 
-type DAGTaskGroup struct {
-	TaskGroupName string `json:"task_group_name" mapstructure:"task_group_name"`
-	Tooltip       string `yaml:"tooltip" mapstructure:"tooltip"`
+type Task struct {
+	TaskName        string          `json:"task_name" mapstructure:"task_name"`
+	Operator        string          `json:"operator" mapstructure:"operator"`
+	OperatorOptions OperatorOptions `json:"operator_options" mapstructure:"operator_options"`
+	Dependencies    []string        `json:"dependencies" mapstructure:"dependencies"`
 }
 
-type DAGTask struct {
-	TaskName        string              `json:"task_name" mapstructure:"task_name"`
-	Operator        string              `json:"operator" mapstructure:"operator"`
-	OperatorOptions []DAGOperatorOption `json:"operator_options" mapstructure:"operator_options"`
-	TaskGroupName   string              `json:"task_group_name" mapstructure:"task_group_name"`
-	Dependencies    []string            `json:"dependencies" mapstructure:"dependencies"`
+type TaskGroup struct {
+	TaskGroupName string `json:"task_group_name" mapstructure:"task_group_name"`
+	Description   string `json:"description" mapstructure:"description"`
+	Tasks         []Task `json:"tasks" mapstructure:"tasks"`
 }
 
 type DAG struct {
-	DAGId       string         `json:"dag_id" mapstructure:"dag_id"`
-	DefaultArgs DAGDefaultArgs `json:"default_args" mapstructure:"default_args"`
-	DefaultView string         `json:"default_view" mapstructure:"default_view"` // default: 'graph', or 'tree', 'duration', 'gantt', 'landing_times'
-	Orientation string         `json:"orientation" mapstructure:"orientation"`   // default: 'LR', or 'TB', 'RL', 'BT'
-	Description string         `json:"description" mapstructure:"description"`
-	TaskGroups  []DAGTaskGroup `json:"task_groups" mapstructure:"task_groups"`
-	Tasks       []DAGTask      `json:"tasks" mapstructure:"tasks"`
+	DagID       string      `json:"dag_id" mapstructure:"dag_id"`
+	DefaultArgs DefaultArgs `json:"default_args" mapstructure:"default_args"`
+	Description string      `json:"description" mapstructure:"description"`
+	TaskGroups  []TaskGroup `json:"task_groups" mapstructure:"task_groups"`
 }

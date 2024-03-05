@@ -1,4 +1,6 @@
-logs/
-dags/
-*.pid
-*.py
+/logs/
+/dags/**/
+
+
+/*.pid
+/*.py

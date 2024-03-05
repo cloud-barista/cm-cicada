@@ -1,0 +1,166 @@
+{
+  "default_args": {
+    "owner": "ish",
+    "start_date": "2024-03-05",
+    "retries": 0,
+    "retry_delay_sec": 0,
+    "email": "ish@innogrid.com",
+    "email_on_failure": false,
+    "email_on_retry": false
+  },
+  "description": "Make Nexus server",
+  "task_groups": [
+    {
+      "task_group_name": "infra_migration",
+      "description": "this is a task group of infra migration",
+      "tasks": [
+        {
+          "task_name": "infra_task_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Infra migration is started.'"
+            }
+          ]
+        },
+        {
+          "task_name": "infra_task_end",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Infra migration is ended.'"
+            }
+          ],
+          "dependencies": [
+            "infra_task_start"
+          ]
+        }
+      ]
+    },
+    {
+      "task_group_name": "data_migration",
+      "description": "this is a task group of data migration",
+      "tasks": [
+        {
+          "task_name": "data_task_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Data migration is started.'"
+            }
+          ],
+          "dependencies": [
+            "infra_task_end"
+          ]
+        },
+        {
+          "task_name": "data_task_end",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Data migration is ended.'"
+            }
+          ],
+          "dependencies": [
+            "data_task_start"
+          ]
+        }
+      ]
+    },
+    {
+      "task_group_name": "software_migration",
+      "description": "this is a task group of software migration",
+      "tasks": [
+        {
+          "task_name": "software_task_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Software migration is started.'"
+            }
+          ],
+          "dependencies": [
+            "data_task_end"
+          ]
+        },
+        {
+          "task_name": "mkdir_data",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "mkdir -p /data/volume/nexus"
+            }
+          ],
+          "dependencies": [
+            "software_task_start"
+          ]
+        },
+        {
+          "task_name": "chown_data",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "chmod 777 /data/volume/nexus"
+            }
+          ],
+          "dependencies": [
+            "mkdir_data"
+          ]
+        },
+        {
+          "task_name": "docker_sample_task",
+          "operator": "airflow.providers.docker.operators.docker.DockerOperator",
+          "operator_options": [
+            {
+              "name": "image",
+              "value": "sonatype/nexus3:latest"
+            },
+            {
+              "name": "mounts",
+              "value": "[{\"source\": \"/data/volume/nexus\", \"target\": \"/nexus-data\", \"type\": \"bind\"}]"
+            },
+            {
+              "name": "api_version",
+              "value": "auto"
+            },
+            {
+              "name": "auto_remove",
+              "value": "success"
+            },
+            {
+              "name": "docker_url",
+              "value": "unix://var/run/docker.sock"
+            },
+            {
+              "name": "network_mode",
+              "value": "bridge"
+            }
+          ],
+          "dependencies": [
+            "chown_data"
+          ]
+        },
+        {
+          "task_name": "software_task_end",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Software migration is ended.'"
+            }
+          ],
+          "dependencies": [
+            "docker_sample_task"
+          ]
+        }
+      ]
+    }
+  ]
+}

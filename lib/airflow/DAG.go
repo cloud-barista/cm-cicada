@@ -9,7 +9,7 @@ import (
 )
 
 func (conn *Connection) CreateDAG(DAG *model.DAG) error {
-	err := CreateDAGFactoryYAML(DAG)
+	err := writeGustyYAMLs(DAG)
 	if err != nil {
 		return err
 	}
