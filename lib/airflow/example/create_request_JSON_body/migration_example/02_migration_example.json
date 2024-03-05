@@ -1,0 +1,405 @@
+{
+  "default_args": {
+    "owner": "ish",
+    "start_date": "2024-03-05",
+    "retries": 0,
+    "retry_delay_sec": 0,
+    "email": "root@innogrid.com",
+    "email_on_failure": false,
+    "email_on_retry": false
+  },
+  "description": "Migrate Server",
+  "task_groups": [
+    {
+      "task_group_name": "register_csp_connection",
+      "description": "Register CSP's credential, region and connection",
+      "tasks": [
+        {
+          "task_name": "save_credential",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/credential -H 'Content-Type: application/json' -d '{ \"ProviderName\" : \"AZURE\", \"KeyValueInfoList\" : [{\"Key\":\"ClientId\", \"Value\":\"XXXX-XXXX\"}, {\"Key\":\"ClientSecret\", \"Value\":\"xxxx-xxxx\"}, {\"Key\":\"TenantId\", \"Value\":\"xxxx-xxxx\"}, {\"Key\":\"SubscriptionId\", \"Value\":\"xxxx-xxxx\"}], \"CredentialName\" : \"azure-credential-01\" }'"
+            }
+          ],
+          "dependencies": []
+        },
+        {
+          "task_name": "save_region",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider/spider/region -H 'Content-Type: application/json' -d '{ \"ProviderName\" : \"AZURE\", \"KeyValueInfoList\" : [{\"Key\":\"location\", \"Value\":\"northeurope\"}, {\"Key\":\"ResourceGroup\", \"Value\":\"test-group\"}], \"RegionName\" : \"azure-northeurope\" }'"
+            }
+          ],
+          "dependencies": ["save_credential"]
+        },
+        {
+          "task_name": "save_connection",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/connectionconfig -H 'Content-Type: application/json' -d '{ \"ProviderName\" : \"AZURE\", \"DriverName\" : \"azure-driver-01\", \"CredentialName\" : \"azure-credential-01\", \"RegionName\" : \"azure-northeurope\", \"ConfigName\" : \"azure-config-01\" }'"
+            }
+          ],
+          "dependencies": ["save_region"]
+        }
+      ]
+    },
+    {
+      "task_group_name": "migrate_infra",
+      "description": "This is a task group of infra migration",
+      "tasks": [
+        {
+          "task_name": "create_vpc",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/vpc -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"vpc-01\", \"IPv4_CIDR\" : \"10.0.0.0/16\", \"SubnetInfoList\" : [ { \"Name\": \"subnet-01\", \"IPv4_CIDR\": \"10.0.10.0/24\"} ] }}'"
+            }
+          ],
+          "dependencies": ["save_connection"]
+        },
+        {
+          "task_name": "create_security_group_nfs",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/securitygroup -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"sg-nfs\", \"VPCName\" : \"vpc-01\", \"SecurityRules\" : [ {\"FromPort\": \"111\", \"ToPort\" : \"111\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\" }, {\"FromPort\": \"2049\", \"ToPort\" : \"2049\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\"}, {\"FromPort\": \"4000\", \"ToPort\" : \"4003\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\" }, {\"FromPort\": \"10022\", \"ToPort\" : \"10022\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\" } ] }}'"
+            }
+          ],
+          "dependencies": ["create_vpc"]
+        },
+        {
+          "task_name": "create_security_group_web",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/securitygroup -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"sg-web\", \"VPCName\" : \"vpc-01\", \"SecurityRules\" : [ {\"FromPort\": \"8080\", \"ToPort\" : \"8080\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\" }, {\"FromPort\": \"8443\", \"ToPort\" : \"8443\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\"}, {\"FromPort\": \"10022\", \"ToPort\" : \"10022\", \"IPProtocol\" : \"tcp\", \"Direction\" : \"inbound\", \"CIDR\" : \"0.0.0.0/0\" } ] }}'"
+            }
+          ],
+          "dependencies": ["create_vpc"]
+        },
+        {
+          "task_name": "create_keypair",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/keypair -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"keypair-01\"}}'"
+            }
+          ],
+          "dependencies": [
+            "create_security_group_nfs",
+            "create_security_group_web"
+          ]
+        },
+        {
+          "task_name": "create_data_disk_nfs",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/disk -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"spider-disk-nfs\", \"DiskType\" : \"StandardSSD\", \"DiskSize\" : \"100\"}}'"
+            }
+          ],
+          "dependencies": ["create_keypair"]
+        },
+        {
+          "task_name": "create_data_disk_web",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/disk -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"spider-disk-web\", \"DiskType\" : \"StandardSSD\", \"DiskSize\" : \"100\"}}'"
+            }
+          ],
+          "dependencies": ["create_keypair"]
+        },
+        {
+          "task_name": "create_vm_nfs",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/vm -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"vm-nfs\", \"ImageType\" : \"PublicImage\", \"ImageName\" : \"Canonical:UbuntuServer:22.04-LTS:latest\", \"VMSpecName\" : \"Standard_B1ls\", \"VPCName\" : \"vpc-01\", \"SubnetName\" : \"subnet-01\", \"SecurityGroupNames\" : [\"sg-nfs\"], \"DataDiskNames\" : [ \"spider-disk-nfs\" ], \"KeyPairName\" : \"keypair-01\", \"VMUserId\" : \"root\", \"VMUserPasswd\" : \"1234\" }}'"
+            }
+          ],
+          "dependencies": ["create_data_disk_nfs"]
+        },
+        {
+          "task_name": "create_vm_web",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/vm -H 'Content-Type: application/json' -d '{ \"ConnectionName\" : \"azure-config-01\", \"ReqInfo\" : { \"Name\" : \"vm-web\", \"ImageType\" : \"PublicImage\", \"ImageName\" : \"Canonical:UbuntuServer:22.04-LTS:latest\", \"VMSpecName\" : \"Standard_B1ls\", \"VPCName\" : \"vpc-01\", \"SubnetName\" : \"subnet-01\", \"SecurityGroupNames\" : [\"sg-web\"], \"DataDiskNames\" : [ \"spider-disk-web\" ], \"KeyPairName\" : \"keypair-01\", \"VMUserId\" : \"root\", \"VMUserPasswd\" : \"1234\" }}'"
+            }
+          ],
+          "dependencies": ["create_data_disk_web"]
+        }
+      ]
+    },
+    {
+      "task_group_name": "migrate_nfs_server",
+      "description": "[TODO] This is a task group of migrating NFS server",
+      "tasks": [
+        {
+          "task_name": "nfs_get_ip",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/vm/???  -H 'Content-Type: application/json' -d '{\"ip\": \"???\"} | jq '.ip'"
+            },
+            {
+              "name": "do_xcom_push",
+              "value": "true"
+            }
+          ],
+          "dependencies": ["create_vm_nfs"]
+        },
+        {
+          "task_name": "nfs_install",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nfs_get_ip')} apt install nfs-kernel-server"
+            }
+          ],
+          "dependencies": ["nfs_get_ip"]
+        },
+        {
+          "task_name": "nfs_service_stop",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nfs_get_ip')}} systemctl stop nfs-kernel-server | true"
+            }
+          ],
+          "dependencies": ["nfs_install"]
+        },
+        {
+          "task_name": "nfs_configure",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo '/home/nfs_server 10.0.10.0/255.255.255.0(rw,nohide,sync,no_subtree_check,insecure,no_root_squash)' > /tmp/nfs_exports && sshpass -p 'password' scp /tmp/nfs_exports root@{{ti.xcom_pull(task_ids='nfs_get_ip')}}:/etc/exports"
+            }
+          ],
+          "dependencies": ["nfs_service_stop"]
+        },
+        {
+          "task_name": "nfs_copy_data",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Copying NFS data...'"
+            }
+          ],
+          "dependencies": ["nfs_configure"]
+        },
+        {
+          "task_name": "nfs_service_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nfs_get_ip')}} systemctl start nginx"
+            }
+          ],
+          "dependencies": ["nfs_copy_data"]
+        },
+        {
+          "task_name": "nfs_health_check",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "mkdir /tmp/mount-test && mount -t nfs {{ti.xcom_pull(task_ids='nfs_get_ip')}}"
+            }
+          ],
+          "dependencies": ["nfs_service_start"]
+        },
+        {
+          "task_name": "nfs_echo_finished",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'NFS Server Migration Finished!"
+            }
+          ],
+          "dependencies": ["nfs_health_check"]
+        }
+      ]
+    },
+    {
+      "task_group_name": "migrate_web_server",
+      "description": "[TODO] This is a task group of migrating web server",
+      "tasks": [
+        {
+          "task_name": "web_get_ip",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl -sX POST http://cb-spider:1024/spider/vm/???  -H 'Content-Type: application/json' -d '{\"ip\": \"???\"} | jq '.ip'"
+            },
+            {
+              "name": "do_xcom_push",
+              "value": "true"
+            }
+          ],
+          "dependencies": ["create_vm_web"]
+        },
+        {
+          "task_name": "nginx_install",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nginx_get_ip')} apt install nginx"
+            }
+          ],
+          "dependencies": ["web_get_ip"]
+        },
+        {
+          "task_name": "nginx_service_stop",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nginx_get_ip')}} systemctl stop nginx | true"
+            }
+          ],
+          "dependencies": ["nginx_install"]
+        },
+        {
+          "task_name": "nginx_configure",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Configuring NGINX...'"
+            }
+          ],
+          "dependencies": ["nginx_service_stop"]
+        },
+        {
+          "task_name": "nginx_copy_data",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Copying NGINX data...'"
+            }
+          ],
+          "dependencies": ["nginx_configure"]
+        },
+        {
+          "task_name": "nginx_service_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "sshpass -p 'password' ssh root@{{ti.xcom_pull(task_ids='nginx_get_ip')}} systemctl start nginx"
+            }
+          ],
+          "dependencies": ["nginx_copy_data"]
+        },
+        {
+          "task_name": "nginx_health_check_http",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl http://{{ti.xcom_pull(task_ids='nginx_get_ip')}}:8080"
+            }
+          ],
+          "dependencies": ["nginx_service_start"]
+        },
+        {
+          "task_name": "nginx_health_check_https",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "curl https://{{ti.xcom_pull(task_ids='nginx_get_ip')}}:8443"
+            }
+          ],
+          "dependencies": ["nginx_service_start"]
+        },
+        {
+          "task_name": "web_echo_finished",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Web Server Migration Finished!"
+            }
+          ],
+          "dependencies": [
+            "nginx_health_check_http",
+            "nginx_health_check_https"
+          ]
+        }
+      ]
+    },
+    {
+      "task_group_name": "wait",
+      "description": "this is a task group of data migration",
+      "tasks": [
+        {
+          "task_name": "wait_servers",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Waiting servers for 30 seconds...' && sleep 30"
+            }
+          ],
+          "dependencies": ["nfs_echo_finished", "web_echo_finished"]
+        }
+      ]
+    },
+    {
+      "task_group_name": "data_migration",
+      "description": "this is a task group of data migration",
+      "tasks": [
+        {
+          "task_name": "data_task_start",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Data migration is started.'"
+            }
+          ],
+          "dependencies": ["wait_servers"]
+        },
+        {
+          "task_name": "data_task_end",
+          "operator": "airflow.operators.bash.BashOperator",
+          "operator_options": [
+            {
+              "name": "bash_command",
+              "value": "echo 'Data migration is ended.'"
+            }
+          ],
+          "dependencies": ["data_task_start"]
+        }
+      ]
+    }
+  ]
+}
