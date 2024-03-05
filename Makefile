@@ -90,7 +90,7 @@ start: stop start_airflow ## Start Airflow server and the built binary
 	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
 
 stop: ## Stop the built binary
-	@sudo killall ${MODULE_NAME}
+	@sudo killall ${MODULE_NAME} | true
 
 clean: ## Remove previous build
 	@echo Cleaning build...
