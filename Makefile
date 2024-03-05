@@ -79,7 +79,7 @@ start_airflow: ## Start Airflow server
 stop_airflow: ## Stop Airflow server
 	@cd _airflow/ && docker compose down && cd ..
 
-start: start_airflow ## Start Airflow server and the built binary
+start: stop start_airflow ## Start Airflow server and the built binary
 	@git diff > .diff_current
 	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
 	  GIT_HASH_MINE=`git rev-parse HEAD` && \
