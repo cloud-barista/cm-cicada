@@ -1,0 +1,46 @@
+services:
+    airflow-mysql:
+        image: mysql:8.0-debian
+        restart: always
+        environment:
+            - MYSQL_ROOT_PASSWORD=airflow_pass
+            - MYSQL_USER=airflow
+            - MYSQL_PASSWORD=airflow_pass
+            - MYSQL_DATABASE=airflow
+        volumes:
+            - ./create_airflow_db.sql:/docker-entrypoint-initdb.d/create_airflow_db.sql
+            - ./db_data:/var/lib/mysql
+    airflow-server:
+        build:
+            context: .
+        image: airflow-server
+        restart: always
+        environment:
+                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=mysql+mysqldb://airflow:airflow_pass@airflow-mysql/airflow
+        command: >
+            /bin/bash -c "
+                # Wait for MySQL
+                sleep 10
+
+                # Clean up pid
+                rm -f airflow-webserver.pid
+
+                # Set up metadata database
+                airflow db upgrade
+
+                # Create default user
+                airflow users create --username airflow --password airflow_pass --email ish@innogrid.com --firstname SuHyeon --lastname Im --role Admin
+
+                # Start airflow
+                airflow scheduler &
+            	  airflow webserver
+
+                # Keep the server on no matter what
+                sleep infinity
+            "
+        depends_on:
+            - airflow-mysql
+        volumes:
+                - ./airflow-home:/usr/local/airflow
+        ports:
+            - "8080:8080"

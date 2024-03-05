@@ -5,8 +5,8 @@ cm-cicada:
         # skip_tls_verify: true
         timeout: 10
         username: "airflow"
-        password: "airflow"
-    dag_directory_host: "/home/ish/test/airflow/dags"
-    dag_directory_airflow: "/opt/airflow/dags" # Use dag_directory_host for dag_directory_airflow, if this value is empty
+        password: "airflow_pass"
+    dag_directory_host: "./_airflow/airflow-home/dags"
+    dag_directory_airflow: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_airflow, if this value is empty
     listen:
         port: 8083

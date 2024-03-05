@@ -8,7 +8,7 @@ GOPROXY_OPTION := GOPROXY=direct GOSUMDB=off
 GO_COMMAND := ${GOPROXY_OPTION} go
 GOPATH := $(shell go env GOPATH)
 
-.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build run clean help
+.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build start_airflow stop_airflow start stop clean help
 
 all: build
 
@@ -72,7 +72,14 @@ build: lint swag ## Build the binary file
 	@git rev-parse HEAD > .git_hash_last_build
 	@echo Build finished!
 
-run: ## Run the built binary
+start_airflow: ## Start Airflow server
+	@mkdir -p _airflow/airflow-home/dags
+	@cd _airflow/ && docker compose up -d && cd ..
+
+stop_airflow: ## Stop Airflow server
+	@cd _airflow/ && docker compose down && cd ..
+
+start: start_airflow ## Start Airflow server and the built binary
 	@git diff > .diff_current
 	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
 	  GIT_HASH_MINE=`git rev-parse HEAD` && \
@@ -80,7 +87,10 @@ run: ## Run the built binary
 	  if [ "$$STATUS" != "0" ] || [ "$$GIT_HASH_MINE" != "$$GIT_HASH_LAST_BUILD" ]; then \
 	    $(MAKE) build; \
 	  fi
-	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}*
+	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
+
+stop: ## Stop the built binary
+	@sudo killall ${MODULE_NAME}
 
 clean: ## Remove previous build
 	@echo Cleaning build...
