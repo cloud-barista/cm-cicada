@@ -22,10 +22,25 @@ git clone https://github.com/cloud-barista/cm-cicada.git
 
 ## How to run
 
-* Build and run the binary
+* Build and run the binary with Airflow server
    ```shell
-  cd cm-cicada
+   cd cm-cicada
    make start
+   ```
+
+* Stop the binary
+   ```shell
+   make stop
+   ```
+
+* Stop Airflow server
+   ```shell
+   make stop_airflow
+   ```
+
+* (Optional) Start Airflow server
+   ```shell
+   make start_airflow
    ```
 
 ## About configuration file
