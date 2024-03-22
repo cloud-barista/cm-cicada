@@ -1,0 +1,23 @@
+{
+    "task_name": "beetle_task_recommend_infra",
+    "description": "Task of beetle infra recomm",
+    "task_component_name": "beetle_task_component_infra_recommendation",
+    "options": [
+        {
+            "key": "cpu.cores",
+            "value": "8"
+        },
+        {
+            "key": "cpu.cpus",
+            "value": "1"
+        },
+        {
+            "key": "memory.size",
+            "value": "16"
+        },
+        {
+            "key": "storage.size",
+            "value": "100"
+        }
+    ]
+}

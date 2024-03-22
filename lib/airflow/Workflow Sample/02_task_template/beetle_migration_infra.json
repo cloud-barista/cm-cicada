@@ -1,0 +1,67 @@
+{
+    "task_name": "beetle_task_migration_infra",
+    "description": "Task of beetle infra migration",
+    "task_component_name": "beetle_task_component_infra_migration",
+    "options": [
+        {
+            "key": "infra.description",
+            "value": "required"
+        },
+        {
+            "key": "infra.installMonAgent",
+            "value": "required"
+        },
+        {
+            "key": "infra.label",
+            "value": "required"
+        },
+        {
+            "key": "infra.name",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.commonImage",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.commonSpec",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.connectionName",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.description",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.label",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.name",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.rootDiskSize",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.rootDiskType",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.subGroupSize",
+            "value": "required"
+        },
+        {
+            "key": "infra.vm.vmUserPassword",
+            "value": "hidden"
+        },
+        {
+            "key": "infra.systemLabel",
+            "value": "optional"
+        }
+    ]
+}

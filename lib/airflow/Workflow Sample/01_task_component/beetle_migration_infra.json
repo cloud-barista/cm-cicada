@@ -1,0 +1,52 @@
+{
+    "task_component_name": "beetle_task_component_infra_migration",
+    "description": "Task component of beetle infra migration",
+    "operator": "airflow.providers.http.operators.http.SimpleHttpOperator",
+    "operator_options": [
+        {
+            "key": "task_id",
+            "value": "beetle_infra_migration"
+        },
+        {
+            "key": "http_conn_id",
+            "value": "beetle_api"
+        },
+        {
+            "key": "endpoint",
+            "value": "migration/infra"
+        },
+        {
+            "key": "method",
+            "value": "POST"
+        },
+        {
+            "key": "data",
+            "value": "json.dumps({\"description\":\"${infra.description}\",\"installMonAgent\":\"${infra.installMonAgent}\",\"label\":\"${infra.label}\",\"name\":\"${infra.name}\",\"systemLabel\":\"${infra.systemLabel}\",\"vm\":[{\"commonImage\":\"${infra.vm.commonImage}\",\"commonSpec\":\"${infra.vm.commonSpec}\",\"connectionName\":\"${infra.vm.connectionName}\",\"description\":\"${infra.vm.description}\",\"label\":\"${infra.vm.label}\",\"name\":\"${infra.vm.name}\",\"rootDiskSize\":\"${infra.vm.rootDiskSize}\",\"rootDiskType\":\"${infra.vm.rootDiskType}\",\"subGroupSize\":\"${infra.vm.subGroupSize}\",\"vmUserPassword\":\"${infra.vm.vmUserPassword}\"}]})"
+        },
+        {
+            "key": "response_filter",
+            "value": "lambda response: json.loads(response.text)"
+        }
+    ],
+    "required_params": [
+        "infra.description",
+        "infra.installMonAgent",
+        "infra.label",
+        "infra.name",
+        "infra.vm.commonImage",
+        "infra.vm.commonSpec",
+        "infra.vm.connectionName",
+        "infra.vm.description",
+        "infra.vm.label",
+        "infra.vm.name",
+        "infra.vm.rootDiskSize",
+        "infra.vm.rootDiskType",
+        "infra.vm.subGroupSize"
+    ],
+    "hidden_parmas": [
+        "infra.vm.vmUserPassword"
+    ],
+    "optional_params": [
+        "infra.systemLabel"
+    ]
+}

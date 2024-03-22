@@ -1,0 +1,119 @@
+{
+    "task_name": "beetle_task_recommend_infra",
+    "description": "Task of beetle infra recomm",
+    "task_component_name": "beetle_task_component_infra_recommendation",
+    "options": [
+        {
+            "key": "cpu.cores",
+            "value": "required"
+        },
+        {
+            "key": "cpu.cpus",
+            "value": "required"
+        },
+        {
+            "key": "memory.size",
+            "value": "required"
+        },
+        {
+            "key": "storage.size",
+            "value": "required"
+        },
+        {
+            "key": "cpu.cache",
+            "value": "optional"
+        },
+        {
+            "key": "cpu.model",
+            "value": "optional"
+        },
+        {
+            "key": "cpu.speed",
+            "value": "optional"
+        },
+        {
+            "key": "cpu.threads",
+            "value": "optional"
+        },
+        {
+            "key": "cpu.vendor",
+            "value": "optional"
+        },
+        {
+            "key": "memory.speed",
+            "value": "optional"
+        },
+        {
+            "key": "memory.type",
+            "value": "optional"
+        },
+        {
+            "key": "storage.driver",
+            "value": "optional"
+        },
+        {
+            "key": "storage.model",
+            "value": "optional"
+        },
+        {
+            "key": "storage.name",
+            "value": "optional"
+        },
+        {
+            "key": "storage.serial",
+            "value": "optional"
+        },
+        {
+            "key": "storage.vendor",
+            "value": "optional"
+        },
+        {
+            "key": "node.hostname",
+            "value": "optional"
+        },
+        {
+            "key": "node.hypervisor",
+            "value": "optional"
+        },
+        {
+            "key": "node.machineid",
+            "value": "optional"
+        },
+        {
+            "key": "node.timezone",
+            "value": "optional"
+        },
+        {
+            "key": "kernel.architecture",
+            "value": "optional"
+        },
+        {
+            "key": "kernel.release",
+            "value": "optional"
+        },
+        {
+            "key": "kernel.version",
+            "value": "optional"
+        },
+        {
+            "key": "os.architecture",
+            "value": "optional"
+        },
+        {
+            "key": "os.name",
+            "value": "optional"
+        },
+        {
+            "key": "os.release",
+            "value": "optional"
+        },
+        {
+            "key": "os.vendor",
+            "value": "optional"
+        },
+        {
+            "key": "os.version",
+            "value": "optional"
+        }
+    ]
+}
