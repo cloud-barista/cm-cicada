@@ -1,5 +1,6 @@
 services:
     airflow-mysql:
+        container_name: airflow-mysql
         image: mysql:8.0-debian
         restart: always
         environment:
@@ -13,6 +14,7 @@ services:
     airflow-server:
         build:
             context: .
+        container_name: airflow-server
         image: airflow-server
         restart: always
         environment:
