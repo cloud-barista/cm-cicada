@@ -17,8 +17,6 @@ services:
         container_name: airflow-server
         image: airflow-server
         restart: always
-        environment:
-                - AIRFLOW__CORE__SQL_ALCHEMY_CONN=mysql+mysqldb://airflow:airflow_pass@airflow-mysql/airflow
         command: >
             /bin/bash -c "
                 # Wait for MySQL
