@@ -31,6 +31,9 @@ services:
                 # Create default user
                 airflow users create --username airflow --password airflow_pass --email ish@innogrid.com --firstname SuHyeon --lastname Im --role Admin
 
+                # Create beetle API connection
+                airflow connections add --conn-type http --conn-description 'Beetle API' --conn-host 127.0.0.1 --conn-schema 'beetle/' --conn-login default --conn-password default --conn-port 8056 --conn-extra {} beetle_api
+
                 # Start airflow
                 airflow scheduler &
             	  airflow webserver
