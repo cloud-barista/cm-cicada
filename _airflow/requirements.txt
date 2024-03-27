@@ -15,4 +15,3 @@ siuba==0.4.4
 SQLAlchemy-Utils==0.41.2
 yfinance==0.2.37
 dag-factory==0.19.0
-swagger-ui-bundle==1.1.0

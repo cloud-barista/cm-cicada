@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev 
 # Python Requirements
 ADD requirements.txt .
 RUN pip3 install -r requirements.txt
+RUN pip3 install connexion
+RUN pip3 install "connexion[swagger-ui]"
 
 # Airflow Env Vars
 ENV AIRFLOW_HOME='/usr/local/airflow'
@@ -15,4 +17,4 @@ ENV AIRFLOW_HOME='/usr/local/airflow'
 WORKDIR /usr/local/airflow
 
 # Sleep forever
-CMD sleep infinityl
+CMD sleep infinity
