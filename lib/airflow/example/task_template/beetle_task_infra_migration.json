@@ -1,0 +1,40 @@
+{
+  "task_name": "beetle_task_infra_migration",
+  "operator": "airflow.providers.http.operators.http.SimpleHttpOperator",
+  "operator_options": [
+    {
+      "name": "task_id",
+      "value": "migrate_infra"
+    },
+    {
+      "name": "http_conn_id",
+      "value": "beetle_api"
+    },
+    {
+      "name": "endpoint",
+      "value": "/beetle/migration/infra"
+    },
+    {
+      "name": "method",
+      "value": "POST"
+    },
+    {
+      "name": "data",
+      "value": "{\n    \"name\": \"recommended-infra01\",\n    \"installMonAgent\": \"no\",\n    \"label\": \"DynamicVM\",\n    \"systemLabel\": \"\",\n    \"description\": \"Made in CB-TB\",\n    \"vm\": [\n        {\n            \"name\": \"recommended-vm01\",\n            \"subGroupSize\": \"3\",\n            \"label\": \"DynamicVM\",\n            \"description\": \"Description\",\n            \"commonSpec\": \"azure-koreacentral-standard-b4ms\",\n            \"commonImage\": \"ubuntu22-04\",\n            \"rootDiskType\": \"default\",\n            \"rootDiskSize\": \"default\",\n            \"vmUserPassword\": \"test\",\n            \"connectionName\": \"azure-koreacentral\"\n        }\n    ]\n}"
+    },
+    {
+      "name": "headers",
+      "value": {
+        "Content-Type": "application/json"
+      }
+    }
+  ],
+  "param_option": {
+    "operator_option_for_use_as_param": "data",
+    "operator_option_value_is_json": true,
+    "optional_params": [
+      ".vm.rootDiskType",
+      ".vm.rootDiskSize"
+    ]
+  }
+}

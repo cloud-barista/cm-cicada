@@ -1,0 +1,15 @@
+{
+  "task_name": "bash_task_echo",
+  "operator": "airflow.operators.bash.BashOperator",
+  "operator_options": [
+    {
+      "name": "bash_command",
+      "value": "echo 'Infra migration is started.'"
+    }
+  ],
+  "param_option": {
+    "operator_option_for_use_as_param": "bash_command",
+    "operator_option_value_is_json": false,
+    "optional_params": []
+  }
+}
