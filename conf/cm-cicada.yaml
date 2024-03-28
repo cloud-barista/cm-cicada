@@ -20,12 +20,16 @@ cm-cicada:
             host: 127.0.0.1
             port: 8056
             schema: http
+            login: default
+            password: default
           - id: tumblebug_api
             type: http
             description: TumbleBug API
             host: 127.0.0.1
             port: 1323
             schema: http
+            login: default
+            password: default
     dag_directory_host: "./_airflow/airflow-home/dags"
     dag_directory_airflow: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_airflow, if this value is empty
     listen:
