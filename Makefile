@@ -8,7 +8,7 @@ GOPROXY_OPTION := GOPROXY=direct GOSUMDB=off
 GO_COMMAND := ${GOPROXY_OPTION} go
 GOPATH := $(shell go env GOPATH)
 
-.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build start_airflow stop_airflow start stop clean_dags clean help
+.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build run_airflow stop_airflow run stop clean_dags clean help
 
 all: build
 
@@ -72,14 +72,14 @@ build: lint swag ## Build the binary file
 	@git rev-parse HEAD > .git_hash_last_build
 	@echo Build finished!
 
-start_airflow: ## Start Airflow server
+run_airflow: ## Run Airflow server
 	@mkdir -p _airflow/airflow-home/dags
 	@cd _airflow/ && docker compose up -d && cd ..
 
 stop_airflow: ## Stop Airflow server
 	@cd _airflow/ && docker compose down && cd ..
 
-start: stop start_airflow ## Start Airflow server and the built binary
+run: stop run_airflow ## Run Airflow server and the built binary
 	@git diff > .diff_current
 	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
 	  GIT_HASH_MINE=`git rev-parse HEAD` && \
