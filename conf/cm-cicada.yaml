@@ -31,6 +31,6 @@ cm-cicada:
             login: default
             password: default
     dag_directory_host: "./_airflow/airflow-home/dags"
-    dag_directory_airflow: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_airflow, if this value is empty
+    dag_directory_container: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_container, if this value is empty
     listen:
         port: 8083

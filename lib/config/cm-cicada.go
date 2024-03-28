@@ -27,9 +27,9 @@ type cmCicadaConfig struct {
 			Password      string             `yaml:"password"`
 			Connections   []model.Connection `yaml:"connections"`
 		} `yaml:"airflow-server"`
-		DAGDirectoryHost    string `yaml:"dag_directory_host"`
-		DAGDirectoryAirflow string `yaml:"dag_directory_airflow"`
-		Listen              struct {
+		DAGDirectoryHost      string `yaml:"dag_directory_host"`
+		DAGDirectoryContainer string `yaml:"dag_directory_container"`
+		Listen                struct {
 			Port string `yaml:"port"`
 		} `yaml:"listen"`
 	} `yaml:"cm-cicada"`
@@ -103,9 +103,9 @@ func checkCMCicadaConfigFile() error {
 		return errors.New("DAG directory (" + dagDirectoryHost + ") is not exist")
 	}
 
-	dagDirectoryAirflow := CMCicadaConfig.CMCicada.DAGDirectoryAirflow
+	dagDirectoryAirflow := CMCicadaConfig.CMCicada.DAGDirectoryContainer
 	if dagDirectoryAirflow == "" {
-		CMCicadaConfig.CMCicada.DAGDirectoryAirflow = dagDirectoryHost
+		CMCicadaConfig.CMCicada.DAGDirectoryContainer = dagDirectoryHost
 	}
 
 	if CMCicadaConfig.CMCicada.Listen.Port == "" {
