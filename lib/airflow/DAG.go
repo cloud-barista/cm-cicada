@@ -1,14 +1,13 @@
 package airflow
 
 import (
-	"context"
 	"errors"
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
 )
 
-func (conn *Connection) CreateDAG(DAG *model.DAG) error {
+func (client *client) CreateDAG(DAG *model.DAG) error {
 	err := writeGustyYAMLs(DAG)
 	if err != nil {
 		return err
@@ -17,10 +16,10 @@ func (conn *Connection) CreateDAG(DAG *model.DAG) error {
 	return nil
 }
 
-func (conn *Connection) GetDAGs() (airflow.DAGCollection, error) {
-	ctx, cancel := context.WithTimeout(conn.ctx, conn.timeout)
+func (client *client) GetDAGs() (airflow.DAGCollection, error) {
+	ctx, cancel := Context()
 	defer cancel()
-	resp, _, err := conn.cli.DAGApi.GetDags(ctx).Execute()
+	resp, _, err := client.api.DAGApi.GetDags(ctx).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting DAGs. (Error: "+err.Error()+").")
@@ -29,8 +28,8 @@ func (conn *Connection) GetDAGs() (airflow.DAGCollection, error) {
 	return resp, err
 }
 
-func (conn *Connection) RunDAG(dagID string) (airflow.DAGRun, error) {
-	dags, err := conn.GetDAGs()
+func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
+	dags, err := client.GetDAGs()
 	if err != nil {
 		return airflow.DAGRun{}, err
 	}
@@ -50,12 +49,14 @@ func (conn *Connection) RunDAG(dagID string) (airflow.DAGRun, error) {
 		return airflow.DAGRun{}, errors.New("provided dag_id is not exist")
 	}
 
-	ctx, cancel := context.WithTimeout(conn.ctx, conn.timeout)
+	ctx, cancel := Context()
 	defer cancel()
-	resp, _, err := conn.cli.DAGRunApi.PostDagRun(ctx, dagID).DAGRun(*airflow.NewDAGRun()).Execute()
+	resp, _, err := client.api.DAGRunApi.PostDagRun(ctx, dagID).DAGRun(*airflow.NewDAGRun()).Execute()
 	if err != nil {
-		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while running the DAG. (DAG ID: "+dagID+", Error: "+err.Error()+")")
+		errMsg := "AIRFLOW: Error occurred while running the DAG. (DAG ID: " + dagID + ", Error: " + err.Error() + ")"
+		logger.Println(logger.ERROR, false, errMsg)
+
+		return airflow.DAGRun{}, errors.New(errMsg)
 	}
 
 	logger.Println(logger.INFO, false, "AIRFLOW: Running the DAG. (DAG ID: "+dagID+")")

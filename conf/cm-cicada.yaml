@@ -3,9 +3,29 @@ cm-cicada:
         address: 127.0.0.1:8080
         use_tls: false
         # skip_tls_verify: true
+        init_retry: 5
         timeout: 10
         username: "airflow"
         password: "airflow_pass"
+        connections:
+          - id: honeybee_api
+            type: http
+            description: HoneyBee API
+            host: 127.0.0.1
+            port: 8081
+            schema: http
+          - id: beetle_api
+            type: http
+            description: Beetle API
+            host: 127.0.0.1
+            port: 8056
+            schema: http
+          - id: tumblebug_api
+            type: http
+            description: TumbleBug API
+            host: 127.0.0.1
+            port: 1323
+            schema: http
     dag_directory_host: "./_airflow/airflow-home/dags"
     dag_directory_airflow: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_airflow, if this value is empty
     listen:

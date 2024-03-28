@@ -34,7 +34,7 @@ func CreateDAG(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Conn.CreateDAG(&DAG)
+	err = airflow.Client.CreateDAG(&DAG)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to create DAG.")
 	}
@@ -54,7 +54,7 @@ func CreateDAG(c echo.Context) error {
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get DAGs."
 // @Router			/dag/dags [get]
 func GetDAGs(c echo.Context) error {
-	dags, err := airflow.Conn.GetDAGs()
+	dags, err := airflow.Client.GetDAGs()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -80,7 +80,7 @@ func RunDAG(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the dag_id parameter.")
 	}
 
-	dagRun, err := airflow.Conn.RunDAG(dagID)
+	dagRun, err := airflow.Client.RunDAG(dagID)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to run DAG.")
 	}

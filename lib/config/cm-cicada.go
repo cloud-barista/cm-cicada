@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cloud-barista/cm-cicada/common"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
 	"net"
@@ -17,12 +18,14 @@ import (
 type cmCicadaConfig struct {
 	CMCicada struct {
 		AirflowServer struct {
-			Address       string `yaml:"address"`
-			UseTLS        string `yaml:"use_tls"`
-			SkipTLSVerify string `yaml:"skip_tls_verify"`
-			Timeout       string `yaml:"timeout"`
-			Username      string `yaml:"username"`
-			Password      string `yaml:"password"`
+			Address       string             `yaml:"address"`
+			UseTLS        string             `yaml:"use_tls"`
+			SkipTLSVerify string             `yaml:"skip_tls_verify"`
+			InitRetry     string             `yaml:"init_retry"`
+			Timeout       string             `yaml:"timeout"`
+			Username      string             `yaml:"username"`
+			Password      string             `yaml:"password"`
+			Connections   []model.Connection `yaml:"connections"`
 		} `yaml:"airflow-server"`
 		DAGDirectoryHost    string `yaml:"dag_directory_host"`
 		DAGDirectoryAirflow string `yaml:"dag_directory_airflow"`
@@ -67,6 +70,14 @@ func checkCMCicadaConfigFile() error {
 		if err != nil {
 			return errors.New("config error: cm-cicada.airflow-server.skip_tls_verify has invalid value")
 		}
+	}
+
+	if CMCicadaConfig.CMCicada.AirflowServer.InitRetry == "" {
+		return errors.New("config error: cm-cicada.airflow-server.init_retry is empty")
+	}
+	initRetry, err := strconv.Atoi(CMCicadaConfig.CMCicada.AirflowServer.InitRetry)
+	if err != nil || initRetry < 0 {
+		return errors.New("config error: cm-cicada.airflow-server.init_retry has invalid value")
 	}
 
 	if CMCicadaConfig.CMCicada.AirflowServer.Timeout == "" {
