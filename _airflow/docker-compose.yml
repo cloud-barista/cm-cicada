@@ -2,6 +2,8 @@ services:
     airflow-mysql:
         container_name: airflow-mysql
         image: mysql:8.0-debian
+        cap_add:
+          - SYS_NICE
         restart: always
         environment:
             - MYSQL_ROOT_PASSWORD=airflow_pass
