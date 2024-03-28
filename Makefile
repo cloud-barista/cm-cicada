@@ -89,7 +89,7 @@ start: stop start_airflow ## Start Airflow server and the built binary
 	  fi
 	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
 
-stop: ## Stop the built binary
+stop: stop_airflow ## Stop Airflow server and the built binary
 	@sudo killall ${MODULE_NAME} | true
 
 clean_dags: ## Clean DAGs folder
