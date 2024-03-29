@@ -9,6 +9,7 @@ ADD requirements.txt .
 RUN pip3 install -r requirements.txt
 RUN pip3 install connexion
 RUN pip3 install "connexion[swagger-ui]"
+RUN pip3 cache purge
 
 # Airflow Env Vars
 ENV AIRFLOW_HOME='/usr/local/airflow'
