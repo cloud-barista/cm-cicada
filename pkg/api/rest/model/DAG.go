@@ -12,7 +12,7 @@ type DefaultArgs struct {
 
 type OperatorOptions []struct {
 	Name  string `json:"name" mapstructure:"name"`
-	Value string `json:"value" mapstructure:"value"`
+	Value any    `json:"value" mapstructure:"value"`
 }
 
 type Task struct {
