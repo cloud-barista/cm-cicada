@@ -2,7 +2,7 @@ FROM python:3.11.8-slim-bookworm
 USER root
 
 # MySQL Requirements
-RUN apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
+RUN apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev build-essential pkg-config && apt-get clean
 
 # Python Requirements
 ADD requirements.txt .
