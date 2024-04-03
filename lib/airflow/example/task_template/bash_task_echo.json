@@ -10,6 +10,17 @@
   "param_option": {
     "operator_option_for_use_as_param": "bash_command",
     "operator_option_value_is_json": false,
-    "optional_params": []
+    "params": {
+      "required": [
+        "bash_command"
+      ],
+      "properties": {
+        "bash_command": {
+          "description": "Bash command to run",
+          "type": "string",
+          "example": "echo 'Infra migration is started.'"
+        }
+      }
+    }
   }
 }
