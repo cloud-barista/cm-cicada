@@ -13,6 +13,7 @@
       "tasks": [
         {
           "task_name": "bash_task_echo_infra_migration_started",
+          "task_template": "bash_task_echo",
           "operator": "airflow.operators.bash.BashOperator",
           "operator_options": [
             {
@@ -24,6 +25,7 @@
         },
         {
           "task_name": "beetle_task_infra_migration",
+          "task_template": "beetle_task_infra_migration",
           "operator": "airflow.providers.http.operators.http.SimpleHttpOperator",
           "operator_options": [
             {
@@ -59,6 +61,7 @@
         },
         {
           "task_name": "bash_task_echo_infra_migration_finished",
+          "task_template": "bash_task_echo",
           "operator": "airflow.operators.bash.BashOperator",
           "operator_options": [
             {
