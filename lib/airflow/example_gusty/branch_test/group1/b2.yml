@@ -1,0 +1,4 @@
+operator: airflow.operators.bash.BashOperator
+bash_command: "echo b2"
+dependencies:
+  - branch_task
