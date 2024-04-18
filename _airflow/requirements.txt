@@ -1,4 +1,4 @@
-apache-airflow==2.8.4
+apache-airflow==2.9.0
 mysqlclient==2.2.4
 apache-airflow-providers-mysql==5.5.4
 apache-airflow-providers-sqlite==3.7.1
