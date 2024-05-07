@@ -196,7 +196,7 @@ definitions:
         type: array
       task_name:
         type: string
-      task_template:
+      task_component:
         type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup:

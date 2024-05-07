@@ -481,7 +481,7 @@ const docTemplate = `{
                 "task_name": {
                     "type": "string"
                 },
-                "task_template": {
+                "task_component": {
                     "type": "string"
                 }
             }
