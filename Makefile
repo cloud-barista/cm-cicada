@@ -79,7 +79,8 @@ run_airflow: ## Run Airflow server
 stop_airflow: ## Stop Airflow server
 	@cd _airflow/ && docker compose down && cd ..
 
-run: stop run_airflow ## Run Airflow server and the built binary
+run: run_airflow ## Run Airflow server and the built binary
+	@sudo killall ${MODULE_NAME} | true
 	@git diff > .diff_current
 	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
 	  GIT_HASH_MINE=`git rev-parse HEAD` && \
