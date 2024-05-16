@@ -352,7 +352,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/run/{name}": {
+        "/workflow/run/{id}": {
             "post": {
                 "description": "Get the DAG in Airflow",
                 "consumes": [
@@ -396,7 +396,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{name}": {
+        "/workflow/{id}": {
             "get": {
                 "description": "Get a list of DAGs from Airflow",
                 "consumes": [
@@ -424,6 +424,114 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to get a workflow list.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow_template": {
+            "get": {
+                "description": "Get a list of workflow template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow Template]"
+                ],
+                "summary": "List WorkflowTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Page of the workflow template list.",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Row of the workflow template list.",
+                        "name": "row",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "UUID of the workflow template.",
+                        "name": "uuid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Migration group name.",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get a list of workflow template.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get a list of workflow template.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow_template/{id}": {
+            "get": {
+                "description": "Get the workflow template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow Template]"
+                ],
+                "summary": "Get WorkflowTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the WorkflowTemplate",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflow template",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflow template",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }

@@ -52,11 +52,11 @@ func CreateWorkflow(c echo.Context) error {
 // @Success		200	{object}	airflow.DAGCollection	"Successfully get a workflow list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
-// @Router		/workflow/{name} [get]
+// @Router		/workflow/{id} [get]
 func GetWorkflow(c echo.Context) error {
-	dagID := c.Param("name")
+	dagID := c.Param("id")
 	if dagID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the name.")
+		return common.ReturnErrorMsg(c, "Please provide the id.")
 	}
 
 	dag, err := airflow.Client.GetDAG(dagID)
@@ -98,11 +98,11 @@ func ListWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.Workflow	"Successfully run the Workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run Workflow"
-// @Router		/workflow/run/{name} [post]
+// @Router		/workflow/run/{id} [post]
 func RunWorkflow(c echo.Context) error {
-	dagID := c.Param("name")
+	dagID := c.Param("id")
 	if dagID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the name.")
+		return common.ReturnErrorMsg(c, "Please provide the id.")
 	}
 
 	dagRun, err := airflow.Client.RunDAG(dagID)

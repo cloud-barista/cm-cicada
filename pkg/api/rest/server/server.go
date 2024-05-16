@@ -50,8 +50,9 @@ func Init() {
 	// Hide Echo Banner
 	e.HideBanner = true
 
-	route.Workflow(e)
 	route.TaskTemplate(e)
+	route.WorkflowTemplate(e)
+	route.Workflow(e)
 	route.RegisterSwagger(e)
 	route.RegisterUtility(e)
 
