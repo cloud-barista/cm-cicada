@@ -7,13 +7,25 @@ import (
 	"github.com/jollaman999/utils/logger"
 )
 
-func (client *client) CreateDAG(DAG *model.DAG) error {
+func (client *client) CreateDAG(DAG *model.Workflow) error {
 	err := writeGustyYAMLs(DAG)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (client *client) GetDAG(dagID string) (airflow.DAG, error) {
+	ctx, cancel := Context()
+	defer cancel()
+	resp, _, err := client.api.DAGApi.GetDag(ctx, dagID).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting DAGs. (Error: "+err.Error()+").")
+	}
+
+	return resp, err
 }
 
 func (client *client) GetDAGs() (airflow.DAGCollection, error) {

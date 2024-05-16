@@ -146,19 +146,6 @@ definitions:
       error:
         type: string
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG:
-    properties:
-      dag_id:
-        type: string
-      default_args:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs'
-      description:
-        type: string
-      task_groups:
-        items:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
-        type: array
-    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs:
     properties:
       email:
@@ -194,9 +181,9 @@ definitions:
             value: {}
           type: object
         type: array
-      task_name:
-        type: string
       task_component:
+        type: string
+      task_name:
         type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup:
@@ -208,6 +195,19 @@ definitions:
       tasks:
         items:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        type: array
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
+    properties:
+      default_args:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs'
+      description:
+        type: string
+      id:
+        type: string
+      task_groups:
+        items:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
         type: array
     type: object
   pkg_api_rest_controller.SimpleMsg:
@@ -237,46 +237,16 @@ paths:
       summary: Check Cicada is alive
       tags:
       - '[Admin] System management'
-  /dag/create:
-    post:
-      consumes:
-      - application/json
-      description: Create a DAG.
-      parameters:
-      - description: query params
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully get DAGs.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG'
-        "400":
-          description: Sent bad request.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-        "500":
-          description: Failed to get DAGs.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Create a DAG in Airflow
-      tags:
-      - '[DAG] Create DAG'
-  /dag/dags:
+  /workflow:
     get:
       consumes:
       - application/json
-      description: Get a list of DAGs.
+      description: Get a list of DAGs from Airflow
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully get DAGs.
+          description: Successfully get a workflow list.
           schema:
             $ref: '#/definitions/airflow.DAGCollection'
         "400":
@@ -284,19 +254,71 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to get DAGs.
+          description: Failed to get a workflow list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get a list of DAGs from Airflow
+      summary: List Workflow
       tags:
-      - '[DAG] Get DAGs'
-  /dag/run:
+      - '[Workflow]'
     post:
       consumes:
       - application/json
-      description: Run the DAG.
+      description: Create a DAG in Airflow.
       parameters:
-      - description: DAG ID
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully create the DAG.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to create DAG.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Create Workflow
+      tags:
+      - '[Workflow]'
+  /workflow/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of DAGs from Airflow
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a workflow list.
+          schema:
+            $ref: '#/definitions/airflow.DAGCollection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a workflow list.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List Workflow
+      tags:
+      - '[Workflow]'
+  /workflow/run/{name}:
+    post:
+      consumes:
+      - application/json
+      description: Get the DAG in Airflow
+      parameters:
+      - description: Workflow ID
         in: query
         name: dag_id
         required: true
@@ -305,18 +327,18 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully run the DAG.
+          description: Successfully run the Workflow.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
         "400":
           description: Sent bad request.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to run DAG
+          description: Failed to run Workflow
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Run the DAG in Airflow
+      summary: Run Workflow
       tags:
-      - '[DAG] Run DAG'
+      - '[Workflow]'
 swagger: "2.0"

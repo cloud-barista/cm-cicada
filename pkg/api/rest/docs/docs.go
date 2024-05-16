@@ -44,55 +44,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/dag/create": {
-            "post": {
-                "description": "Create a DAG.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "[DAG] Create DAG"
-                ],
-                "summary": "Create a DAG in Airflow",
-                "parameters": [
-                    {
-                        "description": "query params",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully get DAGs.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG"
-                        }
-                    },
-                    "400": {
-                        "description": "Sent bad request.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to get DAGs.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/dag/dags": {
+        "/workflow": {
             "get": {
-                "description": "Get a list of DAGs.",
+                "description": "Get a list of DAGs from Airflow",
                 "consumes": [
                     "application/json"
                 ],
@@ -100,12 +54,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[DAG] Get DAGs"
+                    "[Workflow]"
                 ],
-                "summary": "Get a list of DAGs from Airflow",
+                "summary": "List Workflow",
                 "responses": {
                     "200": {
-                        "description": "Successfully get DAGs.",
+                        "description": "Successfully get a workflow list.",
                         "schema": {
                             "$ref": "#/definitions/airflow.DAGCollection"
                         }
@@ -117,17 +71,15 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get DAGs.",
+                        "description": "Failed to get a workflow list.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
                     }
                 }
-            }
-        },
-        "/dag/run": {
+            },
             "post": {
-                "description": "Run the DAG.",
+                "description": "Create a DAG in Airflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -135,23 +87,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[DAG] Run DAG"
+                    "[Workflow]"
                 ],
-                "summary": "Run the DAG in Airflow",
+                "summary": "Create Workflow",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "DAG ID",
-                        "name": "dag_id",
-                        "in": "query",
-                        "required": true
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully run the DAG.",
+                        "description": "Successfully create the DAG.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
                     },
                     "400": {
@@ -161,7 +115,86 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to run DAG",
+                        "description": "Failed to create DAG.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/run/{name}": {
+            "post": {
+                "description": "Get the DAG in Airflow",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Run Workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID",
+                        "name": "dag_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully run the Workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to run Workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{name}": {
+            "get": {
+                "description": "Get a list of DAGs from Airflow",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "List Workflow",
+                "responses": {
+                    "200": {
+                        "description": "Successfully get a workflow list.",
+                        "schema": {
+                            "$ref": "#/definitions/airflow.DAGCollection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get a workflow list.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -406,26 +439,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DAG": {
-            "type": "object",
-            "properties": {
-                "dag_id": {
-                    "type": "string"
-                },
-                "default_args": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "task_groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
-                    }
-                }
-            }
-        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs": {
             "type": "object",
             "properties": {
@@ -478,10 +491,10 @@ const docTemplate = `{
                         }
                     }
                 },
-                "task_name": {
+                "task_component": {
                     "type": "string"
                 },
-                "task_component": {
+                "task_name": {
                     "type": "string"
                 }
             }
@@ -499,6 +512,26 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                    }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow": {
+            "type": "object",
+            "properties": {
+                "default_args": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "task_groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
                     }
                 }
             }

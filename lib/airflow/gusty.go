@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func checkDAG(dag *model.DAG) error {
+func checkDAG(dag *model.Workflow) error {
 	if dag.DefaultArgs.Owner == "" {
 		return errors.New("owner is not set")
 	}
@@ -64,18 +64,18 @@ func writeModelToYAMLFile(model any, filePath string) error {
 	return fileutil.WriteFile(filePath, parsed)
 }
 
-func writeGustyYAMLs(dag *model.DAG) error {
+func writeGustyYAMLs(dag *model.Workflow) error {
 	err := checkDAG(dag)
 	if err != nil {
 		return err
 	}
 
-	dag.DagID = uuid.New().String()
+	dag.ID = uuid.New().String()
 
-	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.DagID
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.ID
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
-		return errors.New("failed to create the DAG directory (DAG ID=" + dag.DagID +
+		return errors.New("failed to create the Workflow directory (Workflow ID=" + dag.ID +
 			", Description: " + dag.Description)
 	}
 

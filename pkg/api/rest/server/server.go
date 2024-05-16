@@ -50,7 +50,7 @@ func Init() {
 	// Hide Echo Banner
 	e.HideBanner = true
 
-	route.DAG(e)
+	route.Workflow(e)
 	route.RegisterSwagger(e)
 	route.RegisterUtility(e)
 

@@ -29,8 +29,8 @@ type TaskGroup struct {
 	Tasks         []Task `json:"tasks" mapstructure:"tasks"`
 }
 
-type DAG struct {
-	DagID       string      `json:"dag_id" mapstructure:"dag_id"`
+type Workflow struct {
+	ID          string      `json:"id" mapstructure:"id"`
 	DefaultArgs DefaultArgs `json:"default_args" mapstructure:"default_args"`
 	Description string      `json:"description" mapstructure:"description"`
 	TaskGroups  []TaskGroup `json:"task_groups" mapstructure:"task_groups"`

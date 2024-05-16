@@ -100,7 +100,7 @@ func checkCMCicadaConfigFile() error {
 		return errors.New("config error: cm-cicada.dag_directory_host is empty")
 	}
 	if !fileutil.IsExist(dagDirectoryHost) {
-		return errors.New("DAG directory (" + dagDirectoryHost + ") is not exist")
+		return errors.New("Workflow directory (" + dagDirectoryHost + ") is not exist")
 	}
 
 	dagDirectoryAirflow := CMCicadaConfig.CMCicada.DAGDirectoryContainer
