@@ -10,17 +10,17 @@ import (
 )
 
 func checkDAG(dag *model.Workflow) error {
-	if dag.DefaultArgs.Owner == "" {
+	if dag.Data.DefaultArgs.Owner == "" {
 		return errors.New("owner is not set")
 	}
 
-	if dag.DefaultArgs.StartDate == "" {
+	if dag.Data.DefaultArgs.StartDate == "" {
 		return errors.New("start_date is not set")
 	}
 
 	var taskNames []string
 
-	for _, tg := range dag.TaskGroups {
+	for _, tg := range dag.Data.TaskGroups {
 		if tg.TaskGroupName == "" {
 			return errors.New("task group name should not be empty")
 		}
@@ -34,7 +34,7 @@ func checkDAG(dag *model.Workflow) error {
 		}
 	}
 
-	for _, tg := range dag.TaskGroups {
+	for _, tg := range dag.Data.TaskGroups {
 		for _, t := range tg.Tasks {
 			for _, dep := range t.Dependencies {
 				var depFound bool
@@ -76,14 +76,14 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
 		return errors.New("failed to create the Workflow directory (Workflow ID=" + dag.ID +
-			", Description: " + dag.Description)
+			", Description: " + dag.Data.Description)
 	}
 
-	if dag.DefaultArgs.Retries < 0 {
-		dag.DefaultArgs.Retries = 1
+	if dag.Data.DefaultArgs.Retries < 0 {
+		dag.Data.DefaultArgs.Retries = 1
 	}
-	if dag.DefaultArgs.RetryDelaySec < 0 {
-		dag.DefaultArgs.RetryDelaySec = 300
+	if dag.Data.DefaultArgs.RetryDelaySec < 0 {
+		dag.Data.DefaultArgs.RetryDelaySec = 300
 	}
 
 	var dagInfo struct {
@@ -91,8 +91,8 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		Description string            `yaml:"description"`
 	}
 
-	dagInfo.DefaultArgs = dag.DefaultArgs
-	dagInfo.Description = dag.Description
+	dagInfo.DefaultArgs = dag.Data.DefaultArgs
+	dagInfo.Description = dag.Data.Description
 
 	filePath := dagDir + "/METADATA.yml"
 
@@ -101,7 +101,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
 	}
 
-	for _, tg := range dag.TaskGroups {
+	for _, tg := range dag.Data.TaskGroups {
 		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.TaskGroupName)
 		if err != nil {
 			return err

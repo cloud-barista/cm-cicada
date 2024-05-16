@@ -439,6 +439,23 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data": {
+            "type": "object",
+            "properties": {
+                "default_args": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "task_groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
+                    }
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs": {
             "type": "object",
             "properties": {
@@ -518,21 +535,26 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow": {
             "type": "object",
+            "required": [
+                "data",
+                "id",
+                "name"
+            ],
             "properties": {
-                "default_args": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs"
-                },
-                "description": {
+                "created_at": {
                     "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
                 "id": {
                     "type": "string"
                 },
-                "task_groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
-                    }
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

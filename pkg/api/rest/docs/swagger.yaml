@@ -146,6 +146,17 @@ definitions:
       error:
         type: string
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data:
+    properties:
+      default_args:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs'
+      description:
+        type: string
+      task_groups:
+        items:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
+        type: array
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs:
     properties:
       email:
@@ -199,16 +210,20 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
     properties:
-      default_args:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs'
-      description:
+      created_at:
         type: string
+      data:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
       id:
         type: string
-      task_groups:
-        items:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
-        type: array
+      name:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - data
+    - id
+    - name
     type: object
   pkg_api_rest_controller.SimpleMsg:
     properties:

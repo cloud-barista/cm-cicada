@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type DefaultArgs struct {
 	Owner          string `json:"owner" mapstructure:"owner"`
 	StartDate      string `json:"start_date" mapstructure:"start_date"`
@@ -29,9 +31,16 @@ type TaskGroup struct {
 	Tasks         []Task `json:"tasks" mapstructure:"tasks"`
 }
 
-type Workflow struct {
-	ID          string      `json:"id" mapstructure:"id"`
+type Data struct {
 	DefaultArgs DefaultArgs `json:"default_args" mapstructure:"default_args"`
 	Description string      `json:"description" mapstructure:"description"`
 	TaskGroups  []TaskGroup `json:"task_groups" mapstructure:"task_groups"`
+}
+
+type Workflow struct {
+	ID        string    `json:"id" mapstructure:"id" validate:"required"`
+	Name      string    `json:"name" mapstructure:"name" validate:"required"`
+	Data      Data      `json:"data" mapstructure:"data" validate:"required"`
+	CreatedAt time.Time `json:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" mapstructure:"updated_at"`
 }
