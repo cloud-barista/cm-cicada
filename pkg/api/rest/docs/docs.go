@@ -778,6 +778,10 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data": {
             "type": "object",
+            "required": [
+                "default_args",
+                "task_groups"
+            ],
             "properties": {
                 "default_args": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs"
@@ -795,6 +799,10 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs": {
             "type": "object",
+            "required": [
+                "owner",
+                "start_date"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -823,6 +831,13 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
+            "required": [
+                "dependencies",
+                "operator",
+                "operator_options",
+                "task_component",
+                "task_name"
+            ],
             "properties": {
                 "dependencies": {
                     "type": "array",
@@ -837,6 +852,10 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "object",
+                        "required": [
+                            "name",
+                            "value"
+                        ],
                         "properties": {
                             "name": {
                                 "type": "string"
@@ -855,6 +874,10 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup": {
             "type": "object",
+            "required": [
+                "task_group_name",
+                "tasks"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -874,6 +897,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
+                "id",
                 "name"
             ],
             "properties": {

@@ -156,6 +156,9 @@ definitions:
         items:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
         type: array
+    required:
+    - default_args
+    - task_groups
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs:
     properties:
@@ -175,6 +178,9 @@ definitions:
         type: integer
       start_date:
         type: string
+    required:
+    - owner
+    - start_date
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task:
     properties:
@@ -190,12 +196,21 @@ definitions:
             name:
               type: string
             value: {}
+          required:
+          - name
+          - value
           type: object
         type: array
       task_component:
         type: string
       task_name:
         type: string
+    required:
+    - dependencies
+    - operator
+    - operator_options
+    - task_component
+    - task_name
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup:
     properties:
@@ -207,6 +222,9 @@ definitions:
         items:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
         type: array
+    required:
+    - task_group_name
+    - tasks
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate:
     properties:
@@ -222,6 +240,7 @@ definitions:
         type: string
     required:
     - data
+    - id
     - name
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
