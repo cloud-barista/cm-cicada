@@ -208,6 +208,22 @@ definitions:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
         type: array
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate:
+    properties:
+      created_at:
+        type: string
+      data:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - data
+    - name
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
     properties:
       created_at:
@@ -252,6 +268,157 @@ paths:
       summary: Check Cicada is alive
       tags:
       - '[Admin] System management'
+  /task_template:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of task template.
+      parameters:
+      - description: Page of the task template list.
+        in: query
+        name: page
+        type: string
+      - description: Row of the task template list.
+        in: query
+        name: row
+        type: string
+      - description: UUID of the task template.
+        in: query
+        name: uuid
+        type: string
+      - description: Task template name.
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a list of task template.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a list of task template.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List TaskTemplate
+      tags:
+      - '[Task Template]'
+    post:
+      consumes:
+      - application/json
+      description: Register the task template.
+      parameters:
+      - description: task template of the node.
+        in: body
+        name: TaskTemplate
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully register the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to register the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Create TaskTemplate
+      tags:
+      - '[Task Template]'
+  /task_template/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the task template.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully delete the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to delete the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Delete TaskTemplate
+      tags:
+      - '[Task Template]'
+    get:
+      consumes:
+      - application/json
+      description: Get the task template.
+      parameters:
+      - description: UUID of the TaskTemplate
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get TaskTemplate
+      tags:
+      - '[Task Template]'
+    put:
+      consumes:
+      - application/json
+      description: Update the task template.
+      parameters:
+      - description: task template to modify.
+        in: body
+        name: TaskTemplate
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to update the task template
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Update TaskTemplate
+      tags:
+      - '[Task Template]'
   /workflow:
     get:
       consumes:

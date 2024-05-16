@@ -51,6 +51,7 @@ func Init() {
 	e.HideBanner = true
 
 	route.Workflow(e)
+	route.TaskTemplate(e)
 	route.RegisterSwagger(e)
 	route.RegisterUtility(e)
 
