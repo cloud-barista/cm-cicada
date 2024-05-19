@@ -1,0 +1,16 @@
+[Unit]
+Description=Cloud-Migrator Cicada Service
+After=network.target
+
+[Service]
+Environment="CMCICADA_ROOT=/etc/cloud-migrator/cm-cicada/"
+Type=simple
+User=root
+ExecStart=/usr/bin/cm-cicada
+ExecStop=/usr/bin/killall cm-cicada
+Restart=on-failure
+RestartPreventExitStatus=100
+
+[Install]
+WantedBy=multi-user.target
+Alias=cicada.service
