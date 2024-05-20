@@ -354,7 +354,7 @@ const docTemplate = `{
         },
         "/workflow/run/{id}": {
             "post": {
-                "description": "Get the DAG in Airflow",
+                "description": "Run the DAG in Airflow",
                 "consumes": [
                     "application/json"
                 ],
@@ -376,7 +376,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully run the Workflow.",
+                        "description": "Successfully run the DAG.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
@@ -832,7 +832,6 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
             "required": [
-                "dependencies",
                 "operator",
                 "operator_options",
                 "task_component",
@@ -896,22 +895,22 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate": {
             "type": "object",
             "required": [
-                "data",
                 "id",
-                "name"
+                "name",
+                "task"
             ],
             "properties": {
                 "created_at": {
                     "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
                 "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "task": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
                 },
                 "updated_at": {
                     "type": "string"
