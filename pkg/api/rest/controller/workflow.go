@@ -44,14 +44,14 @@ func CreateWorkflow(c echo.Context) error {
 
 // GetWorkflow godoc
 //
-// @Summary		List Workflow
-// @Description	Get a list of DAGs from Airflow
+// @Summary		Get Workflow
+// @Description	Get the DAG from Airflow.
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Success		200	{object}	airflow.DAGCollection	"Successfully get a workflow list."
+// @Success		200	{object}	model.Workflow			"Successfully get the DAG."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the DAG."
 // @Router		/workflow/{id} [get]
 func GetWorkflow(c echo.Context) error {
 	dagID := c.Param("id")

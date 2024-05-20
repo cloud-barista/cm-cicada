@@ -494,23 +494,23 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get a list of DAGs from Airflow
+      description: Get the DAG from Airflow.
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully get a workflow list.
+          description: Successfully get the DAG.
           schema:
-            $ref: '#/definitions/airflow.DAGCollection'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
         "400":
           description: Sent bad request.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to get a workflow list.
+          description: Failed to get the DAG.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List Workflow
+      summary: Get Workflow
       tags:
       - '[Workflow]'
   /workflow/run/{id}:

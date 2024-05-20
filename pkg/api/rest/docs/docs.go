@@ -398,7 +398,7 @@ const docTemplate = `{
         },
         "/workflow/{id}": {
             "get": {
-                "description": "Get a list of DAGs from Airflow",
+                "description": "Get the DAG from Airflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -408,12 +408,12 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "List Workflow",
+                "summary": "Get Workflow",
                 "responses": {
                     "200": {
-                        "description": "Successfully get a workflow list.",
+                        "description": "Successfully get the DAG.",
                         "schema": {
-                            "$ref": "#/definitions/airflow.DAGCollection"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
                     },
                     "400": {
@@ -423,7 +423,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get a workflow list.",
+                        "description": "Failed to get the DAG.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
