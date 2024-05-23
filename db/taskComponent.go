@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
@@ -46,13 +46,13 @@ func TaskComponentInit() error {
 
 		// WorkflowTemplate 생성
 		taskComponent := model.TaskComponent{
-			ID:      baseNameWithoutExt, // 파일명으로 설정
+			ID:        baseNameWithoutExt, // 파일명으로 설정
 			Data:      data,
 			CreatedAt: createdAt,
 		}
 
 		// 삽입
-		err = DB.Create(&taskComponent).Error
+		err = DB.Save(&taskComponent).Error
 		if err != nil {
 			return err
 		}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
@@ -27,7 +27,9 @@ func WorkflowTemplateInit() error {
 		if err != nil {
 			return err
 		}
-		defer jsonFile.Close()
+		defer func() {
+			_ = jsonFile.Close()
+		}()
 
 		// JSON 파일 파싱하여 데이터베이스에 삽입
 		var data model.Data
@@ -46,13 +48,13 @@ func WorkflowTemplateInit() error {
 
 		// WorkflowTemplate 생성
 		workflowTemplate := model.WorkflowTemplate{
-			ID:      baseNameWithoutExt, // 파일명으로 설정
+			ID:        baseNameWithoutExt, // 파일명으로 설정
 			Data:      data,
 			CreatedAt: createdAt,
 		}
 
 		// 삽입
-		err = DB.Create(&workflowTemplate).Error
+		err = DB.Save(&workflowTemplate).Error
 		if err != nil {
 			return err
 		}
