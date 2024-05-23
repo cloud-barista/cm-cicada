@@ -75,3 +75,15 @@ func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
 
 	return resp, err
 }
+
+func (client *client) DeleteDAG(dagID string) error {
+	ctx, cancel := Context()
+	defer cancel()
+	_, err := client.api.DAGApi.DeleteDag(ctx, dagID).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while deleting the DAG. (Error: "+err.Error()+").")
+	}
+
+	return err
+}

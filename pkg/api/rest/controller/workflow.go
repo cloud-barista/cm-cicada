@@ -219,15 +219,20 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the id.")
 	}
 
-	Workflow, err := dao.WorkflowGet(id)
+	workflow, err := dao.WorkflowGet(id)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = dao.WorkflowDelete(Workflow)
+	err = airflow.Client.DeleteDAG(id)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, Workflow, " ")
+	err = dao.WorkflowDelete(workflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
