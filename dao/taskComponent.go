@@ -62,13 +62,6 @@ func TaskComponentGetList(page int, row int) (*[]model.TaskComponent, error) {
 }
 
 func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskComponent, error) {
-	// UUID, err := uuid.NewRandom()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// migrationGroup.UUID = UUID.String()
-
 	result := db.DB.Create(taskComponent)
 	err := result.Error
 	if err != nil {
@@ -76,4 +69,14 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 	}
 
 	return taskComponent, nil
+}
+
+func TaskComponentDelete(taskComponent *model.TaskComponent) error {
+	result := db.DB.Delete(taskComponent)
+	err := result.Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

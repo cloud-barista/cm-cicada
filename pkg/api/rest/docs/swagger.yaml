@@ -298,6 +298,12 @@ paths:
       consumes:
       - application/json
       description: Delete the task component.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

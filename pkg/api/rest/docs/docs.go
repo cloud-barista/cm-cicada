@@ -241,6 +241,15 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Delete TaskComponent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully delete the task component",

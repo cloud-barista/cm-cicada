@@ -7,8 +7,8 @@ import (
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	// "github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 // CreateTaskComponent godoc
@@ -111,10 +111,26 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
+// @Param		id path string true "ID of the workflow."
 // @Success		200	{object}	model.TaskComponent		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
 // @Router		/task_component/{uuid} [delete]
 func DeleteTaskComponent(c echo.Context) error {
-	return nil
+	id := c.Param("id")
+	if id == "" {
+		return common.ReturnErrorMsg(c, "Please provide the id.")
+	}
+
+	taskComponent, err := dao.TaskComponentGet(id)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	err = dao.TaskComponentDelete(taskComponent)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, taskComponent, " ")
 }
