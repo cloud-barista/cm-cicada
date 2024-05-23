@@ -36,8 +36,6 @@ func init() {
 		logger.Panicln(logger.ERROR, true, err.Error())
 	}
 
-	server.Init()
-
 	airflow.Init()
 
 	server.Init()

@@ -22,14 +22,14 @@ func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
 }
 
 func WorkflowGet(id string) (*model.Workflow, error) {
-	Workflow := &model.Workflow{}
+	workflow := &model.Workflow{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
 	if db.DB == nil {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("id = ?", id).First(Workflow)
+	result := db.DB.Where("id = ?", id).First(workflow)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -38,7 +38,7 @@ func WorkflowGet(id string) (*model.Workflow, error) {
 		return nil, err
 	}
 
-	return Workflow, nil
+	return workflow, nil
 }
 
 func WorkflowGetList(page int, row int) (*[]model.Workflow, error) {

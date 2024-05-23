@@ -502,6 +502,15 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully delete the workflow",

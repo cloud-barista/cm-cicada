@@ -209,6 +209,7 @@ func UpdateWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
+// @Param		id path string true "ID of the workflow."
 // @Success		200	{object}	model.Workflow	"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"

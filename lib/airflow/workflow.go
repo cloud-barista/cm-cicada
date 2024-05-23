@@ -3,7 +3,9 @@ package airflow
 import (
 	"errors"
 	"github.com/apache/airflow-client-go/airflow"
+	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/jollaman999/utils/fileutil"
 	"github.com/jollaman999/utils/logger"
 )
 
@@ -77,9 +79,16 @@ func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
 }
 
 func (client *client) DeleteDAG(dagID string) error {
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dagID
+	err := fileutil.DeleteDir(dagDir)
+	if err != nil {
+		logger.Println(logger.ERROR, true,
+			"AIRFLOW: Failed to delete dag directory. (Error: "+err.Error()+").")
+	}
+
 	ctx, cancel := Context()
 	defer cancel()
-	_, err := client.api.DAGApi.DeleteDag(ctx, dagID).Execute()
+	_, err = client.api.DAGApi.DeleteDag(ctx, dagID).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while deleting the DAG. (Error: "+err.Error()+").")
