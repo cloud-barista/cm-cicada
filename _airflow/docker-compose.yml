@@ -1,4 +1,14 @@
 services:
+    airflow-redis:
+        container_name: airflow-redis
+        image: redis:7.2-alpine
+        command: redis-server --requirepass airflow_pass --port 6379
+        healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 5s
+          timeout: 30s
+          retries: 50
+        restart: always
     airflow-mysql:
         container_name: airflow-mysql
         image: mysql:8.0-debian
@@ -13,8 +23,6 @@ services:
         volumes:
             - ./create_airflow_db.sql:/docker-entrypoint-initdb.d/create_airflow_db.sql
             - ./db_data:/var/lib/mysql
-        ports:
-            - "9906:3306"
     airflow-server:
         build:
             context: .
@@ -37,7 +45,9 @@ services:
 
                 # Start airflow
                 airflow scheduler &
-            	  airflow webserver
+                airflow celery worker &
+                airflow celery flower &
+                airflow webserver
 
                 # Keep the server on no matter what
                 sleep infinity
@@ -47,4 +57,6 @@ services:
         volumes:
                 - ./airflow-home:/usr/local/airflow
                 - /var/run/docker.sock:/var/run/docker.sock
-        network_mode: "host"
+        ports:
+            - "5555:5555"
+            - "8080:8080"
