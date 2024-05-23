@@ -6,4 +6,6 @@ vendor
 .diff_*
 .git_*
 
+*.db
+
 *.log
