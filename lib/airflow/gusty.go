@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
 )
@@ -69,8 +68,6 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 	if err != nil {
 		return err
 	}
-
-	dag.ID = uuid.New().String()
 
 	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.ID
 	err = fileutil.CreateDirIfNotExist(dagDir)
