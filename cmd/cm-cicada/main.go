@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/cloud-barista/cm-cicada/common"
+	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/server"
@@ -30,12 +31,20 @@ func init() {
 		log.Panicln(err)
 	}
 
+	err = db.Open()
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err.Error())
+	}
+
+	server.Init()
+
 	airflow.Init()
 
 	server.Init()
 }
 
 func end() {
+	db.Close()
 	logger.CloseLogFile()
 }
 

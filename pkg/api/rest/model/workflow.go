@@ -1,6 +1,11 @@
 package model
 
-import "time"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"time"
+)
 
 type DefaultArgs struct {
 	Owner          string `json:"owner" mapstructure:"owner" validate:"required"`
@@ -43,4 +48,33 @@ type Workflow struct {
 	Data      Data      `json:"data" mapstructure:"data" validate:"required"`
 	CreatedAt time.Time `json:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" mapstructure:"updated_at"`
+}
+func (d DefaultArgs) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+func (d *DefaultArgs) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("Invalid type for DefaultArgs")
+	}
+	return json.Unmarshal(bytes, d)
+}
+
+func (d Data) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+func (d *Data) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("Invalid type for Data")
+	}
+	return json.Unmarshal(bytes, d)
 }

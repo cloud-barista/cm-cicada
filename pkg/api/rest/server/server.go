@@ -50,7 +50,7 @@ func Init() {
 	// Hide Echo Banner
 	e.HideBanner = true
 
-	route.TaskTemplate(e)
+	route.TaskComponent(e)
 	route.WorkflowTemplate(e)
 	route.Workflow(e)
 	route.RegisterSwagger(e)

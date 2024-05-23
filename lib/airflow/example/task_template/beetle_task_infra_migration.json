@@ -33,10 +33,7 @@
     "operator_option_for_use_as_param": "data",
     "operator_option_value_is_json": true,
     "params": {
-      "required": [
-        "name",
-        "vm"
-      ],
+      "required": ["name", "vm"],
       "properties": {
         "description": {
           "type": "string",
@@ -46,10 +43,7 @@
           "description": "InstallMonAgent Option for CB-Dragonfly agent installation ([yes/no] default:yes)",
           "type": "string",
           "default": "yes",
-          "enum": [
-            "yes",
-            "no"
-          ],
+          "enum": ["yes", "no"],
           "example": "no"
         },
         "label": {
@@ -69,10 +63,7 @@
         "vm": {
           "type": "array",
           "items": {
-            "required": [
-              "commonImage",
-              "commonSpec"
-            ],
+            "required": ["commonImage", "commonSpec"],
             "properties": {
               "commonImage": {
                 "description": "CommonImage is field for id of a image in common namespace",
@@ -124,6 +115,5 @@
         }
       }
     }
-  }
   }
 }
