@@ -44,9 +44,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_template": {
+        "/task_component": {
             "get": {
-                "description": "Get a list of task template.",
+                "description": "Get a list of task component.",
                 "consumes": [
                     "application/json"
                 ],
@@ -54,42 +54,30 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Task Template]"
+                    "[Task Component]"
                 ],
-                "summary": "List TaskTemplate",
+                "summary": "List TaskComponent",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Page of the task template list.",
+                        "description": "Page of the task component list.",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Row of the task template list.",
+                        "description": "Row of the task component list.",
                         "name": "row",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "UUID of the task template.",
-                        "name": "uuid",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Task template name.",
-                        "name": "name",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully get a list of task template.",
+                        "description": "Successfully get a list of task component.",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                             }
                         }
                     },
@@ -100,7 +88,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get a list of task template.",
+                        "description": "Failed to get a list of task component.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -108,7 +96,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Register the task template.",
+                "description": "Register the task component.",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,25 +104,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Task Template]"
+                    "[Task Component]"
                 ],
-                "summary": "Create TaskTemplate",
+                "summary": "Create TaskComponent",
                 "parameters": [
                     {
-                        "description": "task template of the node.",
-                        "name": "TaskTemplate",
+                        "description": "task component of the node.",
+                        "name": "TaskComponent",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully register the task template",
+                        "description": "Successfully register the task component",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     },
                     "400": {
@@ -144,7 +132,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to register the task template",
+                        "description": "Failed to register the task component",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -152,9 +140,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_template/{uuid}": {
+        "/task_component/{id}": {
             "get": {
-                "description": "Get the task template.",
+                "description": "Get the task component.",
                 "consumes": [
                     "application/json"
                 ],
@@ -162,23 +150,23 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Task Template]"
+                    "[Task Component]"
                 ],
-                "summary": "Get TaskTemplate",
+                "summary": "Get TaskComponent",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the TaskTemplate",
-                        "name": "uuid",
+                        "description": "id of the TaskComponent",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully get the task template",
+                        "description": "Successfully get the task component",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     },
                     "400": {
@@ -188,15 +176,17 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get the task template",
+                        "description": "Failed to get the task component",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/task_component/{uuid}": {
             "put": {
-                "description": "Update the task template.",
+                "description": "Update the task component.",
                 "consumes": [
                     "application/json"
                 ],
@@ -204,25 +194,25 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Task Template]"
+                    "[Task Component]"
                 ],
-                "summary": "Update TaskTemplate",
+                "summary": "Update TaskComponent",
                 "parameters": [
                     {
-                        "description": "task template to modify.",
-                        "name": "TaskTemplate",
+                        "description": "task component to modify.",
+                        "name": "TaskComponent",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully update the task template",
+                        "description": "Successfully update the task component",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     },
                     "400": {
@@ -232,7 +222,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to update the task template",
+                        "description": "Failed to update the task component",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -240,7 +230,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete the task template.",
+                "description": "Delete the task component.",
                 "consumes": [
                     "application/json"
                 ],
@@ -248,14 +238,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Task Template]"
+                    "[Task Component]"
                 ],
-                "summary": "Delete TaskTemplate",
+                "summary": "Delete TaskComponent",
                 "responses": {
                     "200": {
-                        "description": "Successfully delete the task template",
+                        "description": "Successfully delete the task component",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
                         }
                     },
                     "400": {
@@ -265,7 +255,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to delete the task template",
+                        "description": "Failed to delete the task component",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -511,8 +501,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the WorkflowTemplate",
-                        "name": "uuid",
+                        "description": "id of the WorkflowTemplate",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -829,6 +819,41 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params": {
+            "type": "object",
+            "required": [
+                "properties",
+                "required"
+            ],
+            "properties": {
+                "properties": {},
+                "required": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption": {
+            "type": "object",
+            "required": [
+                "operator_option_for_use_as_param",
+                "operator_option_value_is_json",
+                "params"
+            ],
+            "properties": {
+                "operator_option_for_use_as_param": {
+                    "type": "string"
+                },
+                "operator_option_value_is_json": {
+                    "type": "boolean"
+                },
+                "params": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
             "required": [
@@ -871,6 +896,62 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData": {
+            "type": "object",
+            "required": [
+                "operator",
+                "operator_options",
+                "param_option",
+                "task_name"
+            ],
+            "properties": {
+                "operator": {
+                    "type": "string"
+                },
+                "operator_options": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "value"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {}
+                        }
+                    }
+                },
+                "param_option": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption"
+                },
+                "task_name": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup": {
             "type": "object",
             "required": [
@@ -889,31 +970,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
                     }
-                }
-            }
-        },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskTemplate": {
-            "type": "object",
-            "required": [
-                "id",
-                "name",
-                "task"
-            ],
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "task": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
-                },
-                "updated_at": {
-                    "type": "string"
                 }
             }
         },

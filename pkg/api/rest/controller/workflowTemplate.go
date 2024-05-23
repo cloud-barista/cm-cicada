@@ -1,9 +1,13 @@
 package controller
 
 import (
-	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
-	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	// "errors"
+	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
+	_"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	// "github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 // GetWorkflowTemplate godoc
@@ -13,13 +17,21 @@ import (
 // @Tags		[Workflow Template]
 // @Accept		json
 // @Produce		json
-// @Param		uuid path string true "UUID of the WorkflowTemplate"
+// @Param		id path string true "id of the WorkflowTemplate"
 // @Success		200	{object}	model.Workflow			"Successfully get the workflow template"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow template"
 // @Router		/workflow_template/{id} [get]
 func GetWorkflowTemplate(c echo.Context) error {
-	return nil
+	id := c.Param("id")
+	if id == "" {
+		return common.ReturnErrorMsg(c, "id is empty")
+	}
+	workflowTemplate, err := dao.WorkflowTemplateGet(id)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	return c.JSONPretty(http.StatusOK, workflowTemplate, "")
 }
 
 // ListWorkflowTemplate godoc
@@ -38,5 +50,14 @@ func GetWorkflowTemplate(c echo.Context) error {
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of workflow template."
 // @Router			/workflow_template [get]
 func ListWorkflowTemplate(c echo.Context) error {
-	return nil
+	page, row, err := common.CheckPageRow(c)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	workflowTemplateList, err := dao.WorkflowTemplateGetList(page, row)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	return c.JSONPretty(http.StatusOK, workflowTemplateList, "")
 }
