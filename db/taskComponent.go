@@ -44,7 +44,7 @@ func TaskComponentInit() error {
 		baseName := filepath.Base(file)
 		baseNameWithoutExt := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 
-		// WorkflowTemplate 생성
+		// TaskComponent 생성
 		taskComponent := model.TaskComponent{
 			ID:        baseNameWithoutExt, // 파일명으로 설정
 			Data:      data,
