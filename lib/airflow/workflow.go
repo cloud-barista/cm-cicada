@@ -22,7 +22,7 @@ func (client *client) GetDAG(dagID string) (airflow.DAG, error) {
 	resp, _, err := client.api.DAGApi.GetDag(ctx, dagID).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while getting DAGs. (Error: "+err.Error()+").")
+			"AIRFLOW: Error occurred while getting the DAG. (Error: "+err.Error()+").")
 	}
 
 	return resp, err
