@@ -444,7 +444,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "[On-premise] Workflow"
+                    "[Workflow]"
                 ],
                 "summary": "Update Workflow",
                 "parameters": [
@@ -488,7 +488,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "[On-premise] Workflow"
+                    "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
                 "responses": {

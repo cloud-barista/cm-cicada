@@ -455,7 +455,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[On-premise] Workflow"
+                    "[Workflow]"
                 ],
                 "summary": "Update Workflow",
                 "parameters": [
@@ -499,7 +499,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[On-premise] Workflow"
+                    "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
                 "responses": {

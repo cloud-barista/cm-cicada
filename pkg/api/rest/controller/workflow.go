@@ -173,7 +173,7 @@ func RunWorkflow(c echo.Context) error {
 //
 // @Summary		Update Workflow
 // @Description	Update the workflow content.
-// @Tags		[On-premise] Workflow
+// @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
 // @Param		Workflow body model.Workflow true "Workflow to modify."
@@ -206,7 +206,7 @@ func UpdateWorkflow(c echo.Context) error {
 //
 // @Summary		Delete Workflow
 // @Description	Delete the workflow.
-// @Tags		[On-premise] Workflow
+// @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
 // @Success		200	{object}	model.Workflow	"Successfully delete the workflow"
