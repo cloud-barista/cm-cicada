@@ -899,6 +899,7 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent": {
             "type": "object",
             "required": [
+                "data",
                 "id"
             ],
             "properties": {
