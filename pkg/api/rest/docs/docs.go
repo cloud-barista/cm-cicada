@@ -265,7 +265,7 @@ const docTemplate = `{
         },
         "/workflow": {
             "get": {
-                "description": "Get a list of DAGs from Airflow",
+                "description": "Get a workflow list.",
                 "consumes": [
                     "application/json"
                 ],
@@ -276,11 +276,28 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Page of the connection information list.",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Row of the connection information list.",
+                        "name": "row",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successfully get a workflow list.",
                         "schema": {
-                            "$ref": "#/definitions/airflow.DAGCollection"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            }
                         }
                     },
                     "400": {
@@ -298,7 +315,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a DAG in Airflow.",
+                "description": "Create a workflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -311,7 +328,7 @@ const docTemplate = `{
                 "summary": "Create Workflow",
                 "parameters": [
                     {
-                        "description": "query params",
+                        "description": "Workflow content",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -322,9 +339,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully create the DAG.",
+                        "description": "Successfully create the workflow.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate"
                         }
                     },
                     "400": {
@@ -344,7 +361,7 @@ const docTemplate = `{
         },
         "/workflow/run/{id}": {
             "post": {
-                "description": "Run the DAG in Airflow",
+                "description": "Run the workflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -359,14 +376,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Workflow ID",
-                        "name": "dag_id",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully run the DAG.",
+                        "description": "Successfully run the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
@@ -378,7 +395,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to run Workflow",
+                        "description": "Failed to run the Workflow",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -388,7 +405,7 @@ const docTemplate = `{
         },
         "/workflow/{id}": {
             "get": {
-                "description": "Get the DAG from Airflow.",
+                "description": "Get the workflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -399,9 +416,18 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Successfully get the DAG.",
+                        "description": "Successfully get the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
@@ -413,7 +439,84 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get the DAG.",
+                        "description": "Failed to get the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the workflow content.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[On-premise] Workflow"
+                ],
+                "summary": "Update Workflow",
+                "parameters": [
+                    {
+                        "description": "Workflow to modify.",
+                        "name": "Workflow",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully update the workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update the workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the workflow.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[On-premise] Workflow"
+                ],
+                "summary": "Delete Workflow",
+                "responses": {
+                    "200": {
+                        "description": "Successfully delete the workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete the workflow",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -466,7 +569,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate"
                             }
                         }
                     },
@@ -511,7 +614,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the workflow template",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate"
                         }
                     },
                     "400": {
@@ -531,233 +634,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "airflow.DAG": {
-            "type": "object",
-            "properties": {
-                "dag_id": {
-                    "description": "The ID of the DAG.",
-                    "type": "string"
-                },
-                "default_view": {
-                    "description": "Default view of the DAG inside the webserver  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                },
-                "description": {
-                    "description": "User-provided DAG description, which can consist of several sentences or paragraphs that describe DAG contents.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                },
-                "file_token": {
-                    "description": "The key containing the encrypted path to the file. Encryption and decryption take place only on the server. This prevents the client from reading an non-DAG file. This also ensures API extensibility, because the format of encrypted data may change.",
-                    "type": "string"
-                },
-                "fileloc": {
-                    "description": "The absolute path to the file.",
-                    "type": "string"
-                },
-                "has_import_errors": {
-                    "description": "Whether the DAG has import errors  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableBool"
-                        }
-                    ]
-                },
-                "has_task_concurrency_limits": {
-                    "description": "Whether the DAG has task concurrency limits  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableBool"
-                        }
-                    ]
-                },
-                "is_active": {
-                    "description": "Whether the DAG is currently seen by the scheduler(s).  *New in version 2.1.1*  *Changed in version 2.2.0*\u0026#58; Field is read-only.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableBool"
-                        }
-                    ]
-                },
-                "is_paused": {
-                    "description": "Whether the DAG is paused.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableBool"
-                        }
-                    ]
-                },
-                "is_subdag": {
-                    "description": "Whether the DAG is SubDAG.",
-                    "type": "boolean"
-                },
-                "last_expired": {
-                    "description": "Time when the DAG last received a refresh signal (e.g. the DAG's \\\"refresh\\\" button was clicked in the web UI)  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "last_parsed_time": {
-                    "description": "The last time the DAG was parsed.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "last_pickled": {
-                    "description": "The last time the DAG was pickled.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "max_active_runs": {
-                    "description": "Maximum number of active DAG runs for the DAG  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableInt32"
-                        }
-                    ]
-                },
-                "max_active_tasks": {
-                    "description": "Maximum number of active tasks that can be run on the DAG  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableInt32"
-                        }
-                    ]
-                },
-                "next_dagrun": {
-                    "description": "The logical date of the next dag run.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "next_dagrun_create_after": {
-                    "description": "Earliest time at which this ` + "`" + `` + "`" + `next_dagrun` + "`" + `` + "`" + ` can be created.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "next_dagrun_data_interval_end": {
-                    "description": "The end of the interval of the next dag run.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "next_dagrun_data_interval_start": {
-                    "description": "The start of the interval of the next dag run.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableTime"
-                        }
-                    ]
-                },
-                "owners": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "pickle_id": {
-                    "description": "Foreign key to the latest pickle_id  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                },
-                "root_dag_id": {
-                    "description": "If the DAG is SubDAG then it is the top level DAG identifier. Otherwise, null.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                },
-                "schedule_interval": {
-                    "$ref": "#/definitions/airflow.NullableScheduleInterval"
-                },
-                "scheduler_lock": {
-                    "description": "Whether (one of) the scheduler is scheduling this DAG at the moment  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableBool"
-                        }
-                    ]
-                },
-                "tags": {
-                    "description": "List of tags.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/airflow.Tag"
-                    }
-                },
-                "timetable_description": {
-                    "description": "Timetable/Schedule Interval description.  *New in version 2.3.0*",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                }
-            }
-        },
-        "airflow.DAGCollection": {
-            "type": "object",
-            "properties": {
-                "dags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/airflow.DAG"
-                    }
-                },
-                "total_entries": {
-                    "description": "Count of objects in the current result set.",
-                    "type": "integer"
-                }
-            }
-        },
-        "airflow.NullableBool": {
-            "type": "object"
-        },
-        "airflow.NullableInt32": {
-            "type": "object"
-        },
-        "airflow.NullableScheduleInterval": {
-            "type": "object"
-        },
-        "airflow.NullableString": {
-            "type": "object"
-        },
-        "airflow.NullableTime": {
-            "type": "object"
-        },
-        "airflow.Tag": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -978,8 +854,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "id",
-                "name"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -991,7 +866,25 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate": {
+            "type": "object",
+            "required": [
+                "data",
+                "id"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
+                },
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {

@@ -5,30 +5,44 @@ import (
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"gorm.io/gorm"
+	"time"
 )
 
-func WorkflowTemplateGet(id string) (*model.WorkflowTemplate, error) {
-	workflowTemplate := &model.WorkflowTemplate{}
+func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
+	workflow.CreatedAt = time.Now()
+	workflow.UpdatedAt = time.Now()
+
+	result := db.DB.Create(workflow)
+	err := result.Error
+	if err != nil {
+		return nil, err
+	}
+
+	return workflow, nil
+}
+
+func WorkflowGet(id string) (*model.Workflow, error) {
+	Workflow := &model.Workflow{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
 	if db.DB == nil {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("id = ?", id).First(workflowTemplate)
+	result := db.DB.Where("id = ?", id).First(Workflow)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("workflow template not found with the provided id")
+			return nil, errors.New("workflow not found with the provided id")
 		}
 		return nil, err
 	}
 
-	return workflowTemplate, nil
+	return Workflow, nil
 }
 
-func WorkflowTemplateGetList(page int, row int) (*[]model.WorkflowTemplate, error) {
-	workflowTemplateList := &[]model.WorkflowTemplate{}
+func WorkflowGetList(page int, row int) (*[]model.Workflow, error) {
+	WorkflowList := &[]model.Workflow{}
 	// Ensure db.DB is not nil to avoid runtime panics
 	if db.DB == nil {
 		return nil, errors.New("database connection is not initialized")
@@ -51,29 +65,34 @@ func WorkflowTemplateGetList(page int, row int) (*[]model.WorkflowTemplate, erro
 			return nil
 		}
 		return filtered
-	}).Find(workflowTemplateList)
+	}).Find(WorkflowList)
 
 	err := result.Error
 	if err != nil {
 		return nil, err
 	}
 
-	return workflowTemplateList, nil
+	return WorkflowList, nil
 }
 
-func WorkflowTemplateCreate(workflowTemplate *model.WorkflowTemplate) (*model.WorkflowTemplate, error) {
-	// UUID, err := uuid.NewRandom()
-	// if err != nil {
-	// 	return nil, err
-	// }
+func WorkflowUpdate(workflow *model.Workflow) error {
+	workflow.UpdatedAt = time.Now()
 
-	// migrationGroup.UUID = UUID.String()
-
-	result := db.DB.Create(workflowTemplate)
+	result := db.DB.Model(&model.Workflow{}).Where("id = ?", workflow.ID).Updates(workflow)
 	err := result.Error
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return workflowTemplate, nil
+	return nil
+}
+
+func WorkflowDelete(workflow *model.Workflow) error {
+	result := db.DB.Delete(workflow)
+	err := result.Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

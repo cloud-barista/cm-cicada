@@ -4,7 +4,7 @@ import (
 	// "errors"
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
-	_"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	// "github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -18,7 +18,7 @@ import (
 // @Accept		json
 // @Produce		json
 // @Param		id path string true "id of the WorkflowTemplate"
-// @Success		200	{object}	model.Workflow			"Successfully get the workflow template"
+// @Success		200	{object}	model.WorkflowTemplate			"Successfully get the workflow template"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow template"
 // @Router		/workflow_template/{id} [get]
@@ -45,7 +45,7 @@ func GetWorkflowTemplate(c echo.Context) error {
 // @Param		row query string false "Row of the workflow template list."
 // @Param		uuid query string false "UUID of the workflow template."
 // @Param		name query string false "Migration group name."
-// @Success		200	{object}	[]model.Workflow		"Successfully get a list of workflow template."
+// @Success		200	{object}	[]model.WorkflowTemplate		"Successfully get a list of workflow template."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of workflow template."
 // @Router			/workflow_template [get]

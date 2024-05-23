@@ -9,5 +9,6 @@ func Workflow(e *echo.Echo) {
 	e.POST("/workflow", controller.CreateWorkflow)
 	e.GET("/workflow/:id", controller.GetWorkflow)
 	e.GET("/workflow", controller.ListWorkflow)
-	e.POST("/workflow/run/:id", controller.RunWorkflow)
+	e.PUT("/workflow/:id", controller.UpdateWorkflow)
+	e.DELETE("/workflow/:id", controller.DeleteWorkflow)
 }

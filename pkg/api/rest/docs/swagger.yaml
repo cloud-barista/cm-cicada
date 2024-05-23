@@ -1,146 +1,4 @@
 definitions:
-  airflow.DAG:
-    properties:
-      dag_id:
-        description: The ID of the DAG.
-        type: string
-      default_view:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableString'
-        description: Default view of the DAG inside the webserver  *New in version
-          2.3.0*
-      description:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableString'
-        description: User-provided DAG description, which can consist of several sentences
-          or paragraphs that describe DAG contents.
-      file_token:
-        description: The key containing the encrypted path to the file. Encryption
-          and decryption take place only on the server. This prevents the client from
-          reading an non-DAG file. This also ensures API extensibility, because the
-          format of encrypted data may change.
-        type: string
-      fileloc:
-        description: The absolute path to the file.
-        type: string
-      has_import_errors:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableBool'
-        description: Whether the DAG has import errors  *New in version 2.3.0*
-      has_task_concurrency_limits:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableBool'
-        description: Whether the DAG has task concurrency limits  *New in version
-          2.3.0*
-      is_active:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableBool'
-        description: Whether the DAG is currently seen by the scheduler(s).  *New
-          in version 2.1.1*  *Changed in version 2.2.0*&#58; Field is read-only.
-      is_paused:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableBool'
-        description: Whether the DAG is paused.
-      is_subdag:
-        description: Whether the DAG is SubDAG.
-        type: boolean
-      last_expired:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: Time when the DAG last received a refresh signal (e.g. the DAG's
-          \"refresh\" button was clicked in the web UI)  *New in version 2.3.0*
-      last_parsed_time:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: The last time the DAG was parsed.  *New in version 2.3.0*
-      last_pickled:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: The last time the DAG was pickled.  *New in version 2.3.0*
-      max_active_runs:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableInt32'
-        description: Maximum number of active DAG runs for the DAG  *New in version
-          2.3.0*
-      max_active_tasks:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableInt32'
-        description: Maximum number of active tasks that can be run on the DAG  *New
-          in version 2.3.0*
-      next_dagrun:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: The logical date of the next dag run.  *New in version 2.3.0*
-      next_dagrun_create_after:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: Earliest time at which this ``next_dagrun`` can be created.  *New
-          in version 2.3.0*
-      next_dagrun_data_interval_end:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: The end of the interval of the next dag run.  *New in version
-          2.3.0*
-      next_dagrun_data_interval_start:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableTime'
-        description: The start of the interval of the next dag run.  *New in version
-          2.3.0*
-      owners:
-        items:
-          type: string
-        type: array
-      pickle_id:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableString'
-        description: Foreign key to the latest pickle_id  *New in version 2.3.0*
-      root_dag_id:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableString'
-        description: If the DAG is SubDAG then it is the top level DAG identifier.
-          Otherwise, null.
-      schedule_interval:
-        $ref: '#/definitions/airflow.NullableScheduleInterval'
-      scheduler_lock:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableBool'
-        description: Whether (one of) the scheduler is scheduling this DAG at the
-          moment  *New in version 2.3.0*
-      tags:
-        description: List of tags.
-        items:
-          $ref: '#/definitions/airflow.Tag'
-        type: array
-      timetable_description:
-        allOf:
-        - $ref: '#/definitions/airflow.NullableString'
-        description: Timetable/Schedule Interval description.  *New in version 2.3.0*
-    type: object
-  airflow.DAGCollection:
-    properties:
-      dags:
-        items:
-          $ref: '#/definitions/airflow.DAG'
-        type: array
-      total_entries:
-        description: Count of objects in the current result set.
-        type: integer
-    type: object
-  airflow.NullableBool:
-    type: object
-  airflow.NullableInt32:
-    type: object
-  airflow.NullableScheduleInterval:
-    type: object
-  airflow.NullableString:
-    type: object
-  airflow.NullableTime:
-    type: object
-  airflow.Tag:
-    properties:
-      name:
-        type: string
-    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse:
     properties:
       error:
@@ -296,14 +154,25 @@ definitions:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
       id:
         type: string
-      name:
+      updated_at:
+        type: string
+    required:
+    - data
+    - id
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate:
+    properties:
+      created_at:
+        type: string
+      data:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
+      id:
         type: string
       updated_at:
         type: string
     required:
     - data
     - id
-    - name
     type: object
   pkg_api_rest_controller.SimpleMsg:
     properties:
@@ -480,14 +349,25 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get a list of DAGs from Airflow
+      description: Get a workflow list.
+      parameters:
+      - description: Page of the connection information list.
+        in: query
+        name: page
+        type: string
+      - description: Row of the connection information list.
+        in: query
+        name: row
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Successfully get a workflow list.
           schema:
-            $ref: '#/definitions/airflow.DAGCollection'
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+            type: array
         "400":
           description: Sent bad request.
           schema:
@@ -502,9 +382,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a DAG in Airflow.
+      description: Create a workflow.
       parameters:
-      - description: query params
+      - description: Workflow content
         in: body
         name: request
         required: true
@@ -514,9 +394,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully create the DAG.
+          description: Successfully create the workflow.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate'
         "400":
           description: Sent bad request.
           schema:
@@ -529,15 +409,15 @@ paths:
       tags:
       - '[Workflow]'
   /workflow/{id}:
-    get:
+    delete:
       consumes:
       - application/json
-      description: Get the DAG from Airflow.
+      description: Delete the workflow.
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully get the DAG.
+          description: Successfully delete the workflow
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
         "400":
@@ -545,28 +425,27 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to get the DAG.
+          description: Failed to delete the workflow
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get Workflow
+      summary: Delete Workflow
       tags:
-      - '[Workflow]'
-  /workflow/run/{id}:
-    post:
+      - '[On-premise] Workflow'
+    get:
       consumes:
       - application/json
-      description: Run the DAG in Airflow
+      description: Get the workflow.
       parameters:
-      - description: Workflow ID
-        in: query
-        name: dag_id
+      - description: ID of the workflow.
+        in: path
+        name: id
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully run the DAG.
+          description: Successfully get the workflow.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
         "400":
@@ -574,7 +453,65 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to run Workflow
+          description: Failed to get the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Workflow
+      tags:
+      - '[Workflow]'
+    put:
+      consumes:
+      - application/json
+      description: Update the workflow content.
+      parameters:
+      - description: Workflow to modify.
+        in: body
+        name: Workflow
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully update the workflow
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to update the workflow
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Update Workflow
+      tags:
+      - '[On-premise] Workflow'
+  /workflow/run/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Run the workflow.
+      parameters:
+      - description: Workflow ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully run the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to run the Workflow
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Run Workflow
@@ -609,7 +546,7 @@ paths:
           description: Successfully get a list of workflow template.
           schema:
             items:
-              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate'
             type: array
         "400":
           description: Sent bad request.
@@ -639,7 +576,7 @@ paths:
         "200":
           description: Successfully get the workflow template
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate'
         "400":
           description: Sent bad request.
           schema:

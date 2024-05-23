@@ -43,12 +43,12 @@ type Data struct {
 }
 
 type Workflow struct {
-	ID        string    `json:"id" mapstructure:"id" validate:"required"`
-	Name      string    `json:"name" mapstructure:"name" validate:"required"`
-	Data      Data      `json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt time.Time `json:"created_at" mapstructure:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" mapstructure:"updated_at"`
+	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Data      Data      `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
 }
+
 func (d DefaultArgs) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }
