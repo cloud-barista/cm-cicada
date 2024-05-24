@@ -111,11 +111,11 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		id path string true "ID of the task component."
 // @Success		200	{object}	model.TaskComponent		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
-// @Router		/task_component/{uuid} [delete]
+// @Router		/task_component/{id} [delete]
 func DeleteTaskComponent(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {

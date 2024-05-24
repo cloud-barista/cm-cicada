@@ -265,6 +265,34 @@ paths:
       tags:
       - '[Task Component]'
   /task_component/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the task component.
+      parameters:
+      - description: ID of the task component.
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully delete the task component
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to delete the task component
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Delete TaskComponent
+      tags:
+      - '[Task Component]'
     get:
       consumes:
       - application/json
@@ -294,34 +322,6 @@ paths:
       tags:
       - '[Task Component]'
   /task_component/{uuid}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete the task component.
-      parameters:
-      - description: ID of the workflow.
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully delete the task component
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent'
-        "400":
-          description: Sent bad request.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-        "500":
-          description: Failed to delete the task component
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Delete TaskComponent
-      tags:
-      - '[Task Component]'
     put:
       consumes:
       - application/json
