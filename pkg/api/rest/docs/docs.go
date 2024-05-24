@@ -384,7 +384,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workflow ID",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],

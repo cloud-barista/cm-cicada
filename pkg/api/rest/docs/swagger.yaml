@@ -506,7 +506,7 @@ paths:
       description: Run the workflow.
       parameters:
       - description: Workflow ID
-        in: query
+        in: path
         name: id
         required: true
         type: string

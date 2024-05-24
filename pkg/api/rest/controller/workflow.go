@@ -150,7 +150,7 @@ func ListWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id query string true "Workflow ID"
+// @Param		id path string true "Workflow ID"
 // @Success		200	{object}	model.Workflow			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
@@ -159,6 +159,11 @@ func RunWorkflow(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
 		return common.ReturnErrorMsg(c, "Please provide the id.")
+	}
+
+	_, err := dao.WorkflowGet(id)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	dagRun, err := airflow.Client.RunDAG(id)
