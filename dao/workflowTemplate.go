@@ -60,20 +60,3 @@ func WorkflowTemplateGetList(page int, row int) (*[]model.WorkflowTemplate, erro
 
 	return workflowTemplateList, nil
 }
-
-func WorkflowTemplateCreate(workflowTemplate *model.WorkflowTemplate) (*model.WorkflowTemplate, error) {
-	// UUID, err := uuid.NewRandom()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// migrationGroup.UUID = UUID.String()
-
-	result := db.DB.Create(workflowTemplate)
-	err := result.Error
-	if err != nil {
-		return nil, err
-	}
-
-	return workflowTemplate, nil
-}
