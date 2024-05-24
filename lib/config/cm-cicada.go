@@ -18,8 +18,12 @@ import (
 type cmCicadaConfig struct {
 	CMCicada struct {
 		TaskComponent struct {
-			LoadExamples string `yaml:"load_examples"`
+			LoadExamples      string `yaml:"load_examples"`
+			ExamplesDirectory string `yaml:"examples_directory"`
 		} `yaml:"task_component"`
+		WorkflowTemplate struct {
+			TemplatesDirectory string `yaml:"templates_directory"`
+		} `yaml:"workflow_template"`
 		AirflowServer struct {
 			Address       string             `yaml:"address"`
 			UseTLS        string             `yaml:"use_tls"`
@@ -42,9 +46,26 @@ var CMCicadaConfig cmCicadaConfig
 var cmCicadaConfigFile = "cm-cicada.yaml"
 
 func checkCMCicadaConfigFile() error {
-	_, err := strconv.ParseBool(strings.ToLower(CMCicadaConfig.CMCicada.TaskComponent.LoadExamples))
+	taskComponentLoadExamples, err := strconv.ParseBool(strings.ToLower(CMCicadaConfig.CMCicada.TaskComponent.LoadExamples))
 	if err != nil {
 		return errors.New("config error: cm-cicada.task_component.load_examples has invalid value")
+	}
+	if taskComponentLoadExamples {
+		if CMCicadaConfig.CMCicada.TaskComponent.ExamplesDirectory == "" {
+			return errors.New("config error: cm-cicada.task_component.examples_directory is empty")
+		}
+		if !fileutil.IsExist(CMCicadaConfig.CMCicada.TaskComponent.ExamplesDirectory) {
+			return errors.New("config error: configured directory of cm-cicada.task_component.examples_directory is not exist (" +
+				CMCicadaConfig.CMCicada.TaskComponent.ExamplesDirectory + ")")
+		}
+	}
+
+	if CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory == "" {
+		return errors.New("config error: cm-cicada.workflow_template.templates_directory is empty")
+	}
+	if !fileutil.IsExist(CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory) {
+		return errors.New("config error: configured directory of cm-cicada.workflow_template.templates_directory is not exist (" +
+			CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory + ")")
 	}
 
 	if CMCicadaConfig.CMCicada.AirflowServer.Address == "" {

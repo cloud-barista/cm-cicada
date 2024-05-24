@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"github.com/cloud-barista/cm-cicada/lib/config"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,7 @@ import (
 
 func WorkflowTemplateInit() error {
 	// JSON 파일이 위치한 디렉토리
-	jsonDir := "lib/airflow/example/workflow_template/"
+	jsonDir := config.CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory
 
 	// JSON 파일 목록 가져오기
 	files, err := filepath.Glob(jsonDir + "*.json")
