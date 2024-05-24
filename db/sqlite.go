@@ -35,16 +35,18 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	logger.Println(logger.INFO, false, "Loading workflow templates...")
 	err = WorkflowTemplateInit()
 	if err != nil {
-		return err
+		logger.Println(logger.ERROR, true, err)
 	}
 
 	taskComponentLoadExamples, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.TaskComponent.LoadExamples)
 	if taskComponentLoadExamples {
+		logger.Println(logger.INFO, false, "Loading task components...")
 		err = TaskComponentInit()
 		if err != nil {
-			return err
+			logger.Println(logger.ERROR, true, err)
 		}
 	}
 
