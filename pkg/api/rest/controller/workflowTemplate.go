@@ -43,8 +43,6 @@ func GetWorkflowTemplate(c echo.Context) error {
 // @Produce		json
 // @Param		page query string false "Page of the workflow template list."
 // @Param		row query string false "Row of the workflow template list."
-// @Param		uuid query string false "UUID of the workflow template."
-// @Param		name query string false "Migration group name."
 // @Success		200	{object}	[]model.WorkflowTemplate		"Successfully get a list of workflow template."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of workflow template."

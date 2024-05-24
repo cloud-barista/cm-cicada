@@ -565,18 +565,6 @@ const docTemplate = `{
                         "description": "Row of the workflow template list.",
                         "name": "row",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "UUID of the workflow template.",
-                        "name": "uuid",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Migration group name.",
-                        "name": "name",
-                        "in": "query"
                     }
                 ],
                 "responses": {

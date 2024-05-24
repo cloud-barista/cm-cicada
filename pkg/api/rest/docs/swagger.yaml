@@ -542,14 +542,6 @@ paths:
         in: query
         name: row
         type: string
-      - description: UUID of the workflow template.
-        in: query
-        name: uuid
-        type: string
-      - description: Migration group name.
-        in: query
-        name: name
-        type: string
       produces:
       - application/json
       responses:
