@@ -99,9 +99,33 @@ func ListTaskComponent(c echo.Context) error {
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
-// @Router		/task_component/{uuid} [put]
+// @Router		/task_component/{id} [put]
 func UpdateTaskComponent(c echo.Context) error {
-	return nil
+	taskComponent := new(model.TaskComponent)
+	err := c.Bind(taskComponent)
+	if err != nil {
+		return err
+	}
+
+	id := c.Param("id")
+	if id == "" {
+		return common.ReturnErrorMsg(c, "Please provide the id.")
+	}
+	oldTaskComponent, err := dao.TaskComponentGet(id)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	if taskComponent.Data.TaskName != "" {
+		oldTaskComponent.Data = taskComponent.Data
+	}
+
+	err = dao.TaskComponentUpdate(oldTaskComponent)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, oldTaskComponent, " ")
 }
 
 // DeleteTaskComponent godoc

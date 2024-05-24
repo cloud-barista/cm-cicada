@@ -71,6 +71,16 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 	return taskComponent, nil
 }
 
+func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
+	result := db.DB.Model(&model.TaskComponent{}).Where("id = ?", taskComponent.ID).Updates(taskComponent)
+	err := result.Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func TaskComponentDelete(taskComponent *model.TaskComponent) error {
 	result := db.DB.Delete(taskComponent)
 	err := result.Error

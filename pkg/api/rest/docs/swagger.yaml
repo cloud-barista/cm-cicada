@@ -321,7 +321,6 @@ paths:
       summary: Get TaskComponent
       tags:
       - '[Task Component]'
-  /task_component/{uuid}:
     put:
       consumes:
       - application/json
