@@ -161,17 +161,17 @@ func RunWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the id.")
 	}
 
-	_, err := dao.WorkflowGet(id)
+	workflow, err := dao.WorkflowGet(id)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	dagRun, err := airflow.Client.RunDAG(id)
+	_, err = airflow.Client.RunDAG(id)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
 
-	return c.JSONPretty(http.StatusOK, dagRun, " ")
+	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
 
 // UpdateWorkflow godoc
