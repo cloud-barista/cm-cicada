@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cicada/health": {
+        "/cicada/readyz": {
             "get": {
-                "description": "Check Cicada is alive",
+                "description": "Check Cicada is ready",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,16 +27,16 @@ const docTemplate = `{
                 "tags": [
                     "[Admin] System management"
                 ],
-                "summary": "Check Cicada is alive",
+                "summary": "Check Ready",
                 "responses": {
                     "200": {
-                        "description": "Successfully get heath state.",
+                        "description": "Successfully get ready state.",
                         "schema": {
                             "$ref": "#/definitions/pkg_api_rest_controller.SimpleMsg"
                         }
                     },
                     "500": {
-                        "description": "Failed to check health.",
+                        "description": "Failed to check ready state.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }

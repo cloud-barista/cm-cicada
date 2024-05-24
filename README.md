@@ -90,7 +90,7 @@ git clone https://github.com/cloud-barista/cm-cicada.git
 Check if CM-Cicada is running
 
 ```bash
-curl http://127.0.0.1:8083/cicada/health
+curl http://127.0.0.1:8083/cicada/readyz
 
 # Output if it's running successfully
 # {"message":"CM-Cicada API server is running"}

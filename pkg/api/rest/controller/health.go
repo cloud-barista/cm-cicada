@@ -10,18 +10,25 @@ type SimpleMsg struct {
 	Message string `json:"message"`
 }
 
-// GetHealth func is for checking Cicada server health.
-// @Summary Check Cicada is alive
-// @Description Check Cicada is alive
+var OkMessage = SimpleMsg{}
+var IsReady = false
+
+// CheckReady func is for checking Cicada server health.
+// @Summary Check Ready
+// @Description Check Cicada is ready
 // @Tags [Admin] System management
-// @Accept  json
-// @Produce  json
-// @Success		200 {object}	SimpleMsg	"Successfully get heath state."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to check health."
+// @Accept		json
+// @Produce		json
+// @Success		200 {object}	SimpleMsg				"Successfully get ready state."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to check ready state."
 //
-// @Router /cicada/health [get]
-func GetHealth(c echo.Context) error {
-	okMessage := SimpleMsg{}
-	okMessage.Message = "CM-Cicada API server is running"
-	return c.JSONPretty(http.StatusOK, &okMessage, " ")
+// @Router /cicada/readyz [get]
+func CheckReady(c echo.Context) error {
+	status := http.StatusOK
+
+	if !IsReady {
+		status = http.StatusServiceUnavailable
+	}
+
+	return c.JSONPretty(status, &OkMessage, " ")
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/controller"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/server"
 	"github.com/jollaman999/utils/logger"
 	"github.com/jollaman999/utils/syscheck"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -31,14 +33,29 @@ func init() {
 		log.Panicln(err)
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer func() {
+			wg.Done()
+		}()
+		controller.OkMessage.Message = "API server is not ready"
+		server.Init()
+	}()
+
+	controller.OkMessage.Message = "Database is not ready"
 	err = db.Open()
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err.Error())
 	}
 
+	controller.OkMessage.Message = "Airflow connection is not ready"
 	airflow.Init()
 
-	server.Init()
+	controller.OkMessage.Message = "CM-Cicada API server is ready"
+	controller.IsReady = true
+
+	wg.Wait()
 }
 
 func end() {
