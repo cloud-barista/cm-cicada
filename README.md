@@ -40,6 +40,11 @@ git clone https://github.com/cloud-barista/cm-cicada.git
     - 'conf' directory where running the binary
     - 'conf' directory where placed in the path of 'CMCICADA_ROOT' environment variable
 - Configuration options
+    - task_component
+        - load_examples : Load task component examples if true.
+        - examples_directory : Specify directory where task component examples are located. Must be set if 'load_examples' is true.
+    - workflow_template
+        - templates_directory : Specify directory where workflow templates are located.
     - airflow-server
         - address : Specify Airflow server's address ({IP or Domain}:{Port})
         - use_tls : Must be true if Airflow server uses HTTPS.
@@ -64,25 +69,46 @@ git clone https://github.com/cloud-barista/cm-cicada.git
 - Configuration file example
   ```yaml
   cm-cicada:
-       airflow-server:
-            address: 127.0.0.1:8080
-            use_tls: false
-            # skip_tls_verify: true
-            init_retry: 5
-            timeout: 10
-            username: "airflow"
-            password: "airflow"
-            connections:
-            - id: honeybee_api
-              type: http
-              description: HoneyBee API
-              host: 127.0.0.1
-              port: 8081
-              schema: http
-       dag_directory_host: "/home/ish/test/airflow/dags"
-       dag_directory_container: "/opt/airflow/dags" # Use dag_directory_host for dag_directory_container, if this value is empty
-       listen:
-            port: 8083
+    task_component:
+        load_examples: true
+        examples_directory: "./lib/airflow/example/task_template/"
+    workflow_template:
+        templates_directory: "./lib/airflow/example/workflow_template/"
+    airflow-server:
+        address: 127.0.0.1:8080
+        use_tls: false
+        # skip_tls_verify: true
+        init_retry: 5
+        timeout: 10
+        username: "airflow"
+        password: "airflow_pass"
+        connections:
+          - id: honeybee_api
+            type: http
+            description: HoneyBee API
+            host: 127.0.0.1
+            port: 8081
+            schema: http
+          - id: beetle_api
+            type: http
+            description: Beetle API
+            host: 127.0.0.1
+            port: 8056
+            schema: http
+            login: default
+            password: default
+          - id: tumblebug_api
+            type: http
+            description: TumbleBug API
+            host: 127.0.0.1
+            port: 1323
+            schema: http
+            login: default
+            password: default
+    dag_directory_host: "./_airflow/airflow-home/dags"
+    dag_directory_container: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_container, if this value is empty
+    listen:
+        port: 8083
   ```
 
 ## Health-check
@@ -93,5 +119,5 @@ Check if CM-Cicada is running
 curl http://127.0.0.1:8083/cicada/readyz
 
 # Output if it's running successfully
-# {"message":"CM-Cicada API server is running"}
+# {"message":"CM-Cicada API server is ready"}
 ```
