@@ -1,4 +1,6 @@
 cm-cicada:
+    task_component:
+        load_examples: true
     airflow-server:
         address: 127.0.0.1:8080
         use_tls: false

@@ -17,6 +17,9 @@ import (
 
 type cmCicadaConfig struct {
 	CMCicada struct {
+		TaskComponent struct {
+			LoadExamples string `yaml:"load_examples"`
+		} `yaml:"task_component"`
 		AirflowServer struct {
 			Address       string             `yaml:"address"`
 			UseTLS        string             `yaml:"use_tls"`
@@ -39,6 +42,11 @@ var CMCicadaConfig cmCicadaConfig
 var cmCicadaConfigFile = "cm-cicada.yaml"
 
 func checkCMCicadaConfigFile() error {
+	_, err := strconv.ParseBool(strings.ToLower(CMCicadaConfig.CMCicada.TaskComponent.LoadExamples))
+	if err != nil {
+		return errors.New("config error: cm-cicada.task_component.load_examples has invalid value")
+	}
+
 	if CMCicadaConfig.CMCicada.AirflowServer.Address == "" {
 		return errors.New("config error: cm-cicada.airflow-server.address is empty")
 	}
