@@ -95,6 +95,7 @@ func ListTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
+// @Param		id path string true "id of the TaskComponent"
 // @Param		TaskComponent body model.TaskComponent true "task component to modify."
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."

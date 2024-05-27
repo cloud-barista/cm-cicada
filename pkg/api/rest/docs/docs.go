@@ -197,6 +197,13 @@ const docTemplate = `{
                 "summary": "Update TaskComponent",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "id of the TaskComponent",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "task component to modify.",
                         "name": "TaskComponent",
                         "in": "body",
@@ -466,6 +473,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update Workflow",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Workflow to modify.",
                         "name": "Workflow",

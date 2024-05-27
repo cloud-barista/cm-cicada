@@ -326,6 +326,11 @@ paths:
       - application/json
       description: Update the task component.
       parameters:
+      - description: id of the TaskComponent
+        in: path
+        name: id
+        required: true
+        type: string
       - description: task component to modify.
         in: body
         name: TaskComponent
@@ -475,6 +480,11 @@ paths:
       - application/json
       description: Update the workflow content.
       parameters:
+      - description: Workflow ID
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Workflow to modify.
         in: body
         name: Workflow

@@ -181,6 +181,7 @@ func RunWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
+// @Param		id path string true "Workflow ID"
 // @Param		Workflow body model.Workflow true "Workflow to modify."
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
