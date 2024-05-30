@@ -25,7 +25,7 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
-	err = DB.AutoMigrate(&model.Workflow{})
+	err = DB.AutoMigrate(&model.WorkflowTemplate{})
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)
 	}
