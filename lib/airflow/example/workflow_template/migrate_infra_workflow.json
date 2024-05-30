@@ -1,10 +1,4 @@
 {
-  "default_args": {
-    "owner": "ish",
-    "start_date": "2024-03-29",
-    "retries": 0,
-    "retry_delay_sec": 0
-  },
   "description": "Migrate Server",
   "task_groups": [
     {

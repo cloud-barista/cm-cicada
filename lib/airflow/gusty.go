@@ -6,17 +6,10 @@ import (
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 func checkDAG(dag *model.Workflow) error {
-	if dag.Data.DefaultArgs.Owner == "" {
-		return errors.New("owner is not set")
-	}
-
-	if dag.Data.DefaultArgs.StartDate == "" {
-		return errors.New("start_date is not set")
-	}
-
 	var taskNames []string
 
 	for _, tg := range dag.Data.TaskGroups {
@@ -76,19 +69,24 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 			", Description: " + dag.Data.Description)
 	}
 
-	if dag.Data.DefaultArgs.Retries < 0 {
-		dag.Data.DefaultArgs.Retries = 1
-	}
-	if dag.Data.DefaultArgs.RetryDelaySec < 0 {
-		dag.Data.DefaultArgs.RetryDelaySec = 300
+	type defaultArgs struct {
+		Owner         string `yaml:"owner"`
+		StartDate     string `yaml:"start_date"`
+		Retries       int    `yaml:"retries"`
+		RetryDelaySec int    `yaml:"retry_delay_sec"`
 	}
 
 	var dagInfo struct {
-		DefaultArgs model.DefaultArgs `yaml:"default_args"`
-		Description string            `yaml:"description"`
+		defaultArgs defaultArgs `yaml:"default_args"`
+		Description string      `yaml:"description"`
 	}
 
-	dagInfo.DefaultArgs = dag.Data.DefaultArgs
+	dagInfo.defaultArgs = defaultArgs{
+		Owner:         "cm-cicada",
+		StartDate:     time.Now().Format(time.DateOnly),
+		Retries:       0,
+		RetryDelaySec: 0,
+	}
 	dagInfo.Description = dag.Data.Description
 
 	filePath := dagDir + "/METADATA.yml"

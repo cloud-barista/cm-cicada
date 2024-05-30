@@ -6,8 +6,6 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data:
     properties:
-      default_args:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs'
       description:
         type: string
       task_groups:
@@ -15,30 +13,7 @@ definitions:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
         type: array
     required:
-    - default_args
     - task_groups
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.DefaultArgs:
-    properties:
-      email:
-        type: string
-      email_on_failure:
-        type: boolean
-      email_on_retry:
-        type: boolean
-      owner:
-        type: string
-      retries:
-        description: 'default: 1'
-        type: integer
-      retry_delay_sec:
-        description: 'default: 300'
-        type: integer
-      start_date:
-        type: string
-    required:
-    - owner
-    - start_date
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params:
     properties:
