@@ -5,6 +5,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"net/http"
@@ -69,6 +70,8 @@ func CreateWorkflow(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
+
+	workflow.UUID = uuid.New().String()
 
 	err = airflow.Client.CreateDAG(&workflow)
 	if err != nil {
