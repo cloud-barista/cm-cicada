@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 func TaskComponentGet(uuid string) (*model.TaskComponent, error) {
@@ -60,6 +62,10 @@ func TaskComponentGetList(page int, row int) (*[]model.TaskComponent, error) {
 }
 
 func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskComponent, error) {
+	taskComponent.UUID = uuid.New().String()
+	taskComponent.CreatedAt = time.Now()
+	taskComponent.UpdatedAt = time.Now()
+
 	result := db.DB.Create(taskComponent)
 	err := result.Error
 	if err != nil {
