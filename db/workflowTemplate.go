@@ -16,7 +16,7 @@ func WorkflowTemplateInit() error {
 	jsonDir := config.CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory
 
 	// JSON 파일 목록 가져오기
-	files, err := filepath.Glob(jsonDir + "/*/" + "*.json")
+	files, err := filepath.Glob(jsonDir + "*.json")
 	if err != nil {
 		return err
 	}
@@ -47,15 +47,9 @@ func WorkflowTemplateInit() error {
 		baseName := filepath.Base(file)
 		baseNameWithoutExt := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 
-		// 디렉토리 이름 추출
-		dir := filepath.Dir(file)
-		dirSplit := strings.Split(dir, "/")
-		dirName := dirSplit[len(dirSplit)-1]
-
 		// WorkflowTemplate 생성
 		workflowTemplate := model.WorkflowTemplate{
-			UUID:      baseNameWithoutExt,
-			Name:      dirName,
+			ID:        baseNameWithoutExt, // 파일명으로 설정
 			Data:      data,
 			CreatedAt: createdAt,
 		}

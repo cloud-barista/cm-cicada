@@ -129,7 +129,7 @@
                 }
             }
         },
-        "/task_component/{uuid}": {
+        "/task_component/{id}": {
             "get": {
                 "description": "Get the task component.",
                 "consumes": [
@@ -145,8 +145,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the TaskComponent",
-                        "name": "uuid",
+                        "description": "ID of the TaskComponent",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -187,8 +187,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the TaskComponent",
-                        "name": "uuid",
+                        "description": "ID of the TaskComponent",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -238,8 +238,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the task component.",
-                        "name": "uuid",
+                        "description": "ID of the task component.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -362,7 +362,7 @@
                 }
             }
         },
-        "/workflow/run/{uuid}": {
+        "/workflow/run/{id}": {
             "post": {
                 "description": "Run the workflow.",
                 "consumes": [
@@ -378,8 +378,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -406,7 +406,7 @@
                 }
             }
         },
-        "/workflow/{uuid}": {
+        "/workflow/{id}": {
             "get": {
                 "description": "Get the workflow.",
                 "consumes": [
@@ -422,8 +422,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -464,8 +464,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -515,8 +515,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -745,8 +745,7 @@
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -755,13 +754,10 @@
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }
@@ -806,8 +802,7 @@
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -816,13 +811,10 @@
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }
@@ -831,8 +823,7 @@
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -841,13 +832,10 @@
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }

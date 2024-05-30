@@ -21,7 +21,7 @@ func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
 	return workflow, nil
 }
 
-func WorkflowGet(uuid string) (*model.Workflow, error) {
+func WorkflowGet(id string) (*model.Workflow, error) {
 	workflow := &model.Workflow{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
@@ -29,11 +29,11 @@ func WorkflowGet(uuid string) (*model.Workflow, error) {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("uuid = ?", uuid).First(workflow)
+	result := db.DB.Where("id = ?", id).First(workflow)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("workflow not found with the provided UUID")
+			return nil, errors.New("workflow not found with the provided id")
 		}
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func WorkflowGetList(page int, row int) (*[]model.Workflow, error) {
 func WorkflowUpdate(workflow *model.Workflow) error {
 	workflow.UpdatedAt = time.Now()
 
-	result := db.DB.Model(&model.Workflow{}).Where("uuid = ?", workflow.UUID).Updates(workflow)
+	result := db.DB.Model(&model.Workflow{}).Where("id = ?", workflow.ID).Updates(workflow)
 	err := result.Error
 	if err != nil {
 		return err

@@ -140,7 +140,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_component/{uuid}": {
+        "/task_component/{id}": {
             "get": {
                 "description": "Get the task component.",
                 "consumes": [
@@ -156,8 +156,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the TaskComponent",
-                        "name": "uuid",
+                        "description": "ID of the TaskComponent",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -198,8 +198,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the TaskComponent",
-                        "name": "uuid",
+                        "description": "ID of the TaskComponent",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -249,8 +249,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the task component.",
-                        "name": "uuid",
+                        "description": "ID of the task component.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -373,7 +373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/run/{uuid}": {
+        "/workflow/run/{id}": {
             "post": {
                 "description": "Run the workflow.",
                 "consumes": [
@@ -389,8 +389,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -417,7 +417,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{uuid}": {
+        "/workflow/{id}": {
             "get": {
                 "description": "Get the workflow.",
                 "consumes": [
@@ -433,8 +433,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -475,8 +475,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -526,8 +526,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the workflow.",
-                        "name": "uuid",
+                        "description": "ID of the workflow.",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -756,8 +756,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -766,13 +765,10 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }
@@ -817,8 +813,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -827,13 +822,10 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }
@@ -842,8 +834,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "name",
-                "uuid"
+                "id"
             ],
             "properties": {
                 "created_at": {
@@ -852,13 +843,10 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "name": {
+                "id": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "uuid": {
                     "type": "string"
                 }
             }

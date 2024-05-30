@@ -23,11 +23,11 @@ import (
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow template"
 // @Router		/workflow_template/{uuid} [get]
 func GetWorkflowTemplate(c echo.Context) error {
-	uuid := c.Param("uuid")
-	if uuid == "" {
-		return common.ReturnErrorMsg(c, "uuid is empty")
+	id := c.Param("id")
+	if id == "" {
+		return common.ReturnErrorMsg(c, "id is empty")
 	}
-	workflowTemplate, err := dao.WorkflowTemplateGet(uuid)
+	workflowTemplate, err := dao.WorkflowTemplateGet(id)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

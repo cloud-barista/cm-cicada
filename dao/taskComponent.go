@@ -4,12 +4,11 @@ import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
 
-func TaskComponentGet(uuid string) (*model.TaskComponent, error) {
+func TaskComponentGet(id string) (*model.TaskComponent, error) {
 	taskComponent := &model.TaskComponent{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
@@ -17,11 +16,11 @@ func TaskComponentGet(uuid string) (*model.TaskComponent, error) {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("uuid = ?", uuid).First(taskComponent)
+	result := db.DB.Where("id = ?", id).First(taskComponent)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("task component not found with the provided UUID")
+			return nil, errors.New("task component not found with the provided id")
 		}
 		return nil, err
 	}
@@ -62,7 +61,6 @@ func TaskComponentGetList(page int, row int) (*[]model.TaskComponent, error) {
 }
 
 func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskComponent, error) {
-	taskComponent.UUID = uuid.New().String()
 	taskComponent.CreatedAt = time.Now()
 	taskComponent.UpdatedAt = time.Now()
 
@@ -76,7 +74,7 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 }
 
 func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
-	result := db.DB.Model(&model.TaskComponent{}).Where("uuid = ?", taskComponent.UUID).Updates(taskComponent)
+	result := db.DB.Model(&model.TaskComponent{}).Where("id = ?", taskComponent.ID).Updates(taskComponent)
 	err := result.Error
 	if err != nil {
 		return err

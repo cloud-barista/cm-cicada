@@ -7,8 +7,8 @@ import (
 
 func TaskComponent(e *echo.Echo) {
 	e.POST("/task_component", controller.CreateTaskComponent)
-	e.GET("/task_component/:uuid", controller.GetTaskComponent)
+	e.GET("/task_component/:id", controller.GetTaskComponent)
 	e.GET("/task_component", controller.ListTaskComponent)
-	e.PUT("/task_component/:uuid", controller.UpdateTaskComponent)
-	e.DELETE("/task_component/:uuid", controller.DeleteTaskComponent)
+	e.PUT("/task_component/:id", controller.UpdateTaskComponent)
+	e.DELETE("/task_component/:id", controller.DeleteTaskComponent)
 }

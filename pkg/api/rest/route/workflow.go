@@ -7,9 +7,9 @@ import (
 
 func Workflow(e *echo.Echo) {
 	e.POST("/workflow", controller.CreateWorkflow)
-	e.GET("/workflow/:uuid", controller.GetWorkflow)
+	e.GET("/workflow/:id", controller.GetWorkflow)
 	e.GET("/workflow", controller.ListWorkflow)
-	e.PUT("/workflow/:uuid", controller.UpdateWorkflow)
-	e.POST("/workflow/run/:uuid", controller.RunWorkflow)
-	e.DELETE("/workflow/:uuid", controller.DeleteWorkflow)
+	e.PUT("/workflow/:id", controller.UpdateWorkflow)
+	e.POST("/workflow/run/:id", controller.RunWorkflow)
+	e.DELETE("/workflow/:id", controller.DeleteWorkflow)
 }
