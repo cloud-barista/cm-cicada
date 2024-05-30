@@ -2,11 +2,13 @@ package airflow
 
 import (
 	"errors"
+	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/google/uuid"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
+	"strings"
 	"time"
 )
 
@@ -63,11 +65,11 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		return err
 	}
 
-	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.ID
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.UUID
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
 		return errors.New("failed to create the Workflow directory (Workflow ID=" + dag.ID +
-			", Description: " + dag.Data.Description)
+			", Workflow UUID=" + dag.UUID + ", Description: " + dag.Data.Description)
 	}
 
 	type defaultArgs struct {
@@ -83,7 +85,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 	}
 
 	dagInfo.defaultArgs = defaultArgs{
-		Owner:         "cm-cicada",
+		Owner:         strings.ToLower(common.ModuleName),
 		StartDate:     time.Now().Format(time.DateOnly),
 		Retries:       0,
 		RetryDelaySec: 0,

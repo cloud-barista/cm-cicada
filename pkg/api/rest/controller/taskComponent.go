@@ -1,13 +1,10 @@
 package controller
 
 import (
-	// "errors"
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	// "github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -22,10 +19,9 @@ import (
 // @Success		200	{object}	model.TaskComponent		"Successfully register the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
-// @Router			/task_component [post]
+// @Router			/cicada/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.TaskComponent)
-	log.Println("taskComponent ? ", taskComponent)
 	err := c.Bind(taskComponent)
 	if err != nil {
 		return err
@@ -45,17 +41,17 @@ func CreateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the TaskComponent"
+// @Param		tcId path string true "ID of the TaskComponent"
 // @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/task_component/{id} [get]
+// @Router		/cicada/task_component/{tcId} [get]
 func GetTaskComponent(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "id is empty")
+	tcId := c.Param("tcId")
+	if tcId == "" {
+		return common.ReturnErrorMsg(c, "tcId is empty")
 	}
-	taskComponent, err := dao.TaskComponentGet(id)
+	taskComponent, err := dao.TaskComponentGet(tcId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -74,7 +70,7 @@ func GetTaskComponent(c echo.Context) error {
 // @Success		200	{object}	[]model.TaskComponent	"Successfully get a list of task component."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of task component."
-// @Router			/task_component [get]
+// @Router			/cicada/task_component [get]
 func ListTaskComponent(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -95,12 +91,12 @@ func ListTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the TaskComponent"
+// @Param		tcId path string true "ID of the TaskComponent"
 // @Param		TaskComponent body model.TaskComponent true "task component to modify."
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
-// @Router		/task_component/{id} [put]
+// @Router		/cicada/task_component/{tcId} [put]
 func UpdateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.TaskComponent)
 	err := c.Bind(taskComponent)
@@ -108,11 +104,11 @@ func UpdateTaskComponent(c echo.Context) error {
 		return err
 	}
 
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	tcId := c.Param("tcId")
+	if tcId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tcId.")
 	}
-	oldTaskComponent, err := dao.TaskComponentGet(id)
+	oldTaskComponent, err := dao.TaskComponentGet(tcId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -136,18 +132,18 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the task component."
+// @Param		tcId path string true "ID of the task component."
 // @Success		200	{object}	model.TaskComponent		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
-// @Router		/task_component/{id} [delete]
+// @Router		/cicada/task_component/{tcId} [delete]
 func DeleteTaskComponent(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	tcId := c.Param("tcId")
+	if tcId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tcId.")
 	}
 
-	taskComponent, err := dao.TaskComponentGet(id)
+	taskComponent, err := dao.TaskComponentGet(tcId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

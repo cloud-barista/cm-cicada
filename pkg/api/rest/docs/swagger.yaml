@@ -159,7 +159,7 @@ paths:
       summary: Check Ready
       tags:
       - '[Admin] System management'
-  /task_component:
+  /cicada/task_component:
     get:
       consumes:
       - application/json
@@ -222,7 +222,7 @@ paths:
       summary: Create TaskComponent
       tags:
       - '[Task Component]'
-  /task_component/{id}:
+  /cicada/task_component/{tcId}:
     delete:
       consumes:
       - application/json
@@ -230,7 +230,7 @@ paths:
       parameters:
       - description: ID of the task component.
         in: path
-        name: id
+        name: tcId
         required: true
         type: string
       produces:
@@ -258,7 +258,7 @@ paths:
       parameters:
       - description: ID of the TaskComponent
         in: path
-        name: id
+        name: tcId
         required: true
         type: string
       produces:
@@ -286,7 +286,7 @@ paths:
       parameters:
       - description: ID of the TaskComponent
         in: path
-        name: id
+        name: tcId
         required: true
         type: string
       - description: task component to modify.
@@ -313,7 +313,7 @@ paths:
       summary: Update TaskComponent
       tags:
       - '[Task Component]'
-  /workflow:
+  /cicada/workflow:
     get:
       consumes:
       - application/json
@@ -376,7 +376,7 @@ paths:
       summary: Create Workflow
       tags:
       - '[Workflow]'
-  /workflow/{id}:
+  /cicada/workflow/{wfId}:
     delete:
       consumes:
       - application/json
@@ -384,7 +384,7 @@ paths:
       parameters:
       - description: ID of the workflow.
         in: path
-        name: id
+        name: wfId
         required: true
         type: string
       produces:
@@ -412,7 +412,7 @@ paths:
       parameters:
       - description: ID of the workflow.
         in: path
-        name: id
+        name: wfId
         required: true
         type: string
       produces:
@@ -440,7 +440,7 @@ paths:
       parameters:
       - description: ID of the workflow.
         in: path
-        name: id
+        name: wfId
         required: true
         type: string
       - description: Workflow to modify.
@@ -467,7 +467,7 @@ paths:
       summary: Update Workflow
       tags:
       - '[Workflow]'
-  /workflow/run/{id}:
+  /cicada/workflow/{wfId}/run:
     post:
       consumes:
       - application/json
@@ -496,7 +496,7 @@ paths:
       summary: Run Workflow
       tags:
       - '[Workflow]'
-  /workflow_template:
+  /cicada/workflow_template:
     get:
       consumes:
       - application/json
@@ -530,15 +530,15 @@ paths:
       summary: List WorkflowTemplate
       tags:
       - '[Workflow Template]'
-  /workflow_template/{uuid}:
+  /cicada/workflow_template/{wftId}:
     get:
       consumes:
       - application/json
       description: Get the workflow template.
       parameters:
-      - description: UUID of the WorkflowTemplate
+      - description: ID of the WorkflowTemplate
         in: path
-        name: uuid
+        name: wftId
         required: true
         type: string
       produces:

@@ -5,6 +5,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 	"net/http"
@@ -46,7 +47,7 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 // @Success		200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to create DAG."
-// @Router		/workflow [post]
+// @Router		/cicada/workflow [post]
 func CreateWorkflow(c echo.Context) error {
 	var workflow model.Workflow
 
@@ -70,6 +71,8 @@ func CreateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
+	workflow.UUID = uuid.New().String()
+
 	err = airflow.Client.CreateDAG(&workflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to create the workflow.")
@@ -92,23 +95,23 @@ func CreateWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		wfId path string true "ID of the workflow."
 // @Success		200	{object}	model.Workflow			"Successfully get the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
-// @Router		/workflow/{id} [get]
+// @Router		/cicada/workflow/{wfId} [get]
 func GetWorkflow(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	workflow, err := dao.WorkflowGet(id)
+	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = airflow.Client.GetDAG(id)
+	_, err = airflow.Client.GetDAG(workflow.UUID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
@@ -128,7 +131,7 @@ func GetWorkflow(c echo.Context) error {
 // @Success		200	{object}	[]model.Workflow		"Successfully get a workflow list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
-// @Router		/workflow [get]
+// @Router		/cicada/workflow [get]
 func ListWorkflow(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -154,19 +157,19 @@ func ListWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.Workflow			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
-// @Router		/workflow/run/{id} [post]
+// @Router		/cicada/workflow/{wfId}/run [post]
 func RunWorkflow(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
+	wfId := c.Param("wfId")
+	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the id.")
 	}
 
-	workflow, err := dao.WorkflowGet(id)
+	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = airflow.Client.RunDAG(id)
+	_, err = airflow.Client.RunDAG(workflow.UUID)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
@@ -181,12 +184,12 @@ func RunWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		wfId path string true "ID of the workflow."
 // @Param		Workflow body model.Workflow true "Workflow to modify."
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
-// @Router		/workflow/{id} [put]
+// @Router		/cicada/workflow/{wfId} [put]
 func UpdateWorkflow(c echo.Context) error {
 	Workflow := new(model.Workflow)
 	err := c.Bind(Workflow)
@@ -194,7 +197,7 @@ func UpdateWorkflow(c echo.Context) error {
 		return err
 	}
 
-	Workflow.ID = c.Param("id")
+	Workflow.ID = c.Param("wfId")
 	_, err = dao.WorkflowGet(Workflow.ID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
@@ -215,23 +218,23 @@ func UpdateWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		wfId path string true "ID of the workflow."
 // @Success		200	{object}	model.Workflow	"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"
-// @Router		/workflow/{id} [delete]
+// @Router		/cicada/workflow/{wfId} [delete]
 func DeleteWorkflow(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	workflow, err := dao.WorkflowGet(id)
+	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(id)
+	err = airflow.Client.DeleteDAG(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

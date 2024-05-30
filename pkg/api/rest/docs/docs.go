@@ -44,7 +44,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_component": {
+        "/cicada/task_component": {
             "get": {
                 "description": "Get a list of task component.",
                 "consumes": [
@@ -140,7 +140,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_component/{id}": {
+        "/cicada/task_component/{tcId}": {
             "get": {
                 "description": "Get the task component.",
                 "consumes": [
@@ -157,7 +157,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the TaskComponent",
-                        "name": "id",
+                        "name": "tcId",
                         "in": "path",
                         "required": true
                     }
@@ -199,7 +199,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the TaskComponent",
-                        "name": "id",
+                        "name": "tcId",
                         "in": "path",
                         "required": true
                     },
@@ -250,7 +250,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the task component.",
-                        "name": "id",
+                        "name": "tcId",
                         "in": "path",
                         "required": true
                     }
@@ -277,7 +277,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow": {
+        "/cicada/workflow": {
             "get": {
                 "description": "Get a workflow list.",
                 "consumes": [
@@ -373,51 +373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/run/{id}": {
-            "post": {
-                "description": "Run the workflow.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "[Workflow]"
-                ],
-                "summary": "Run Workflow",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID of the workflow.",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully run the workflow.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
-                        }
-                    },
-                    "400": {
-                        "description": "Sent bad request.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to run the Workflow",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/workflow/{id}": {
+        "/cicada/workflow/{wfId}": {
             "get": {
                 "description": "Get the workflow.",
                 "consumes": [
@@ -434,7 +390,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow.",
-                        "name": "id",
+                        "name": "wfId",
                         "in": "path",
                         "required": true
                     }
@@ -476,7 +432,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow.",
-                        "name": "id",
+                        "name": "wfId",
                         "in": "path",
                         "required": true
                     },
@@ -527,7 +483,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow.",
-                        "name": "id",
+                        "name": "wfId",
                         "in": "path",
                         "required": true
                     }
@@ -554,7 +510,51 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow_template": {
+        "/cicada/workflow/{wfId}/run": {
+            "post": {
+                "description": "Run the workflow.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Run Workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully run the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to run the Workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cicada/workflow_template": {
             "get": {
                 "description": "Get a list of workflow template.",
                 "consumes": [
@@ -606,7 +606,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow_template/{uuid}": {
+        "/cicada/workflow_template/{wftId}": {
             "get": {
                 "description": "Get the workflow template.",
                 "consumes": [
@@ -622,8 +622,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "UUID of the WorkflowTemplate",
-                        "name": "uuid",
+                        "description": "ID of the WorkflowTemplate",
+                        "name": "wftId",
                         "in": "path",
                         "required": true
                     }
