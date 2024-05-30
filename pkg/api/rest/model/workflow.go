@@ -7,18 +7,18 @@ import (
 	"time"
 )
 
-type TaskOptions struct {
+type Options struct {
 	APIConnectionID string `json:"api_connection_id" mapstructure:"api_connection_id" validate:"required"`
 	Endpoint        string `json:"endpoint" mapstructure:"endpoint" validate:"required"`
 	Method          string `json:"method" mapstructure:"method" validate:"required"`
-	Data            string `json:"data" mapstructure:"data" validate:"required"`
+	RequestBody     string `json:"request_body" mapstructure:"request_body" validate:"required"`
 }
 
 type Task struct {
-	TaskName      string      `json:"task_name" mapstructure:"task_name" validate:"required"`
-	TaskComponent string      `json:"task_component" mapstructure:"task_component" validate:"required"`
-	TaskOptions   TaskOptions `json:"task_options" mapstructure:"task_options" validate:"required"`
-	Dependencies  []string    `json:"dependencies" mapstructure:"dependencies"`
+	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
+	Options       Options  `json:"options" mapstructure:"options" validate:"required"`
+	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
 }
 
 type TaskGroup struct {

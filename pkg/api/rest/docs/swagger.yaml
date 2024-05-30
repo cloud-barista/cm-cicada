@@ -15,6 +15,22 @@ definitions:
     required:
     - task_groups
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options:
+    properties:
+      api_connection_id:
+        type: string
+      endpoint:
+        type: string
+      method:
+        type: string
+      request_body:
+        type: string
+    required:
+    - api_connection_id
+    - endpoint
+    - method
+    - request_body
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params:
     properties:
       properties: {}
@@ -39,16 +55,16 @@ definitions:
         items:
           type: string
         type: array
+      name:
+        type: string
+      options:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options'
       task_component:
         type: string
-      task_name:
-        type: string
-      task_options:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions'
     required:
+    - name
+    - options
     - task_component
-    - task_name
-    - task_options
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent:
     properties:
@@ -69,16 +85,13 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData:
     properties:
+      options:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options'
       param_option:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption'
-      task_name:
-        type: string
-      task_options:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions'
     required:
+    - options
     - param_option
-    - task_name
-    - task_options
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup:
     properties:
@@ -93,22 +106,6 @@ definitions:
     required:
     - task_group_name
     - tasks
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions:
-    properties:
-      api_connection_id:
-        type: string
-      data:
-        type: string
-      endpoint:
-        type: string
-      method:
-        type: string
-    required:
-    - api_connection_id
-    - data
-    - endpoint
-    - method
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
     properties:
@@ -234,7 +231,7 @@ paths:
       summary: Create TaskComponent
       tags:
       - '[Task Component]'
-  /task_component/{id}:
+  /task_component/{uuid}:
     delete:
       consumes:
       - application/json
@@ -242,7 +239,7 @@ paths:
       parameters:
       - description: UUID of the task component.
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:
@@ -268,9 +265,9 @@ paths:
       - application/json
       description: Get the task component.
       parameters:
-      - description: id of the TaskComponent
+      - description: UUID of the TaskComponent
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:
@@ -296,9 +293,9 @@ paths:
       - application/json
       description: Update the task component.
       parameters:
-      - description: id of the TaskComponent
+      - description: UUID of the TaskComponent
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       - description: task component to modify.
@@ -388,7 +385,7 @@ paths:
       summary: Create Workflow
       tags:
       - '[Workflow]'
-  /workflow/{id}:
+  /workflow/{uuid}:
     delete:
       consumes:
       - application/json
@@ -450,7 +447,7 @@ paths:
       - application/json
       description: Update the workflow content.
       parameters:
-      - description: Workflow UUID
+      - description: UUID of the workflow.
         in: path
         name: uuid
         required: true
@@ -479,13 +476,13 @@ paths:
       summary: Update Workflow
       tags:
       - '[Workflow]'
-  /workflow/run/{id}:
+  /workflow/run/{uuid}:
     post:
       consumes:
       - application/json
       description: Run the workflow.
       parameters:
-      - description: Workflow UUID
+      - description: UUID of the workflow.
         in: path
         name: uuid
         required: true
@@ -542,15 +539,15 @@ paths:
       summary: List WorkflowTemplate
       tags:
       - '[Workflow Template]'
-  /workflow_template/{id}:
+  /workflow_template/{uuid}:
     get:
       consumes:
       - application/json
       description: Get the workflow template.
       parameters:
-      - description: id of the WorkflowTemplate
+      - description: UUID of the WorkflowTemplate
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:

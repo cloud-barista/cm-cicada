@@ -140,7 +140,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/task_component/{id}": {
+        "/task_component/{uuid}": {
             "get": {
                 "description": "Get the task component.",
                 "consumes": [
@@ -156,8 +156,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id of the TaskComponent",
-                        "name": "id",
+                        "description": "UUID of the TaskComponent",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -198,8 +198,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id of the TaskComponent",
-                        "name": "id",
+                        "description": "UUID of the TaskComponent",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     },
@@ -250,7 +250,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "UUID of the task component.",
-                        "name": "id",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -373,7 +373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/run/{id}": {
+        "/workflow/run/{uuid}": {
             "post": {
                 "description": "Run the workflow.",
                 "consumes": [
@@ -389,7 +389,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workflow UUID",
+                        "description": "UUID of the workflow.",
                         "name": "uuid",
                         "in": "path",
                         "required": true
@@ -417,7 +417,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{id}": {
+        "/workflow/{uuid}": {
             "get": {
                 "description": "Get the workflow.",
                 "consumes": [
@@ -475,7 +475,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workflow UUID",
+                        "description": "UUID of the workflow.",
                         "name": "uuid",
                         "in": "path",
                         "required": true
@@ -606,7 +606,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow_template/{id}": {
+        "/workflow_template/{uuid}": {
             "get": {
                 "description": "Get the workflow template.",
                 "consumes": [
@@ -622,8 +622,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id of the WorkflowTemplate",
-                        "name": "id",
+                        "description": "UUID of the WorkflowTemplate",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -677,6 +677,29 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options": {
+            "type": "object",
+            "required": [
+                "api_connection_id",
+                "endpoint",
+                "method",
+                "request_body"
+            ],
+            "properties": {
+                "api_connection_id": {
+                    "type": "string"
+                },
+                "endpoint": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "request_body": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params": {
             "type": "object",
             "required": [
@@ -707,9 +730,9 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
             "required": [
-                "task_component",
-                "task_name",
-                "task_options"
+                "name",
+                "options",
+                "task_component"
             ],
             "properties": {
                 "dependencies": {
@@ -718,14 +741,14 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options"
+                },
                 "task_component": {
                     "type": "string"
-                },
-                "task_name": {
-                    "type": "string"
-                },
-                "task_options": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions"
                 }
             }
         },
@@ -757,19 +780,15 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData": {
             "type": "object",
             "required": [
-                "param_option",
-                "task_name",
-                "task_options"
+                "options",
+                "param_option"
             ],
             "properties": {
+                "options": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options"
+                },
                 "param_option": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption"
-                },
-                "task_name": {
-                    "type": "string"
-                },
-                "task_options": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions"
                 }
             }
         },
@@ -791,29 +810,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
                     }
-                }
-            }
-        },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions": {
-            "type": "object",
-            "required": [
-                "api_connection_id",
-                "data",
-                "endpoint",
-                "method"
-            ],
-            "properties": {
-                "api_connection_id": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "string"
-                },
-                "endpoint": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
                 }
             }
         },

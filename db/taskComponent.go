@@ -28,7 +28,9 @@ func TaskComponentInit() error {
 		if err != nil {
 			return err
 		}
-		defer jsonFile.Close()
+		defer func() {
+			_ = jsonFile.Close()
+		}()
 
 		// JSON 파일 파싱하여 데이터베이스에 삽입
 		var data model.TaskData

@@ -6,6 +6,6 @@ import (
 )
 
 func WorkflowTemplate(e *echo.Echo) {
-	e.GET("/workflow_template/:id", controller.GetWorkflowTemplate)
+	e.GET("/workflow_template/:uuid", controller.GetWorkflowTemplate)
 	e.GET("/workflow_template", controller.ListWorkflowTemplate)
 }

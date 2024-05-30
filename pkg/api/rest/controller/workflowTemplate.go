@@ -17,17 +17,17 @@ import (
 // @Tags		[Workflow Template]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "id of the WorkflowTemplate"
+// @Param		uuid path string true "UUID of the WorkflowTemplate"
 // @Success		200	{object}	model.WorkflowTemplate			"Successfully get the workflow template"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow template"
-// @Router		/workflow_template/{id} [get]
+// @Router		/workflow_template/{uuid} [get]
 func GetWorkflowTemplate(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "id is empty")
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		return common.ReturnErrorMsg(c, "uuid is empty")
 	}
-	workflowTemplate, err := dao.WorkflowTemplateGet(id)
+	workflowTemplate, err := dao.WorkflowTemplateGet(uuid)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

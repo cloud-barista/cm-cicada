@@ -45,17 +45,17 @@ func CreateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "id of the TaskComponent"
+// @Param		uuid path string true "UUID of the TaskComponent"
 // @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/task_component/{id} [get]
+// @Router		/task_component/{uuid} [get]
 func GetTaskComponent(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "id is empty")
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		return common.ReturnErrorMsg(c, "uuid is empty")
 	}
-	taskComponent, err := dao.TaskComponentGet(id)
+	taskComponent, err := dao.TaskComponentGet(uuid)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -95,12 +95,12 @@ func ListTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "id of the TaskComponent"
+// @Param		uuid path string true "UUID of the TaskComponent"
 // @Param		TaskComponent body model.TaskComponent true "task component to modify."
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
-// @Router		/task_component/{id} [put]
+// @Router		/task_component/{uuid} [put]
 func UpdateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.TaskComponent)
 	err := c.Bind(taskComponent)
@@ -108,16 +108,16 @@ func UpdateTaskComponent(c echo.Context) error {
 		return err
 	}
 
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		return common.ReturnErrorMsg(c, "Please provide the uuid.")
 	}
-	oldTaskComponent, err := dao.TaskComponentGet(id)
+	oldTaskComponent, err := dao.TaskComponentGet(uuid)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if taskComponent.Data.TaskName != "" {
+	if taskComponent.Name != "" {
 		oldTaskComponent.Data = taskComponent.Data
 	}
 
@@ -136,18 +136,18 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "UUID of the task component."
+// @Param		uuid path string true "UUID of the task component."
 // @Success		200	{object}	model.TaskComponent		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
-// @Router		/task_component/{id} [delete]
+// @Router		/task_component/{uuid} [delete]
 func DeleteTaskComponent(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		return common.ReturnErrorMsg(c, "Please provide the uuid.")
 	}
 
-	taskComponent, err := dao.TaskComponentGet(id)
+	taskComponent, err := dao.TaskComponentGet(uuid)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

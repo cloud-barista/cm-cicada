@@ -19,11 +19,11 @@ func checkDAG(dag *model.Workflow) error {
 		}
 
 		for _, t := range tg.Tasks {
-			if t.TaskName == "" {
+			if t.Name == "" {
 				return errors.New("task name should not be empty")
 			}
 
-			taskNames = append(taskNames, t.TaskName)
+			taskNames = append(taskNames, t.Name)
 		}
 	}
 
@@ -38,7 +38,7 @@ func checkDAG(dag *model.Workflow) error {
 					}
 				}
 				if !depFound {
-					return errors.New("wrong dependency found in " + tg.TaskGroupName + "." + t.TaskName + " (" + dep + ")")
+					return errors.New("wrong dependency found in " + tg.TaskGroupName + "." + t.Name + " (" + dep + ")")
 				}
 			}
 		}
@@ -131,11 +131,11 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 			taskOptions["dependencies"] = t.Dependencies
 
 			taskOptions["task_id"] = uuid.New().String()
-			taskOptions["http_conn_id"] = t.TaskOptions.APIConnectionID
-			taskOptions["endpoint"] = t.TaskOptions.Endpoint
-			taskOptions["method"] = t.TaskOptions.Method
+			taskOptions["http_conn_id"] = t.Options.APIConnectionID
+			taskOptions["endpoint"] = t.Options.Endpoint
+			taskOptions["method"] = t.Options.Method
 
-			filePath = dagDir + "/" + tg.TaskGroupName + "/" + t.TaskName + ".yml"
+			filePath = dagDir + "/" + tg.TaskGroupName + "/" + t.Name + ".yml"
 
 			err = writeModelToYAMLFile(taskOptions, filePath)
 			if err != nil {
