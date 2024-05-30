@@ -6,21 +6,8 @@
       "description": "Migrate Server",
       "tasks": [
         {
-          "task_name": "bash_task_echo_infra_migration_started",
-          "task_component": "bash_task_echo",
-          "operator": "airflow.operators.bash.BashOperator",
-          "operator_options": [
-            {
-              "name": "bash_command",
-              "value": "echo 'Infra migration is started.'"
-            }
-          ],
-          "dependencies": []
-        },
-        {
           "task_name": "beetle_task_infra_migration",
           "task_component": "beetle_task_infra_migration",
-          "operator": "airflow.providers.http.operators.http.SimpleHttpOperator",
           "operator_options": [
             {
               "name": "task_id",
@@ -49,23 +36,7 @@
               }
             }
           ],
-          "dependencies": [
-            "bash_task_echo_infra_migration_started"
-          ]
-        },
-        {
-          "task_name": "bash_task_echo_infra_migration_finished",
-          "task_component": "bash_task_echo",
-          "operator": "airflow.operators.bash.BashOperator",
-          "operator_options": [
-            {
-              "name": "bash_command",
-              "value": "echo 'Infra migration is finished.'"
-            }
-          ],
-          "dependencies": [
-            "beetle_task_infra_migration"
-          ]
+          "dependencies": []
         }
       ]
     }

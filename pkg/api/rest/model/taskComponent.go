@@ -16,14 +16,11 @@ type TaskComponent struct {
 
 type TaskData struct {
 	TaskName        string          `json:"task_name" mapstructure:"task_name" validate:"required"`
-	Operator        string          `json:"operator" mapstructure:"operator" validate:"required"`
 	OperatorOptions OperatorOptions `json:"operator_options" mapstructure:"operator_options" validate:"required"`
 	ParmaOption     ParmaOption     `json:"param_option" mapstructure:"param_option" validate:"required"`
 }
 type ParmaOption struct {
-	OperatorOptionForUseAsParam string `json:"operator_option_for_use_as_param" mapstructure:"operator_option_for_use_as_param" validate:"required"`
-	OperatorOptionValueIsJson   bool   `json:"operator_option_value_is_json" mapstructure:"operator_option_value_is_json" validate:"required"`
-	Params                      Params `json:"params" mapstructure:"params" validate:"required"`
+	Params Params `json:"params" mapstructure:"params" validate:"required"`
 }
 
 type Params struct {

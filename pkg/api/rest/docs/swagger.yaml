@@ -28,15 +28,9 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption:
     properties:
-      operator_option_for_use_as_param:
-        type: string
-      operator_option_value_is_json:
-        type: boolean
       params:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
     required:
-    - operator_option_for_use_as_param
-    - operator_option_value_is_json
     - params
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task:
@@ -45,8 +39,6 @@ definitions:
         items:
           type: string
         type: array
-      operator:
-        type: string
       operator_options:
         items:
           properties:
@@ -63,7 +55,6 @@ definitions:
       task_name:
         type: string
     required:
-    - operator
     - operator_options
     - task_component
     - task_name
@@ -84,8 +75,6 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData:
     properties:
-      operator:
-        type: string
       operator_options:
         items:
           properties:
@@ -102,7 +91,6 @@ definitions:
       task_name:
         type: string
     required:
-    - operator
     - operator_options
     - param_option
     - task_name

@@ -1,6 +1,5 @@
 {
   "task_name": "beetle_task_infra_migration",
-  "operator": "airflow.providers.http.operators.http.SimpleHttpOperator",
   "operator_options": [
     {
       "name": "task_id",
@@ -30,8 +29,6 @@
     }
   ],
   "param_option": {
-    "operator_option_for_use_as_param": "data",
-    "operator_option_value_is_json": true,
     "params": {
       "required": ["name", "vm"],
       "properties": {

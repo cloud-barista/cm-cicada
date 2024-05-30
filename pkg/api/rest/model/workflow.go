@@ -15,7 +15,6 @@ type OperatorOptions []struct {
 type Task struct {
 	TaskName        string          `json:"task_name" mapstructure:"task_name" validate:"required"`
 	TaskComponent   string          `json:"task_component" mapstructure:"task_component" validate:"required"`
-	Operator        string          `json:"operator" mapstructure:"operator" validate:"required"`
 	OperatorOptions OperatorOptions `json:"operator_options" mapstructure:"operator_options" validate:"required"`
 	Dependencies    []string        `json:"dependencies" mapstructure:"dependencies"`
 }

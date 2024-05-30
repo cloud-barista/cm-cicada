@@ -118,7 +118,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		for _, t := range tg.Tasks {
 			taskOptions := make(map[string]any)
 
-			taskOptions["operator"] = t.Operator
+			taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
 			taskOptions["dependencies"] = t.Dependencies
 			for _, operatorOption := range t.OperatorOptions {
 				taskOptions[operatorOption.Name] = operatorOption.Value

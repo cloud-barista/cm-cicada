@@ -696,17 +696,9 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption": {
             "type": "object",
             "required": [
-                "operator_option_for_use_as_param",
-                "operator_option_value_is_json",
                 "params"
             ],
             "properties": {
-                "operator_option_for_use_as_param": {
-                    "type": "string"
-                },
-                "operator_option_value_is_json": {
-                    "type": "boolean"
-                },
                 "params": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params"
                 }
@@ -715,7 +707,6 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
             "required": [
-                "operator",
                 "operator_options",
                 "task_component",
                 "task_name"
@@ -726,9 +717,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "operator": {
-                    "type": "string"
                 },
                 "operator_options": {
                     "type": "array",
@@ -778,15 +766,11 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData": {
             "type": "object",
             "required": [
-                "operator",
                 "operator_options",
                 "param_option",
                 "task_name"
             ],
             "properties": {
-                "operator": {
-                    "type": "string"
-                },
                 "operator_options": {
                     "type": "array",
                     "items": {
