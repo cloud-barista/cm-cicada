@@ -1,6 +1,6 @@
 module github.com/cloud-barista/cm-cicada
 
-go 1.22.1
+go 1.21.6
 
 require (
 	github.com/apache/airflow-client-go/airflow v0.0.0-20230210234754-8ce0b39cfbb2
