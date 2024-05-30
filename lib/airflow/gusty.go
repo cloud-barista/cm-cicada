@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
 	"time"
@@ -119,10 +120,20 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 			taskOptions := make(map[string]any)
 
 			taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
-			taskOptions["dependencies"] = t.Dependencies
-			for _, operatorOption := range t.OperatorOptions {
-				taskOptions[operatorOption.Name] = operatorOption.Value
+
+			type headers struct {
+				ContentType string `json:"Content-Type"`
 			}
+			taskOptions["headers"] = headers{
+				ContentType: "application/json",
+			}
+
+			taskOptions["dependencies"] = t.Dependencies
+
+			taskOptions["task_id"] = uuid.New().String()
+			taskOptions["http_conn_id"] = t.TaskOptions.APIConnectionID
+			taskOptions["endpoint"] = t.TaskOptions.Endpoint
+			taskOptions["method"] = t.TaskOptions.Method
 
 			filePath = dagDir + "/" + tg.TaskGroupName + "/" + t.TaskName + ".yml"
 

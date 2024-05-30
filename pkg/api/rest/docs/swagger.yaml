@@ -39,25 +39,16 @@ definitions:
         items:
           type: string
         type: array
-      operator_options:
-        items:
-          properties:
-            name:
-              type: string
-            value: {}
-          required:
-          - name
-          - value
-          type: object
-        type: array
       task_component:
         type: string
       task_name:
         type: string
+      task_options:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions'
     required:
-    - operator_options
     - task_component
     - task_name
+    - task_options
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent:
     properties:
@@ -75,25 +66,16 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData:
     properties:
-      operator_options:
-        items:
-          properties:
-            name:
-              type: string
-            value: {}
-          required:
-          - name
-          - value
-          type: object
-        type: array
       param_option:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption'
       task_name:
         type: string
+      task_options:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions'
     required:
-    - operator_options
     - param_option
     - task_name
+    - task_options
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup:
     properties:
@@ -108,6 +90,22 @@ definitions:
     required:
     - task_group_name
     - tasks
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskOptions:
+    properties:
+      api_connection_id:
+        type: string
+      data:
+        type: string
+      endpoint:
+        type: string
+      method:
+        type: string
+    required:
+    - api_connection_id
+    - data
+    - endpoint
+    - method
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
     properties:

@@ -15,9 +15,9 @@ type TaskComponent struct {
 }
 
 type TaskData struct {
-	TaskName        string          `json:"task_name" mapstructure:"task_name" validate:"required"`
-	OperatorOptions OperatorOptions `json:"operator_options" mapstructure:"operator_options" validate:"required"`
-	ParmaOption     ParmaOption     `json:"param_option" mapstructure:"param_option" validate:"required"`
+	TaskName    string      `json:"task_name" mapstructure:"task_name" validate:"required"`
+	TaskOptions TaskOptions `json:"task_options" mapstructure:"task_options" validate:"required"`
+	ParmaOption ParmaOption `json:"param_option" mapstructure:"param_option" validate:"required"`
 }
 type ParmaOption struct {
 	Params Params `json:"params" mapstructure:"params" validate:"required"`

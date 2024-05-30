@@ -1,33 +1,11 @@
 {
   "task_name": "tumblebug_mcis_dynamic",
-  "operator_options": [
-    {
-      "name": "task_id",
-      "value": "mcis_dynamic"
-    },
-    {
-      "name": "http_conn_id",
-      "value": "tumblebug_api"
-    },
-    {
-      "name": "endpoint",
-      "value": "/tumblebug/ns/ns01/mcisDynamic"
-    },
-    {
-      "name": "method",
-      "value": "POST"
-    },
-    {
-      "name": "data",
-      "value": "{\"description\":\"Made in CB-TB\",\"installMonAgent\":\"no\",\"label\":\"DynamicVM\",\"name\":\"mcis01\",\"systemLabel\":\"\",\"vm\":[{\"commonImage\":\"ubuntu18.04\",\"commonSpec\":\"aws-ap-northeast-2-t2-small\",\"connectionName\":\"string\",\"description\":\"Description\",\"label\":\"DynamicVM\",\"name\":\"g1-1\",\"rootDiskSize\":\"default, 30, 42, ...\",\"rootDiskType\":\"default, TYPE1, ...\",\"subGroupSize\":\"3\",\"vmUserPassword default:\":\"string\"}]}"
-    },
-    {
-      "name": "headers",
-      "value": {
-        "Content-Type": "application/json"
-      }
-    }
-  ],
+  "task_options": {
+    "api_connection_id": "tumblebug_api",
+    "endpoint": "/tumblebug/ns/ns01/mcisDynamic",
+    "method": "POST",
+    "data": "{\"description\":\"Made in CB-TB\",\"installMonAgent\":\"no\",\"label\":\"DynamicVM\",\"name\":\"mcis01\",\"systemLabel\":\"\",\"vm\":[{\"commonImage\":\"ubuntu18.04\",\"commonSpec\":\"aws-ap-northeast-2-t2-small\",\"connectionName\":\"string\",\"description\":\"Description\",\"label\":\"DynamicVM\",\"name\":\"g1-1\",\"rootDiskSize\":\"default, 30, 42, ...\",\"rootDiskType\":\"default, TYPE1, ...\",\"subGroupSize\":\"3\",\"vmUserPassword default:\":\"string\"}]}"
+  },
   "param_option": {
     "params": {
       "required": [
