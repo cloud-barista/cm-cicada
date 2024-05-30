@@ -92,7 +92,7 @@ func CreateWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		uuid path string true "UUID of the workflow."
 // @Success		200	{object}	model.Workflow			"Successfully get the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
@@ -150,7 +150,7 @@ func ListWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "Workflow ID"
+// @Param		uuid path string true "Workflow UUID"
 // @Success		200	{object}	model.Workflow			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
@@ -181,7 +181,7 @@ func RunWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "Workflow ID"
+// @Param		uuid path string true "Workflow UUID"
 // @Param		Workflow body model.Workflow true "Workflow to modify."
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
@@ -194,8 +194,8 @@ func UpdateWorkflow(c echo.Context) error {
 		return err
 	}
 
-	Workflow.ID = c.Param("id")
-	_, err = dao.WorkflowGet(Workflow.ID)
+	Workflow.UUID = c.Param("id")
+	_, err = dao.WorkflowGet(Workflow.UUID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -215,7 +215,7 @@ func UpdateWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		uuid path string true "UUID of the workflow."
 // @Success		200	{object}	model.Workflow	"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"

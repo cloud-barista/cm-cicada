@@ -15,11 +15,11 @@ func WorkflowTemplateGet(id string) (*model.WorkflowTemplate, error) {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("id = ?", id).First(workflowTemplate)
+	result := db.DB.Where("uuid = ?", id).First(workflowTemplate)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("workflow template not found with the provided id")
+			return nil, errors.New("workflow template not found with the provided UUID")
 		}
 		return nil, err
 	}

@@ -249,7 +249,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the task component.",
+                        "description": "UUID of the task component.",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -389,8 +389,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workflow ID",
-                        "name": "id",
+                        "description": "Workflow UUID",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -433,8 +433,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
-                        "name": "id",
+                        "description": "UUID of the workflow.",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -475,8 +475,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workflow ID",
-                        "name": "id",
+                        "description": "Workflow UUID",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     },
@@ -526,8 +526,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
-                        "name": "id",
+                        "description": "UUID of the workflow.",
+                        "name": "uuid",
                         "in": "path",
                         "required": true
                     }
@@ -733,7 +733,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "id"
+                "name",
+                "uuid"
             ],
             "properties": {
                 "created_at": {
@@ -742,10 +743,13 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
                 },
-                "id": {
+                "name": {
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }
@@ -817,7 +821,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "id"
+                "name",
+                "uuid"
             ],
             "properties": {
                 "created_at": {
@@ -826,10 +831,13 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "id": {
+                "name": {
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }
@@ -838,7 +846,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "id"
+                "name",
+                "uuid"
             ],
             "properties": {
                 "created_at": {
@@ -847,10 +856,13 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 },
-                "id": {
+                "name": {
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }

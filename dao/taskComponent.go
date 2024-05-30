@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TaskComponentGet(id string) (*model.TaskComponent, error) {
+func TaskComponentGet(uuid string) (*model.TaskComponent, error) {
 	taskComponent := &model.TaskComponent{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
@@ -15,11 +15,11 @@ func TaskComponentGet(id string) (*model.TaskComponent, error) {
 		return nil, errors.New("database connection is not initialized")
 	}
 
-	result := db.DB.Where("id = ?", id).First(taskComponent)
+	result := db.DB.Where("uuid = ?", uuid).First(taskComponent)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("task component not found with the provided id")
+			return nil, errors.New("task component not found with the provided UUID")
 		}
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 }
 
 func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
-	result := db.DB.Model(&model.TaskComponent{}).Where("id = ?", taskComponent.ID).Updates(taskComponent)
+	result := db.DB.Model(&model.TaskComponent{}).Where("uuid = ?", taskComponent.UUID).Updates(taskComponent)
 	err := result.Error
 	if err != nil {
 		return err

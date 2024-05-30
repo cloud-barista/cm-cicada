@@ -63,10 +63,10 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		return err
 	}
 
-	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.ID
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.UUID
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
-		return errors.New("failed to create the Workflow directory (Workflow ID=" + dag.ID +
+		return errors.New("failed to create the Workflow directory (Workflow UUID=" + dag.UUID +
 			", Description: " + dag.Data.Description)
 	}
 

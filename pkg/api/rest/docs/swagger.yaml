@@ -56,13 +56,16 @@ definitions:
         type: string
       data:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
-      id:
+      name:
         type: string
       updated_at:
         type: string
+      uuid:
+        type: string
     required:
     - data
-    - id
+    - name
+    - uuid
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData:
     properties:
@@ -113,13 +116,16 @@ definitions:
         type: string
       data:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
-      id:
+      name:
         type: string
       updated_at:
         type: string
+      uuid:
+        type: string
     required:
     - data
-    - id
+    - name
+    - uuid
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate:
     properties:
@@ -127,13 +133,16 @@ definitions:
         type: string
       data:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data'
-      id:
+      name:
         type: string
       updated_at:
         type: string
+      uuid:
+        type: string
     required:
     - data
-    - id
+    - name
+    - uuid
     type: object
   pkg_api_rest_controller.SimpleMsg:
     properties:
@@ -231,7 +240,7 @@ paths:
       - application/json
       description: Delete the task component.
       parameters:
-      - description: ID of the task component.
+      - description: UUID of the task component.
         in: path
         name: id
         required: true
@@ -385,9 +394,9 @@ paths:
       - application/json
       description: Delete the workflow.
       parameters:
-      - description: ID of the workflow.
+      - description: UUID of the workflow.
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:
@@ -413,9 +422,9 @@ paths:
       - application/json
       description: Get the workflow.
       parameters:
-      - description: ID of the workflow.
+      - description: UUID of the workflow.
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:
@@ -441,9 +450,9 @@ paths:
       - application/json
       description: Update the workflow content.
       parameters:
-      - description: Workflow ID
+      - description: Workflow UUID
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       - description: Workflow to modify.
@@ -476,9 +485,9 @@ paths:
       - application/json
       description: Run the workflow.
       parameters:
-      - description: Workflow ID
+      - description: Workflow UUID
         in: path
-        name: id
+        name: uuid
         required: true
         type: string
       produces:

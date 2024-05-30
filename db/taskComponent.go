@@ -16,7 +16,7 @@ func TaskComponentInit() error {
 	jsonDir := config.CMCicadaConfig.CMCicada.TaskComponent.ExamplesDirectory
 
 	// JSON 파일 목록 가져오기
-	files, err := filepath.Glob(jsonDir + "*.json")
+	files, err := filepath.Glob(jsonDir + "/*/" + "*.json")
 	if err != nil {
 		return err
 	}
@@ -45,9 +45,15 @@ func TaskComponentInit() error {
 		baseName := filepath.Base(file)
 		baseNameWithoutExt := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 
+		// 디렉토리 이름 추출
+		dir := filepath.Dir(file)
+		dirSplit := strings.Split(dir, "/")
+		dirName := dirSplit[len(dirSplit)-1]
+
 		// TaskComponent 생성
 		taskComponent := model.TaskComponent{
-			ID:        baseNameWithoutExt, // 파일명으로 설정
+			UUID:      baseNameWithoutExt,
+			Name:      dirName,
 			Data:      data,
 			CreatedAt: createdAt,
 		}
