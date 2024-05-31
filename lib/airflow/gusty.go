@@ -5,7 +5,6 @@ import (
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
 	"strings"
@@ -132,7 +131,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 
 			taskOptions["dependencies"] = t.Dependencies
 
-			taskOptions["task_id"] = uuid.New().String()
+			taskOptions["task_id"] = t.ID
 			taskOptions["http_conn_id"] = t.Options.APIConnectionID
 			taskOptions["endpoint"] = t.Options.Endpoint
 			taskOptions["method"] = t.Options.Method
