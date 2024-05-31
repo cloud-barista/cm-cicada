@@ -162,7 +162,7 @@ func ListWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		id path string true "ID of the workflow."
+// @Param		wfId path string true "ID of the workflow."
 // @Success		200	{object}	model.SimpleMsg			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"

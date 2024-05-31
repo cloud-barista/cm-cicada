@@ -527,7 +527,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow.",
-                        "name": "id",
+                        "name": "wfId",
                         "in": "path",
                         "required": true
                     }

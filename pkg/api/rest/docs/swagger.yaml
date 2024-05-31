@@ -509,7 +509,7 @@ paths:
       parameters:
       - description: ID of the workflow.
         in: path
-        name: id
+        name: wfId
         required: true
         type: string
       produces:
