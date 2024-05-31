@@ -13,6 +13,15 @@ import (
 	"time"
 )
 
+type CreateWorkflowReq struct {
+	ID   string     `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Data model.Data `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+}
+
+type UpdateWorkflowReq struct {
+	Data model.Data `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+}
+
 func toTimeHookFunc() mapstructure.DecodeHookFunc {
 	return func(
 		f reflect.Type,
@@ -43,7 +52,7 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		request body model.Workflow true "Workflow content"
+// @Param		request body CreateWorkflowReq true "Workflow content"
 // @Success		200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to create DAG."
@@ -154,7 +163,7 @@ func ListWorkflow(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		id path string true "ID of the workflow."
-// @Success		200	{object}	model.Workflow			"Successfully run the workflow."
+// @Success		200	{object}	model.SimpleMsg			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
 // @Router		/cicada/workflow/{wfId}/run [post]
@@ -174,7 +183,7 @@ func RunWorkflow(c echo.Context) error {
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
 
-	return c.JSONPretty(http.StatusOK, workflow, " ")
+	return c.JSONPretty(http.StatusOK, model.SimpleMsg{Message: "success"}, " ")
 }
 
 // UpdateWorkflow godoc
@@ -185,7 +194,7 @@ func RunWorkflow(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Param		Workflow body model.Workflow true "Workflow to modify."
+// @Param		Workflow body UpdateWorkflowReq true "Workflow to modify."
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
@@ -219,7 +228,7 @@ func UpdateWorkflow(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	model.Workflow			"Successfully delete the workflow"
+// @Success		200	{object}	model.SimpleMsg			"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"
 // @Router		/cicada/workflow/{wfId} [delete]
@@ -244,7 +253,7 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, workflow, " ")
+	return c.JSONPretty(http.StatusOK, model.SimpleMsg{Message: "success"}, " ")
 }
 
 // ListTaskGroup godoc

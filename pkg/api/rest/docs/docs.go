@@ -32,7 +32,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get ready state.",
                         "schema": {
-                            "$ref": "#/definitions/pkg_api_rest_controller.SimpleMsg"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg"
                         }
                     },
                     "500": {
@@ -114,7 +114,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
+                            "$ref": "#/definitions/pkg_api_rest_controller.CreateTaskComponentReq"
                         }
                     }
                 ],
@@ -209,7 +209,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
+                            "$ref": "#/definitions/pkg_api_rest_controller.UpdateTaskComponentReq"
                         }
                     }
                 ],
@@ -259,7 +259,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully delete the task component",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg"
                         }
                     },
                     "400": {
@@ -347,7 +347,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/pkg_api_rest_controller.CreateWorkflowReq"
                         }
                     }
                 ],
@@ -442,7 +442,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/pkg_api_rest_controller.UpdateWorkflowReq"
                         }
                     }
                 ],
@@ -492,7 +492,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully delete the workflow",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg"
                         }
                     },
                     "400": {
@@ -536,7 +536,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully run the workflow.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg"
                         }
                     },
                     "400": {
@@ -1035,6 +1035,14 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
             "required": [
@@ -1159,11 +1167,55 @@ const docTemplate = `{
                 }
             }
         },
-        "pkg_api_rest_controller.SimpleMsg": {
+        "pkg_api_rest_controller.CreateTaskComponentReq": {
             "type": "object",
+            "required": [
+                "data",
+                "id"
+            ],
             "properties": {
-                "message": {
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
+                },
+                "id": {
                     "type": "string"
+                }
+            }
+        },
+        "pkg_api_rest_controller.CreateWorkflowReq": {
+            "type": "object",
+            "required": [
+                "data",
+                "id"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "pkg_api_rest_controller.UpdateTaskComponentReq": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData"
+                }
+            }
+        },
+        "pkg_api_rest_controller.UpdateWorkflowReq": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
                 }
             }
         }

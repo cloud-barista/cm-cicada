@@ -8,6 +8,15 @@ import (
 	"net/http"
 )
 
+type CreateTaskComponentReq struct {
+	ID   string         `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+}
+
+type UpdateTaskComponentReq struct {
+	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+}
+
 // CreateTaskComponent godoc
 //
 // @Summary		Create TaskComponent
@@ -15,11 +24,11 @@ import (
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		TaskComponent body model.TaskComponent true "task component of the node."
+// @Param		TaskComponent body CreateTaskComponentReq true "task component of the node."
 // @Success		200	{object}	model.TaskComponent		"Successfully register the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
-// @Router			/cicada/task_component [post]
+// @Router		/cicada/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.TaskComponent)
 	err := c.Bind(taskComponent)
@@ -92,7 +101,7 @@ func ListTaskComponent(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		tcId path string true "ID of the TaskComponent"
-// @Param		TaskComponent body model.TaskComponent true "task component to modify."
+// @Param		TaskComponent body UpdateTaskComponentReq true "task component to modify."
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
@@ -133,7 +142,7 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		tcId path string true "ID of the task component."
-// @Success		200	{object}	model.TaskComponent		"Successfully delete the task component"
+// @Success		200	{object}	model.SimpleMsg		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
 // @Router		/cicada/task_component/{tcId} [delete]
@@ -153,5 +162,5 @@ func DeleteTaskComponent(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, taskComponent, " ")
+	return c.JSONPretty(http.StatusOK, model.SimpleMsg{Message: "success"}, " ")
 }
