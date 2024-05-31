@@ -126,8 +126,8 @@ func GetWorkflow(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		page query string false "Page of the connection information list."
-// @Param		row query string false "Row of the connection information list."
+// @Param		page query string false "Page of the task list."
+// @Param		row query string false "Row of the task list."
 // @Success		200	{object}	[]model.Workflow		"Successfully get a workflow list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
@@ -219,7 +219,7 @@ func UpdateWorkflow(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	model.Workflow	"Successfully delete the workflow"
+// @Success		200	{object}	model.Workflow			"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"
 // @Router		/cicada/workflow/{wfId} [delete]
@@ -234,7 +234,7 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(wfId)
+	err = airflow.Client.DeleteDAG(workflow.UUID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -245,4 +245,232 @@ func DeleteWorkflow(c echo.Context) error {
 	}
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
+}
+
+// ListTaskGroup godoc
+//
+// @Summary		List TaskGroup
+// @Description	Get a task group list of the workflow.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Success		200	{object}	[]model.TaskGroup		"Successfully get a task group list."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get a task group list."
+// @Router		/cicada/workflow/{wfId}/task_group [get]
+func ListTaskGroup(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	var taskGroups []model.TaskGroup
+	taskGroups = append(taskGroups, workflow.Data.TaskGroups...)
+
+	return c.JSONPretty(http.StatusOK, taskGroups, " ")
+}
+
+// GetTaskGroup godoc
+//
+// @Summary		Get TaskGroup
+// @Description	Get the task group.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		tgId path string true "ID of the task group."
+// @Success		200	{object}	model.Task				"Successfully get the task group."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
+// @Router		/cicada/workflow/{wfId}/task_group/{tgId} [get]
+func GetTaskGroup(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	tgId := c.Param("tgId")
+	if tgId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tgId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for _, tg := range workflow.Data.TaskGroups {
+		if tg.ID == tgId {
+			return c.JSONPretty(http.StatusOK, tg, " ")
+		}
+	}
+
+	return common.ReturnErrorMsg(c, "Task group not found.")
+}
+
+// ListTaskFromTaskGroup godoc
+//
+// @Summary		List Task from Task Group
+// @Description	Get a task list from the task group.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		tgId path string true "ID of the task group."
+// @Success		200	{object}	[]model.Task			"Successfully get a task list from the task group."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get a task list from the task group."
+// @Router		/cicada/workflow/{wfId}/task_group/{tgId}/task [get]
+func ListTaskFromTaskGroup(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	tgId := c.Param("tgId")
+	if tgId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tgId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	var tasks []model.Task
+	for _, tg := range workflow.Data.TaskGroups {
+		if tg.ID == tgId {
+			tasks = append(tasks, tg.Tasks...)
+			break
+		}
+	}
+
+	return c.JSONPretty(http.StatusOK, tasks, " ")
+}
+
+// GetTaskFromTaskGroup godoc
+//
+// @Summary		Get Task from Task Group
+// @Description	Get the task from the task group.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		tgId path string true "ID of the task group."
+// @Param		taskId path string true "ID of the task."
+// @Success		200	{object}	model.Task			"Successfully get the task from the task group."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task from the task group."
+// @Router		/cicada/workflow/{wfId}/task_group/{tgId}/task/{taskId} [get]
+func GetTaskFromTaskGroup(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	tgId := c.Param("tgId")
+	if tgId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tgId.")
+	}
+
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for _, tg := range workflow.Data.TaskGroups {
+		if tg.ID == tgId {
+			for _, task := range tg.Tasks {
+				if task.ID == taskId {
+					return c.JSONPretty(http.StatusOK, task, " ")
+				}
+			}
+
+			break
+		}
+	}
+
+	return common.ReturnErrorMsg(c, "Task not found.")
+}
+
+// ListTask godoc
+//
+// @Summary		List Task
+// @Description	Get a task list of the workflow.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Success		200	{object}	[]model.Task			"Successfully get a task list."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get a task list."
+// @Router		/cicada/workflow/{wfId}/task [get]
+func ListTask(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	var tasks []model.Task
+	for _, tg := range workflow.Data.TaskGroups {
+		tasks = append(tasks, tg.Tasks...)
+	}
+
+	return c.JSONPretty(http.StatusOK, tasks, " ")
+}
+
+// GetTask godoc
+//
+// @Summary		Get Task
+// @Description	Get the task.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		taskId path string true "ID of the task."
+// @Success		200	{object}	model.Task				"Successfully get the task."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
+// @Router		/cicada/workflow/{wfId}/task/{taskId} [get]
+func GetTask(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	}
+
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for _, tg := range workflow.Data.TaskGroups {
+		for _, task := range tg.Tasks {
+			if task.ID == taskId {
+				return c.JSONPretty(http.StatusOK, task, " ")
+			}
+		}
+	}
+
+	return common.ReturnErrorMsg(c, "Task not found.")
 }

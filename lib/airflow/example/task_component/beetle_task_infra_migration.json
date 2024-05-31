@@ -1,5 +1,5 @@
 {
-  "name": "beetle_task_infra_migration",
+  "id": "beetle_task_infra_migration",
   "options": {
     "api_connection_id": "beetle_api",
     "endpoint": "/beetle/migration/infra",

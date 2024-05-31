@@ -55,14 +55,14 @@ definitions:
         items:
           type: string
         type: array
-      name:
+      id:
         type: string
       options:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options'
       task_component:
         type: string
     required:
-    - name
+    - id
     - options
     - task_component
     type: object
@@ -94,14 +94,14 @@ definitions:
     properties:
       description:
         type: string
-      task_group_name:
+      id:
         type: string
       tasks:
         items:
           $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
         type: array
     required:
-    - task_group_name
+    - id
     - tasks
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
@@ -319,11 +319,11 @@ paths:
       - application/json
       description: Get a workflow list.
       parameters:
-      - description: Page of the connection information list.
+      - description: Page of the task list.
         in: query
         name: page
         type: string
-      - description: Row of the connection information list.
+      - description: Row of the task list.
         in: query
         name: row
         type: string
@@ -494,6 +494,211 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Run Workflow
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task:
+    get:
+      consumes:
+      - application/json
+      description: Get a task list of the workflow.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a task list.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a task list.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List Task
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task/{taskId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the task.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the task.
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the task.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Task
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task_group:
+    get:
+      consumes:
+      - application/json
+      description: Get a task group list of the workflow.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a task group list.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a task group list.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List TaskGroup
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task_group/{tgId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the task group.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the task group.
+        in: path
+        name: tgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the task group.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task group.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get TaskGroup
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task_group/{tgId}/task:
+    get:
+      consumes:
+      - application/json
+      description: Get a task list from the task group.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the task group.
+        in: path
+        name: tgId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a task list from the task group.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a task list from the task group.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List Task from Task Group
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/task_group/{tgId}/task/{taskId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the task from the task group.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the task group.
+        in: path
+        name: tgId
+        required: true
+        type: string
+      - description: ID of the task.
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the task from the task group.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task from the task group.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Task from Task Group
       tags:
       - '[Workflow]'
   /cicada/workflow_template:

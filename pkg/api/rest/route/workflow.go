@@ -14,4 +14,13 @@ func Workflow(e *echo.Echo) {
 	e.PUT("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.UpdateWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/run", controller.RunWorkflow)
 	e.DELETE("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.DeleteWorkflow)
+
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group", controller.ListTaskGroup)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group/:tgId", controller.GetTaskGroup)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group/:tgId/task", controller.ListTaskFromTaskGroup)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group/:tgId/task/:taskId", controller.GetTaskFromTaskGroup)
+
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task", controller.ListTask)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task/:taskId", controller.GetTask)
+
 }

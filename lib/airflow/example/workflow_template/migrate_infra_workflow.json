@@ -1,13 +1,13 @@
 {
-  "name": "migrate_infra_workflow",
+  "id": "migrate_infra_workflow",
   "description": "Migrate Server",
   "task_groups": [
     {
-      "task_group_name": "migrate_infra",
+      "id": "migrate_infra",
       "description": "Migrate Server",
       "tasks": [
         {
-          "name": "beetle_task_infra_migration",
+          "id": "beetle_task_infra_migration",
           "task_component": "beetle_task_infra_migration",
           "options": {
             "api_connection_id": "beetle_api",

@@ -71,7 +71,7 @@ git clone https://github.com/cloud-barista/cm-cicada.git
   cm-cicada:
     task_component:
         load_examples: true
-        examples_directory: "./lib/airflow/example/task_template/"
+        examples_directory: "./lib/airflow/example/task_component/"
     workflow_template:
         templates_directory: "./lib/airflow/example/workflow_template/"
     airflow-server:

@@ -16,16 +16,16 @@ func checkDAG(dag *model.Workflow) error {
 	var taskNames []string
 
 	for _, tg := range dag.Data.TaskGroups {
-		if tg.TaskGroupName == "" {
-			return errors.New("task group name should not be empty")
+		if tg.ID == "" {
+			return errors.New("task group id should not be empty")
 		}
 
 		for _, t := range tg.Tasks {
-			if t.Name == "" {
-				return errors.New("task name should not be empty")
+			if t.ID == "" {
+				return errors.New("task id should not be empty")
 			}
 
-			taskNames = append(taskNames, t.Name)
+			taskNames = append(taskNames, t.ID)
 		}
 	}
 
@@ -40,7 +40,7 @@ func checkDAG(dag *model.Workflow) error {
 					}
 				}
 				if !depFound {
-					return errors.New("wrong dependency found in " + tg.TaskGroupName + "." + t.Name + " (" + dep + ")")
+					return errors.New("wrong dependency found in " + tg.ID + "." + t.ID + " (" + dep + ")")
 				}
 			}
 		}
@@ -100,7 +100,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 	}
 
 	for _, tg := range dag.Data.TaskGroups {
-		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.TaskGroupName)
+		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.ID)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 
 		taskGroup.Tooltip = tg.Description
 
-		filePath = dagDir + "/" + tg.TaskGroupName + "/METADATA.yml"
+		filePath = dagDir + "/" + tg.ID + "/METADATA.yml"
 
 		err = writeModelToYAMLFile(taskGroup, filePath)
 		if err != nil {
@@ -137,7 +137,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 			taskOptions["endpoint"] = t.Options.Endpoint
 			taskOptions["method"] = t.Options.Method
 
-			filePath = dagDir + "/" + tg.TaskGroupName + "/" + t.Name + ".yml"
+			filePath = dagDir + "/" + tg.ID + "/" + t.ID + ".yml"
 
 			err = writeModelToYAMLFile(taskOptions, filePath)
 			if err != nil {

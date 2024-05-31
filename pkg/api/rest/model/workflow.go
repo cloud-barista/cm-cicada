@@ -15,16 +15,16 @@ type Options struct {
 }
 
 type Task struct {
-	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	ID            string   `json:"id" mapstructure:"id" validate:"required"`
 	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
 	Options       Options  `json:"options" mapstructure:"options" validate:"required"`
 	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
 }
 
 type TaskGroup struct {
-	TaskGroupName string `json:"task_group_name" mapstructure:"task_group_name" validate:"required"`
-	Description   string `json:"description" mapstructure:"description"`
-	Tasks         []Task `json:"tasks" mapstructure:"tasks" validate:"required"`
+	ID          string `json:"id" mapstructure:"id" validate:"required"`
+	Description string `json:"description" mapstructure:"description"`
+	Tasks       []Task `json:"tasks" mapstructure:"tasks" validate:"required"`
 }
 
 type Data struct {

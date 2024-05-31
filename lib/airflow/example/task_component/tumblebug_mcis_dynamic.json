@@ -1,5 +1,5 @@
 {
-  "name": "tumblebug_mcis_dynamic",
+  "id": "tumblebug_mcis_dynamic",
   "options": {
     "api_connection_id": "tumblebug_api",
     "endpoint": "/tumblebug/ns/ns01/mcisDynamic",
