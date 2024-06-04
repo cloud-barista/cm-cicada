@@ -5,6 +5,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -22,12 +23,22 @@ import (
 // @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
 // @Router		/cicada/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
-	taskComponent := new(model.TaskComponent)
-	err := c.Bind(taskComponent)
+	createTaskComponentReq := new(model.CreateTaskComponentReq)
+	err := c.Bind(createTaskComponentReq)
 	if err != nil {
 		return err
 	}
-	taskComponent, err = dao.TaskComponentCreate(taskComponent)
+
+	if createTaskComponentReq.Name == "" {
+		return common.ReturnErrorMsg(c, "Please provide the name.")
+	}
+
+	var taskComponent model.TaskComponent
+	taskComponent.ID = uuid.New().String()
+	taskComponent.Name = createTaskComponentReq.Name
+	taskComponent.Data = createTaskComponentReq.Data
+
+	_, err = dao.TaskComponentCreate(&taskComponent)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
