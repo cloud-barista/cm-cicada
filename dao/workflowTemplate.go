@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func WorkflowTemplateGet(id string) (*model.WorkflowTemplate, error) {
+func WorkflowTemplateGet(id string) (*model.GetWorkflowTemplate, error) {
 	workflowTemplate := &model.WorkflowTemplate{}
 
 	// Ensure db.DB is not nil to avoid runtime panics
@@ -24,7 +24,10 @@ func WorkflowTemplateGet(id string) (*model.WorkflowTemplate, error) {
 		return nil, err
 	}
 
-	return workflowTemplate, nil
+	return &model.GetWorkflowTemplate{
+		Name: workflowTemplate.Name,
+		Data: workflowTemplate.Data,
+	}, nil
 }
 
 func WorkflowTemplateGetList(workflowTemplate *model.WorkflowTemplate, page int, row int) (*[]model.WorkflowTemplate, error) {
