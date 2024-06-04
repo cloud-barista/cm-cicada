@@ -9,17 +9,6 @@ import (
 	"net/http"
 )
 
-type CreateTaskComponentReq struct {
-	ID   string         `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name string         `json:"name" mapstructure:"name" validate:"required"`
-	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-}
-
-type UpdateTaskComponentReq struct {
-	Name string         `json:"name" mapstructure:"name" validate:"required"`
-	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-}
-
 // CreateTaskComponent godoc
 //
 // @Summary		Create TaskComponent
@@ -27,7 +16,7 @@ type UpdateTaskComponentReq struct {
 // @Tags		[Task Component]
 // @Accept		json
 // @Produce		json
-// @Param		TaskComponent body CreateTaskComponentReq true "task component of the node."
+// @Param		TaskComponent body model.CreateTaskComponentReq true "task component of the node."
 // @Success		200	{object}	model.TaskComponent		"Successfully register the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
@@ -128,13 +117,13 @@ func ListTaskComponent(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		tcId path string true "ID of the TaskComponent"
-// @Param		TaskComponent body UpdateTaskComponentReq true "task component to modify."
+// @Param		TaskComponent body model.CreateTaskComponentReq true "task component to modify."
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
 // @Router		/cicada/task_component/{tcId} [put]
 func UpdateTaskComponent(c echo.Context) error {
-	taskComponent := new(model.TaskComponent)
+	taskComponent := new(model.CreateTaskComponentReq)
 	err := c.Bind(taskComponent)
 	if err != nil {
 		return err
@@ -149,9 +138,11 @@ func UpdateTaskComponent(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if taskComponent.ID != "" {
-		oldTaskComponent.Data = taskComponent.Data
+	if taskComponent.Name != "" {
+		oldTaskComponent.Name = taskComponent.Name
 	}
+
+	oldTaskComponent.Data = taskComponent.Data
 
 	err = dao.TaskComponentUpdate(oldTaskComponent)
 	if err != nil {

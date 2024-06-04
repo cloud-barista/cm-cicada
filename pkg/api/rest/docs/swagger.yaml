@@ -15,6 +15,16 @@ definitions:
     required:
     - task_groups
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq:
+    properties:
+      data:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
+      name:
+        type: string
+    required:
+    - data
+    - name
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskGroupReq:
     properties:
       description:
@@ -206,19 +216,6 @@ definitions:
     - name
     - tasks
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.UpdateWorkflowReq:
-    properties:
-      data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq'
-      id:
-        type: string
-      name:
-        type: string
-    required:
-    - data
-    - id
-    - name
-    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
     properties:
       created_at:
@@ -247,29 +244,6 @@ definitions:
     required:
     - data
     - id
-    - name
-    type: object
-  pkg_api_rest_controller.CreateTaskComponentReq:
-    properties:
-      data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
-      id:
-        type: string
-      name:
-        type: string
-    required:
-    - data
-    - id
-    - name
-    type: object
-  pkg_api_rest_controller.UpdateTaskComponentReq:
-    properties:
-      data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
-      name:
-        type: string
-    required:
-    - data
     - name
     type: object
 info:
@@ -367,7 +341,7 @@ paths:
         name: TaskComponent
         required: true
         schema:
-          $ref: '#/definitions/pkg_api_rest_controller.CreateTaskComponentReq'
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq'
       produces:
       - application/json
       responses:
@@ -458,7 +432,7 @@ paths:
         name: TaskComponent
         required: true
         schema:
-          $ref: '#/definitions/pkg_api_rest_controller.UpdateTaskComponentReq'
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq'
       produces:
       - application/json
       responses:
@@ -674,7 +648,7 @@ paths:
         name: Workflow
         required: true
         schema:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.UpdateWorkflowReq'
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowReq'
       produces:
       - application/json
       responses:

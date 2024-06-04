@@ -31,6 +31,11 @@ type TaskComponent struct {
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
 }
 
+type CreateTaskComponentReq struct {
+	Name string   `json:"name" mapstructure:"name" validate:"required"`
+	Data TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+}
+
 type Params struct {
 	Required   []string    `json:"required" mapstructure:"required" validate:"required"`
 	Properties interface{} `json:"properties" mapstructure:"properties" validate:"required"`

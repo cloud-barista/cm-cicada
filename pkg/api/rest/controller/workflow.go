@@ -369,30 +369,87 @@ func RunWorkflow(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Param		Workflow body 	model.UpdateWorkflowReq true "Workflow to modify."
+// @Param		Workflow body 	model.CreateWorkflowReq true "Workflow to modify."
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
 // @Router		/cicada/workflow/{wfId} [put]
 func UpdateWorkflow(c echo.Context) error {
-	Workflow := new(model.Workflow)
-	err := c.Bind(Workflow)
+	workflow := new(model.CreateWorkflowReq)
+	err := c.Bind(workflow)
 	if err != nil {
 		return err
 	}
 
-	Workflow.ID = c.Param("wfId")
-	_, err = dao.WorkflowGet(Workflow.ID)
+	wfId := c.Param("wfId")
+	oldWorkflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = dao.WorkflowUpdate(Workflow)
+	if oldWorkflow.Name != "" {
+		oldWorkflow.Name = workflow.Name
+	}
+
+	workflowData, err := createDataReqToData(workflow.Data)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	oldWorkflow.Data = workflowData
+
+	// Remove old task groups and tasks from the database
+	for _, tg := range oldWorkflow.Data.TaskGroups {
+		taskGroup, err := dao.TaskGroupGet(tg.ID)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
+		err = dao.TaskGroupDelete(taskGroup)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
+
+		for _, t := range tg.Tasks {
+			task, err := dao.TaskGet(t.ID)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
+			err = dao.TaskDelete(task)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
+		}
+	}
+
+	// Create task groups and tasks to the database
+	for _, tg := range workflowData.TaskGroups {
+		_, err = dao.TaskGroupCreate(&model.TaskGroupDBModel{
+			ID:         tg.ID,
+			Name:       tg.Name,
+			WorkflowID: wfId,
+		})
+		if err != nil {
+			return common.ReturnErrorMsg(c, err.Error())
+		}
+
+		for _, t := range tg.Tasks {
+			_, err = dao.TaskCreate(&model.TaskDBModel{
+				ID:          t.ID,
+				Name:        t.Name,
+				WorkflowID:  wfId,
+				TaskGroupID: tg.ID,
+			})
+			if err != nil {
+				return common.ReturnErrorMsg(c, err.Error())
+			}
+		}
+	}
+
+	err = dao.WorkflowUpdate(oldWorkflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, Workflow, " ")
+	return c.JSONPretty(http.StatusOK, oldWorkflow, " ")
 }
 
 // DeleteWorkflow godoc
