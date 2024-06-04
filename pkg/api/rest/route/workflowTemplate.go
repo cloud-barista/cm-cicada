@@ -9,5 +9,6 @@ import (
 
 func WorkflowTemplate(e *echo.Echo) {
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow_template/:wftId", controller.GetWorkflowTemplate)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow_template/name/:wfName", controller.GetWorkflowTemplateByName)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow_template", controller.ListWorkflowTemplate)
 }

@@ -10,6 +10,7 @@ import (
 func Workflow(e *echo.Echo) {
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow", controller.CreateWorkflow)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.GetWorkflow)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/name/:wfName", controller.GetWorkflowByName)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow", controller.ListWorkflow)
 	e.PUT("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.UpdateWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/run", controller.RunWorkflow)
@@ -21,6 +22,10 @@ func Workflow(e *echo.Echo) {
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group/:tgId/task/:taskId", controller.GetTaskFromTaskGroup)
 
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task", controller.ListTask)
+
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task/:taskId", controller.GetTask)
+
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task_group/:tgId", controller.GetTaskGroupDirectly)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task/:taskId", controller.GetTaskDirectly)
 
 }

@@ -225,6 +225,51 @@ func GetWorkflow(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
 
+// GetWorkflowByName godoc
+//
+// @Summary		Get Workflow by Name
+// @Description	Get the workflow by name.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfName path string true "Name of the workflow."
+// @Success		200	{object}	model.Workflow			"Successfully get the workflow."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
+// @Router		/cicada/workflow/name/{wfName} [get]
+func GetWorkflowByName(c echo.Context) error {
+	wfName := c.Param("wfName")
+	if wfName == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfName.")
+	}
+
+	workflow, err := dao.WorkflowGetByName(wfName)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for i, tg := range workflow.Data.TaskGroups {
+		_, err = dao.TaskGroupGetByWorkflowIDAndName(workflow.ID, tg.Name)
+		logger.Println(logger.ERROR, true, err)
+
+		workflow.Data.TaskGroups[i].ID = tg.ID
+
+		for j, t := range tg.Tasks {
+			_, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, tg.Name)
+			logger.Println(logger.ERROR, true, err)
+
+			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
+		}
+	}
+
+	_, err = airflow.Client.GetDAG(workflow.ID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
+	}
+
+	return c.JSONPretty(http.StatusOK, workflow, " ")
+}
+
 // ListWorkflow godoc
 //
 // @Summary		List Workflow
@@ -455,6 +500,49 @@ func GetTaskGroup(c echo.Context) error {
 	return common.ReturnErrorMsg(c, "Task group not found.")
 }
 
+// GetTaskGroupDirectly godoc
+//
+// @Summary		Get TaskGroup Directly
+// @Description	Get the task group directly.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		tgId path string true "ID of the task group."
+// @Success		200	{object}	model.Task				"Successfully get the task group."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
+// @Router		/cicada/task_group/{tgId} [get]
+func GetTaskGroupDirectly(c echo.Context) error {
+	tgId := c.Param("tgId")
+	if tgId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the tgId.")
+	}
+
+	tgDB, err := dao.TaskGroupGet(tgId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	workflow, err := dao.WorkflowGet(tgDB.WorkflowID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for _, tg := range workflow.Data.TaskGroups {
+		if tg.ID == tgId {
+			return c.JSONPretty(http.StatusOK, model.TaskGroupDirectly{
+				ID:          tg.ID,
+				WorkflowID:  tgDB.WorkflowID,
+				Name:        tg.Name,
+				Description: tg.Description,
+				Tasks:       tg.Tasks,
+			}, " ")
+		}
+	}
+
+	return common.ReturnErrorMsg(c, "task group not found.")
+}
+
 // ListTaskFromTaskGroup godoc
 //
 // @Summary		List Task from Task Group
@@ -614,4 +702,58 @@ func GetTask(c echo.Context) error {
 	}
 
 	return common.ReturnErrorMsg(c, "Task not found.")
+}
+
+// GetTaskDirectly godoc
+//
+// @Summary		Get Task Directly
+// @Description	Get the task directly.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		taskId path string true "ID of the task."
+// @Success		200	{object}	model.TaskDirectly		"Successfully get the task."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
+// @Router		/cicada/task/{taskId} [get]
+func GetTaskDirectly(c echo.Context) error {
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	}
+
+	tDB, err := dao.TaskGet(taskId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	tgDB, err := dao.TaskGroupGet(tDB.TaskGroupID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	workflow, err := dao.WorkflowGet(tgDB.WorkflowID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	for _, tg := range workflow.Data.TaskGroups {
+		if tg.ID == tgDB.ID {
+			for _, task := range tg.Tasks {
+				if task.ID == taskId {
+					return c.JSONPretty(http.StatusOK, model.TaskDirectly{
+						ID:            task.ID,
+						WorkflowID:    tDB.WorkflowID,
+						TaskGroupID:   tDB.TaskGroupID,
+						Name:          task.Name,
+						TaskComponent: task.TaskComponent,
+						RequestBody:   task.RequestBody,
+						Dependencies:  task.Dependencies,
+					}, " ")
+				}
+			}
+		}
+	}
+
+	return common.ReturnErrorMsg(c, "task not found.")
 }

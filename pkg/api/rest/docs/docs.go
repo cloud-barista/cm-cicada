@@ -44,6 +44,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/cicada/task/{taskId}": {
+            "get": {
+                "description": "Get the task directly.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Task Directly",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the task.",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the task.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskDirectly"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the task.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/cicada/task_component": {
             "get": {
                 "description": "Get a list of task component.",
@@ -133,6 +177,50 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to register the task component",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cicada/task_component/name/{tcName}": {
+            "get": {
+                "description": "Get the task component by name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Task Component]"
+                ],
+                "summary": "Get TaskComponent by Name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the TaskComponent",
+                        "name": "tcName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the task component",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the task component",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -277,6 +365,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/cicada/task_group/{tgId}": {
+            "get": {
+                "description": "Get the task group directly.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get TaskGroup Directly",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the task group.",
+                        "name": "tgId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the task group.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the task group.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/cicada/workflow": {
             "get": {
                 "description": "Get a workflow list.",
@@ -372,6 +504,50 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to create workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cicada/workflow/name/{wfName}": {
+            "get": {
+                "description": "Get the workflow by name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Workflow by Name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workflow.",
+                        "name": "wfName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -926,6 +1102,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/cicada/workflow_template/name/{wfName}": {
+            "get": {
+                "description": "Get the workflow template by name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow Template]"
+                ],
+                "summary": "Get WorkflowTemplate by Name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the WorkflowTemplate",
+                        "name": "wfName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflow template",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.GetWorkflowTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflow template",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/cicada/workflow_template/{wftId}": {
             "get": {
                 "description": "Get the workflow template.",
@@ -952,7 +1172,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the workflow template",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.GetWorkflowTemplate"
                         }
                     },
                     "400": {
@@ -1072,6 +1292,21 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
                     }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.GetWorkflowTemplate": {
+            "type": "object",
+            "required": [
+                "data",
+                "name"
+            ],
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1199,6 +1434,43 @@ const docTemplate = `{
                 },
                 "param_option": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskDirectly": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "request_body",
+                "task_component",
+                "task_group_id",
+                "workflow_id"
+            ],
+            "properties": {
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "request_body": {
+                    "type": "string"
+                },
+                "task_component": {
+                    "type": "string"
+                },
+                "task_group_id": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
                 }
             }
         },

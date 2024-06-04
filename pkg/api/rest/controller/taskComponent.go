@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/labstack/echo/v4"
@@ -65,6 +66,30 @@ func GetTaskComponent(c echo.Context) error {
 	taskComponent, err := dao.TaskComponentGet(tcId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
+	}
+	return c.JSONPretty(http.StatusOK, taskComponent, "")
+}
+
+// GetTaskComponentByName godoc
+//
+// @Summary		Get TaskComponent by Name
+// @Description	Get the task component by name.
+// @Tags		[Task Component]
+// @Accept		json
+// @Produce		json
+// @Param		tcName path string true "Name of the TaskComponent"
+// @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
+// @Router		/cicada/task_component/name/{tcName} [get]
+func GetTaskComponentByName(c echo.Context) error {
+	tcName := c.Param("tcName")
+	if tcName == "" {
+		return common.ReturnErrorMsg(c, "tcName is empty")
+	}
+	taskComponent := db.TaskComponentGetByName(tcName)
+	if taskComponent == nil {
+		return common.ReturnErrorMsg(c, "task component not found with the provided name")
 	}
 	return c.JSONPretty(http.StatusOK, taskComponent, "")
 }

@@ -41,6 +41,26 @@ func WorkflowGet(id string) (*model.Workflow, error) {
 	return workflow, nil
 }
 
+func WorkflowGetByName(name string) (*model.Workflow, error) {
+	workflow := &model.Workflow{}
+
+	// Ensure db.DB is not nil to avoid runtime panics
+	if db.DB == nil {
+		return nil, errors.New("database connection is not initialized")
+	}
+
+	result := db.DB.Where("name = ?", name).First(workflow)
+	err := result.Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("workflow not found with the provided name")
+		}
+		return nil, err
+	}
+
+	return workflow, nil
+}
+
 func WorkflowGetList(workflow *model.Workflow, page int, row int) (*[]model.Workflow, error) {
 	WorkflowList := &[]model.Workflow{}
 	// Ensure db.DB is not nil to avoid runtime panics

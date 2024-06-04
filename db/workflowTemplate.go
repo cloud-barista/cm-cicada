@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func workflowTemplateGetByName(name string) *model.WorkflowTemplate {
+func WorkflowTemplateGetByName(name string) *model.WorkflowTemplate {
 	workflowTemplate := &model.WorkflowTemplate{}
 
 	result := DB.Where("name = ?", name).First(workflowTemplate)
@@ -50,7 +50,7 @@ func WorkflowTemplateInit() error {
 			return err
 		}
 
-		previous := workflowTemplateGetByName(workflowTemplate.Name)
+		previous := WorkflowTemplateGetByName(workflowTemplate.Name)
 		if previous != nil {
 			workflowTemplate.ID = previous.ID
 		} else {

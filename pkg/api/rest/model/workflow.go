@@ -15,6 +15,16 @@ type Task struct {
 	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
 }
 
+type TaskDirectly struct {
+	ID            string   `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	WorkflowID    string   `json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
+	TaskGroupID   string   `json:"task_group_id" mapstructure:"task_group_id" validate:"required"`
+	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
+	RequestBody   string   `json:"request_body" mapstructure:"request_body" validate:"required"`
+	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
+}
+
 type TaskDBModel struct {
 	ID          string `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
 	Name        string `json:"name" mapstructure:"name" validate:"required"`
@@ -31,6 +41,14 @@ type CreateTaskReq struct {
 
 type TaskGroup struct {
 	ID          string `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name        string `json:"name" mapstructure:"name" validate:"required"`
+	Description string `json:"description" mapstructure:"description"`
+	Tasks       []Task `json:"tasks" mapstructure:"tasks" validate:"required"`
+}
+
+type TaskGroupDirectly struct {
+	ID          string `json:"id" mapstructure:"id" validate:"required"`
+	WorkflowID  string `json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
 	Name        string `json:"name" mapstructure:"name" validate:"required"`
 	Description string `json:"description" mapstructure:"description"`
 	Tasks       []Task `json:"tasks" mapstructure:"tasks" validate:"required"`
