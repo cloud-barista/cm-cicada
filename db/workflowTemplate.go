@@ -53,20 +53,8 @@ func WorkflowTemplateInit() error {
 		previous := workflowTemplateGetByName(workflowTemplate.Name)
 		if previous != nil {
 			workflowTemplate.ID = previous.ID
-			for i, tg := range workflowTemplate.Data.TaskGroups {
-				workflowTemplate.Data.TaskGroups[i].ID = tg.ID
-				for j, t := range tg.Tasks {
-					workflowTemplate.Data.TaskGroups[i].Tasks[j].ID = t.ID
-				}
-			}
 		} else {
 			workflowTemplate.ID = uuid.New().String()
-			for i, tg := range workflowTemplate.Data.TaskGroups {
-				workflowTemplate.Data.TaskGroups[i].ID = uuid.New().String()
-				for j := range tg.Tasks {
-					workflowTemplate.Data.TaskGroups[i].Tasks[j].ID = uuid.New().String()
-				}
-			}
 		}
 
 		// 삽입

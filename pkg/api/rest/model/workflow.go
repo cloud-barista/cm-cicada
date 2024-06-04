@@ -91,3 +91,18 @@ func (d *Data) Scan(value interface{}) error {
 	}
 	return json.Unmarshal(bytes, d)
 }
+
+func (d CreateDataReq) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+func (d *CreateDataReq) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("Invalid type for Data")
+	}
+	return json.Unmarshal(bytes, d)
+}

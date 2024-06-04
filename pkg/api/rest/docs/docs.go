@@ -1280,7 +1280,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data"
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq"
                 },
                 "id": {
                     "type": "string"
