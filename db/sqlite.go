@@ -20,6 +20,16 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	err = DB.AutoMigrate(&model.TaskDBModel{})
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+
+	err = DB.AutoMigrate(&model.TaskGroupDBModel{})
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+
 	err = DB.AutoMigrate(&model.TaskComponent{})
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)

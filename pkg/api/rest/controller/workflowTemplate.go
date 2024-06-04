@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -39,6 +40,7 @@ func GetWorkflowTemplate(c echo.Context) error {
 // @Tags		[Workflow Template]
 // @Accept		json
 // @Produce		json
+// @Param		name path string false "Name of the workflow template"
 // @Param		page query string false "Page of the workflow template list."
 // @Param		row query string false "Row of the workflow template list."
 // @Success		200	{object}	[]model.WorkflowTemplate		"Successfully get a list of workflow template."
@@ -51,7 +53,11 @@ func ListWorkflowTemplate(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflowTemplateList, err := dao.WorkflowTemplateGetList(page, row)
+	workflowTemplate := &model.WorkflowTemplate{
+		Name: c.QueryParam("name"),
+	}
+
+	workflowTemplateList, err := dao.WorkflowTemplateGetList(workflowTemplate, page, row)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

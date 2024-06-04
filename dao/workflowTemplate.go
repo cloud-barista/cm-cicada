@@ -27,7 +27,7 @@ func WorkflowTemplateGet(id string) (*model.WorkflowTemplate, error) {
 	return workflowTemplate, nil
 }
 
-func WorkflowTemplateGetList(page int, row int) (*[]model.WorkflowTemplate, error) {
+func WorkflowTemplateGetList(workflowTemplate *model.WorkflowTemplate, page int, row int) (*[]model.WorkflowTemplate, error) {
 	workflowTemplateList := &[]model.WorkflowTemplate{}
 	// Ensure db.DB is not nil to avoid runtime panics
 	if db.DB == nil {
@@ -36,6 +36,10 @@ func WorkflowTemplateGetList(page int, row int) (*[]model.WorkflowTemplate, erro
 
 	result := db.DB.Scopes(func(d *gorm.DB) *gorm.DB {
 		var filtered = d
+
+		if len(workflowTemplate.Name) != 0 {
+			filtered = filtered.Where("name LIKE ?", "%"+workflowTemplate.Name+"%")
+		}
 
 		if page != 0 && row != 0 {
 			offset := (page - 1) * row

@@ -9,8 +9,8 @@ import (
 	"github.com/jollaman999/utils/logger"
 )
 
-func (client *client) CreateDAG(DAG *model.Workflow) error {
-	err := writeGustyYAMLs(DAG)
+func (client *client) CreateDAG(workflow *model.Workflow) error {
+	err := writeGustyYAMLs(workflow)
 	if err != nil {
 		return err
 	}

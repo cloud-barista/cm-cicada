@@ -2,14 +2,25 @@ package db
 
 import (
 	"encoding/json"
+
 	"github.com/cloud-barista/cm-cicada/lib/config"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/google/uuid"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
-
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
+
+func taskComponentGetByName(name string) *model.TaskComponent {
+	taskComponent := &model.TaskComponent{}
+
+	result := DB.Where("name = ?", name).First(taskComponent)
+	err := result.Error
+	if err != nil {
+		return nil
+	}
+
+	return taskComponent
+}
 
 func TaskComponentInit() error {
 	// JSON 파일이 위치한 디렉토리
@@ -33,25 +44,18 @@ func TaskComponentInit() error {
 		}()
 
 		// JSON 파일 파싱하여 데이터베이스에 삽입
-		var data model.TaskData
+		var taskComponent model.TaskComponent
 		decoder := json.NewDecoder(jsonFile)
-		err = decoder.Decode(&data)
+		err = decoder.Decode(&taskComponent)
 		if err != nil {
 			return err
 		}
 
-		// CreatedAt 필드를 현재 시간으로 설정
-		createdAt := time.Now()
-
-		// 파일명에서 확장자를 제외한 파일명만 추출
-		baseName := filepath.Base(file)
-		baseNameWithoutExt := strings.TrimSuffix(baseName, filepath.Ext(baseName))
-
-		// TaskComponent 생성
-		taskComponent := model.TaskComponent{
-			ID:        baseNameWithoutExt, // 파일명으로 설정
-			Data:      data,
-			CreatedAt: createdAt,
+		previous := taskComponentGetByName(taskComponent.Name)
+		if previous != nil {
+			taskComponent.ID = previous.ID
+		} else {
+			taskComponent.ID = uuid.New().String()
 		}
 
 		// 삽입

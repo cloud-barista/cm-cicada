@@ -41,7 +41,7 @@ func WorkflowGet(id string) (*model.Workflow, error) {
 	return workflow, nil
 }
 
-func WorkflowGetList(page int, row int) (*[]model.Workflow, error) {
+func WorkflowGetList(workflow *model.Workflow, page int, row int) (*[]model.Workflow, error) {
 	WorkflowList := &[]model.Workflow{}
 	// Ensure db.DB is not nil to avoid runtime panics
 	if db.DB == nil {
@@ -50,6 +50,10 @@ func WorkflowGetList(page int, row int) (*[]model.Workflow, error) {
 
 	result := db.DB.Scopes(func(d *gorm.DB) *gorm.DB {
 		var filtered = d
+
+		if len(workflow.Name) != 0 {
+			filtered = filtered.Where("name LIKE ?", "%"+workflow.Name+"%")
+		}
 
 		if page != 0 && row != 0 {
 			offset := (page - 1) * row

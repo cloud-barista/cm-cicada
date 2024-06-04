@@ -3,6 +3,7 @@ package airflow
 import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/common"
+	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
@@ -11,10 +12,10 @@ import (
 	"time"
 )
 
-func checkDAG(dag *model.Workflow) error {
+func checkWorkflow(workflow *model.Workflow) error {
 	var taskNames []string
 
-	for _, tg := range dag.Data.TaskGroups {
+	for _, tg := range workflow.Data.TaskGroups {
 		if tg.ID == "" {
 			return errors.New("task group id should not be empty")
 		}
@@ -28,8 +29,13 @@ func checkDAG(dag *model.Workflow) error {
 		}
 	}
 
-	for _, tg := range dag.Data.TaskGroups {
+	for _, tg := range workflow.Data.TaskGroups {
 		for _, t := range tg.Tasks {
+			_, err := dao.TaskComponentGet(t.TaskComponent)
+			if err != nil {
+				return errors.New("task component '" + t.TaskComponent + "' not found")
+			}
+
 			for _, dep := range t.Dependencies {
 				var depFound bool
 				for _, tName := range taskNames {
@@ -58,17 +64,17 @@ func writeModelToYAMLFile(model any, filePath string) error {
 	return fileutil.WriteFile(filePath, parsed)
 }
 
-func writeGustyYAMLs(dag *model.Workflow) error {
-	err := checkDAG(dag)
+func writeGustyYAMLs(workflow *model.Workflow) error {
+	err := checkWorkflow(workflow)
 	if err != nil {
 		return err
 	}
 
-	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dag.UUID
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + workflow.ID
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
-		return errors.New("failed to create the Workflow directory (Workflow ID=" + dag.ID +
-			", Workflow UUID=" + dag.UUID + ", Description: " + dag.Data.Description)
+		return errors.New("failed to create the Workflow directory (Workflow ID=" + workflow.ID +
+			", Workflow Name=" + workflow.Name + ", Description: " + workflow.Data.Description)
 	}
 
 	type defaultArgs struct {
@@ -89,7 +95,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		Retries:       0,
 		RetryDelaySec: 0,
 	}
-	dagInfo.Description = dag.Data.Description
+	dagInfo.Description = workflow.Data.Description
 
 	filePath := dagDir + "/METADATA.yml"
 
@@ -98,7 +104,7 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 		return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
 	}
 
-	for _, tg := range dag.Data.TaskGroups {
+	for _, tg := range workflow.Data.TaskGroups {
 		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.ID)
 		if err != nil {
 			return err
@@ -132,9 +138,16 @@ func writeGustyYAMLs(dag *model.Workflow) error {
 			taskOptions["dependencies"] = t.Dependencies
 
 			taskOptions["task_id"] = t.ID
-			taskOptions["http_conn_id"] = t.Options.APIConnectionID
-			taskOptions["endpoint"] = t.Options.Endpoint
-			taskOptions["method"] = t.Options.Method
+
+			taskComponent, err := dao.TaskComponentGet(t.TaskComponent)
+			if err != nil {
+				return errors.New("task component '" + t.TaskComponent + "' not found")
+			}
+
+			taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
+			taskOptions["endpoint"] = taskComponent.Data.Options.Endpoint
+			taskOptions["method"] = taskComponent.Data.Options.Method
+			taskOptions["data"] = t.RequestBody
 
 			filePath = dagDir + "/" + tg.ID + "/" + t.ID + ".yml"
 

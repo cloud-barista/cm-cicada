@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+type Options struct {
+	APIConnectionID string `json:"api_connection_id" mapstructure:"api_connection_id" validate:"required"`
+	Endpoint        string `json:"endpoint" mapstructure:"endpoint" validate:"required"`
+	Method          string `json:"method" mapstructure:"method" validate:"required"`
+	RequestBody     string `json:"request_body" mapstructure:"request_body" validate:"required"`
+}
+
 type ParmaOption struct {
 	Params Params `json:"params" mapstructure:"params" validate:"required"`
 }
@@ -18,6 +25,7 @@ type TaskData struct {
 
 type TaskComponent struct {
 	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name      string    `gorm:"unique,column:name" json:"name" mapstructure:"name" validate:"required"`
 	Data      TaskData  `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 	CreatedAt time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`

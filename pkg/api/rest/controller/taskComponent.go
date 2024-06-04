@@ -10,10 +10,12 @@ import (
 
 type CreateTaskComponentReq struct {
 	ID   string         `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name string         `json:"name" mapstructure:"name" validate:"required"`
 	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
 
 type UpdateTaskComponentReq struct {
+	Name string         `json:"name" mapstructure:"name" validate:"required"`
 	Data model.TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
 
