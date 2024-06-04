@@ -143,7 +143,7 @@ func CreateWorkflow(c echo.Context) error {
 
 	err = airflow.Client.CreateDAG(&workflow)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to create the workflow.")
+		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
 	}
 
 	_, err = dao.WorkflowCreate(&workflow)

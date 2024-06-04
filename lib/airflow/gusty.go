@@ -3,7 +3,7 @@ package airflow
 import (
 	"errors"
 	"github.com/cloud-barista/cm-cicada/common"
-	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
@@ -16,23 +16,23 @@ func checkWorkflow(workflow *model.Workflow) error {
 	var taskNames []string
 
 	for _, tg := range workflow.Data.TaskGroups {
-		if tg.ID == "" {
-			return errors.New("task group id should not be empty")
+		if tg.Name == "" {
+			return errors.New("task group name should not be empty")
 		}
 
 		for _, t := range tg.Tasks {
-			if t.ID == "" {
-				return errors.New("task id should not be empty")
+			if t.Name == "" {
+				return errors.New("task name should not be empty")
 			}
 
-			taskNames = append(taskNames, t.ID)
+			taskNames = append(taskNames, t.Name)
 		}
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
 		for _, t := range tg.Tasks {
-			_, err := dao.TaskComponentGet(t.TaskComponent)
-			if err != nil {
+			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
+			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
 
@@ -45,7 +45,7 @@ func checkWorkflow(workflow *model.Workflow) error {
 					}
 				}
 				if !depFound {
-					return errors.New("wrong dependency found in " + tg.ID + "." + t.ID + " (" + dep + ")")
+					return errors.New("wrong dependency found in " + tg.Name + "." + t.Name + " (" + dep + ")")
 				}
 			}
 		}
@@ -105,7 +105,7 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
-		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.ID)
+		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.Name)
 		if err != nil {
 			return err
 		}
@@ -116,7 +116,7 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 
 		taskGroup.Tooltip = tg.Description
 
-		filePath = dagDir + "/" + tg.ID + "/METADATA.yml"
+		filePath = dagDir + "/" + tg.Name + "/METADATA.yml"
 
 		err = writeModelToYAMLFile(taskGroup, filePath)
 		if err != nil {
@@ -137,10 +137,10 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 
 			taskOptions["dependencies"] = t.Dependencies
 
-			taskOptions["task_id"] = t.ID
+			taskOptions["task_id"] = t.Name
 
-			taskComponent, err := dao.TaskComponentGet(t.TaskComponent)
-			if err != nil {
+			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
+			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
 
@@ -149,7 +149,7 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			taskOptions["method"] = taskComponent.Data.Options.Method
 			taskOptions["data"] = t.RequestBody
 
-			filePath = dagDir + "/" + tg.ID + "/" + t.ID + ".yml"
+			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
 
 			err = writeModelToYAMLFile(taskOptions, filePath)
 			if err != nil {

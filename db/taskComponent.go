@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func taskComponentGetByName(name string) *model.TaskComponent {
+func TaskComponentGetByName(name string) *model.TaskComponent {
 	taskComponent := &model.TaskComponent{}
 
 	result := DB.Where("name = ?", name).First(taskComponent)
@@ -51,7 +51,7 @@ func TaskComponentInit() error {
 			return err
 		}
 
-		previous := taskComponentGetByName(taskComponent.Name)
+		previous := TaskComponentGetByName(taskComponent.Name)
 		if previous != nil {
 			taskComponent.ID = previous.ID
 		} else {
