@@ -371,7 +371,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to create DAG.",
+                        "description": "Failed to create workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }

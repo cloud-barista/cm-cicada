@@ -102,7 +102,7 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 // @Param		request body 	model.CreateWorkflowReq true "Workflow content"
 // @Success		200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to create DAG."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to create workflow."
 // @Router		/cicada/workflow [post]
 func CreateWorkflow(c echo.Context) error {
 	var createWorkflowReq model.CreateWorkflowReq
