@@ -205,13 +205,17 @@ func GetWorkflow(c echo.Context) error {
 
 	for i, tg := range workflow.Data.TaskGroups {
 		_, err = dao.TaskGroupGetByWorkflowIDAndName(wfId, tg.Name)
-		logger.Println(logger.ERROR, true, err)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
 
 		workflow.Data.TaskGroups[i].ID = tg.ID
 
 		for j, t := range tg.Tasks {
 			_, err = dao.TaskGetByWorkflowIDAndName(wfId, tg.Name)
-			logger.Println(logger.ERROR, true, err)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
 
 			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
 		}
@@ -250,13 +254,17 @@ func GetWorkflowByName(c echo.Context) error {
 
 	for i, tg := range workflow.Data.TaskGroups {
 		_, err = dao.TaskGroupGetByWorkflowIDAndName(workflow.ID, tg.Name)
-		logger.Println(logger.ERROR, true, err)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
 
 		workflow.Data.TaskGroups[i].ID = tg.ID
 
 		for j, t := range tg.Tasks {
 			_, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, tg.Name)
-			logger.Println(logger.ERROR, true, err)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
 
 			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
 		}
@@ -302,13 +310,17 @@ func ListWorkflow(c echo.Context) error {
 	for i, w := range *workflows {
 		for j, tg := range workflow.Data.TaskGroups {
 			_, err = dao.TaskGroupGetByWorkflowIDAndName(w.ID, tg.Name)
-			logger.Println(logger.ERROR, true, err)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
 
 			(*workflows)[i].Data.TaskGroups[j].ID = tg.ID
 
 			for k, t := range tg.Tasks {
 				_, err = dao.TaskGetByWorkflowIDAndName(w.ID, tg.Name)
-				logger.Println(logger.ERROR, true, err)
+				if err != nil {
+					logger.Println(logger.ERROR, true, err)
+				}
 
 				(*workflows)[i].Data.TaskGroups[j].Tasks[k].ID = t.ID
 			}
@@ -413,15 +425,23 @@ func DeleteWorkflow(c echo.Context) error {
 
 	for _, tg := range workflow.Data.TaskGroups {
 		taskGroup, err := dao.TaskGroupGet(tg.ID)
-		logger.Println(logger.ERROR, true, err)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
 		err = dao.TaskGroupDelete(taskGroup)
-		logger.Println(logger.ERROR, true, err)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
 
 		for _, t := range tg.Tasks {
 			task, err := dao.TaskGet(t.ID)
-			logger.Println(logger.ERROR, true, err)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
 			err = dao.TaskDelete(task)
-			logger.Println(logger.ERROR, true, err)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
 		}
 	}
 
