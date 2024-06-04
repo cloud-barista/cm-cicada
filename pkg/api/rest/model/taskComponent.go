@@ -25,7 +25,7 @@ type TaskData struct {
 
 type TaskComponent struct {
 	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name      string    `gorm:"unique,column:name" json:"name" mapstructure:"name" validate:"required"`
+	Name      string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
 	Data      TaskData  `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 	CreatedAt time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
