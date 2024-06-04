@@ -46,6 +46,7 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 		var tasks []model.Task
 		for _, tReq := range tgReq.Tasks {
 			tasks = append(tasks, model.Task{
+				ID:            uuid.New().String(),
 				Name:          tReq.Name,
 				TaskComponent: tReq.TaskComponent,
 				RequestBody:   tReq.RequestBody,
