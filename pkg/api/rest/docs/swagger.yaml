@@ -47,6 +47,10 @@ definitions:
         type: array
       name:
         type: string
+      path_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:
@@ -103,6 +107,15 @@ definitions:
     - method
     - request_body
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParamOption:
+    properties:
+      params:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
+      path_params:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
+    required:
+    - params
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params:
     properties:
       properties: {}
@@ -113,13 +126,6 @@ definitions:
     required:
     - properties
     - required
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption:
-    properties:
-      params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
-    required:
-    - params
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg:
     properties:
@@ -136,6 +142,10 @@ definitions:
         type: string
       name:
         type: string
+      path_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:
@@ -168,7 +178,7 @@ definitions:
       options:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options'
       param_option:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParmaOption'
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParamOption'
     required:
     - options
     - param_option
@@ -183,6 +193,10 @@ definitions:
         type: string
       name:
         type: string
+      path_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:

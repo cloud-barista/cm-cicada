@@ -1,0 +1,30 @@
+{
+  "name": "honeybee_task_get_infra",
+  "description": "Get infra information by honeybee.",
+  "data": {
+    "options": {
+      "api_connection_id": "honeybee_api",
+      "endpoint": "/honeybee/source_group/{sgId}/infra",
+      "method": "GET",
+      "request_body": ""
+    },
+    "param_option": {
+      "params": {
+        "required": [],
+        "properties": {
+        }
+      },
+      "path_params": {
+        "required": [
+          "sgId"
+        ],
+        "properties": {
+          "sgId": {
+            "type": "string",
+            "description": "ID of the source group."
+          }
+        }
+      }
+    }
+  }
+}

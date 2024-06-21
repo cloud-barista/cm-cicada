@@ -14,13 +14,14 @@ type Options struct {
 	RequestBody     string `json:"request_body" mapstructure:"request_body" validate:"required"`
 }
 
-type ParmaOption struct {
-	Params Params `json:"params" mapstructure:"params" validate:"required"`
+type ParamOption struct {
+	Params     Params `json:"params" mapstructure:"params" validate:"required"`
+	PathParams Params `json:"path_params" mapstructure:"path_params"`
 }
 
 type TaskData struct {
 	Options     Options     `json:"options" mapstructure:"options" validate:"required"`
-	ParmaOption ParmaOption `json:"param_option" mapstructure:"param_option" validate:"required"`
+	ParmaOption ParamOption `json:"param_option" mapstructure:"param_option" validate:"required"`
 }
 
 type TaskComponent struct {

@@ -16,13 +16,13 @@ cm-cicada:
           - id: honeybee_api
             type: http
             description: HoneyBee API
-            host: 127.0.0.1
+            host: 192.168.110.14
             port: 8081
             schema: http
           - id: beetle_api
             type: http
             description: Beetle API
-            host: 127.0.0.1
+            host: 192.168.110.14
             port: 8056
             schema: http
             login: default
@@ -30,7 +30,7 @@ cm-cicada:
           - id: tumblebug_api
             type: http
             description: TumbleBug API
-            host: 127.0.0.1
+            host: 192.168.110.14
             port: 1323
             schema: http
             login: default

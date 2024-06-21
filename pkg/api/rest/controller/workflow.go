@@ -50,6 +50,7 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 				Name:          tReq.Name,
 				TaskComponent: tReq.TaskComponent,
 				RequestBody:   tReq.RequestBody,
+				PathParams:    tReq.PathParams,
 				Dependencies:  tReq.Dependencies,
 			})
 		}

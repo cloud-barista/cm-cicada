@@ -8,6 +8,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -52,6 +53,27 @@ func checkWorkflow(workflow *model.Workflow) error {
 	}
 
 	return nil
+}
+
+func isTaskExist(workflow *model.Workflow, taskID string) bool {
+	for _, tg := range workflow.Data.TaskGroups {
+		for _, t := range tg.Tasks {
+			if t.Name == taskID {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func parseEndpoint(pathParams map[string]string, endpoint string) string {
+	keys := reflect.ValueOf(pathParams).MapKeys()
+	for _, key := range keys {
+		endpoint = strings.ReplaceAll(endpoint, "{"+key.String()+"}", pathParams[key.String()])
+	}
+
+	return endpoint
 }
 
 func writeModelToYAMLFile(model any, filePath string) error {
@@ -129,7 +151,7 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
 
 			type headers struct {
-				ContentType string `json:"Content-Type"`
+				ContentType string `json:"Content-Type" yaml:"Content-Type"`
 			}
 			taskOptions["headers"] = headers{
 				ContentType: "application/json",
@@ -139,15 +161,22 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 
 			taskOptions["task_id"] = t.Name
 
+			taskOptions["log_response"] = true
+
 			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
 			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
 
 			taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-			taskOptions["endpoint"] = taskComponent.Data.Options.Endpoint
+			taskOptions["endpoint"] = parseEndpoint(t.PathParams, taskComponent.Data.Options.Endpoint)
 			taskOptions["method"] = taskComponent.Data.Options.Method
-			taskOptions["data"] = t.RequestBody
+
+			if isTaskExist(workflow, t.RequestBody) {
+				taskOptions["data"] = "{{ ti.xcom_pull(task_ids=['" + t.RequestBody + "'], key='return_value.json()') }}"
+			} else {
+				taskOptions["data"] = t.RequestBody
+			}
 
 			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
 
