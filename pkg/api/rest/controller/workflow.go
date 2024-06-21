@@ -52,9 +52,9 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 				RequestBody:   tReq.RequestBody,
 				Dependencies:  tReq.Dependencies,
 			})
-			allTasks = append(allTasks, tasks...)
 		}
 
+		allTasks = append(allTasks, tasks...)
 		taskGroups = append(taskGroups, model.TaskGroup{
 			ID:          uuid.New().String(),
 			Name:        tgReq.Name,
@@ -65,11 +65,11 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 
 	for i, tgReq := range createDataReq.TaskGroups {
 		for j, tg := range taskGroups {
-			if i == j {
-				continue
-			}
-
 			if tgReq.Name == tg.Name {
+				if i == j {
+					continue
+				}
+
 				return model.Data{}, errors.New("Duplicated task group name: " + tg.Name)
 			}
 		}
@@ -77,11 +77,11 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 
 	for i, tCheck := range allTasks {
 		for j, t := range allTasks {
-			if i == j {
-				continue
-			}
-
 			if tCheck.Name == t.Name {
+				if i == j {
+					continue
+				}
+
 				return model.Data{}, errors.New("Duplicated task name: " + t.Name)
 			}
 		}
