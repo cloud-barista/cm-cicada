@@ -143,16 +143,16 @@ func CreateWorkflow(c echo.Context) error {
 	workflow.Name = createWorkflowReq.Name
 	workflow.Data = workflowData
 
-	err = airflow.Client.CreateDAG(&workflow)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
-	}
-
 	_, err = dao.WorkflowCreate(&workflow)
 	if err != nil {
 		{
 			return common.ReturnErrorMsg(c, err.Error())
 		}
+	}
+
+	err = airflow.Client.CreateDAG(&workflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
@@ -478,7 +478,7 @@ func DeleteWorkflow(c echo.Context) error {
 
 	err = airflow.Client.DeleteDAG(workflow.ID)
 	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
+		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
