@@ -27,7 +27,6 @@ COPY --from=builder /go/src/github.com/cloud-barista/cm-cicada/cmd/cm-cicada/cm-
 
 RUN mkdir -p /lib/airflow/example/
 COPY lib/airflow/example /lib/airflow/example
-RUN chmod 755 /cm-cicada
 
 USER root
 CMD ["/cm-cicada"]
