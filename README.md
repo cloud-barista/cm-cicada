@@ -10,21 +10,12 @@ This is a subsystem of the Cloud-Barista platform that provides workflow managem
 * Tested operating systems (OSs):
     * Ubuntu 24.04, Ubuntu 22.04, Ubuntu 18.04
 * Language:
-    * Go: 1.22.1
-
-## Download source code
-
-Clone CM-Cicada repository
-
-```bash
-git clone https://github.com/cloud-barista/cm-cicada.git
-```
+    * Go: 1.21.6
 
 ## How to run
 
 * Build and run binary with Airflow server
    ```shell
-   cd cm-cicada
    make run
    ```
 
@@ -121,3 +112,6 @@ curl http://127.0.0.1:8083/cicada/readyz
 # Output if it's running successfully
 # {"message":"CM-Cicada API server is ready"}
 ```
+
+## Check out all APIs
+* [Cicada APIs (Swagger Document)](https://cloud-barista.github.io/cb-tumblebug-api-web/?url=https://raw.githubusercontent.com/cloud-barista/cm-cicada/main/pkg/api/rest/docs/swagger.yaml)
