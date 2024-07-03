@@ -97,7 +97,6 @@ run_docker: run_airflow ## Run Airflow server and the built binary within Docker
 	  GIT_HASH_LAST_BUILD=`cat .git_hash_last_build 2>&1 > /dev/null | true` && \
 	  if [ "$$STATUS" != "0" ] || [ "$$GIT_HASH_MINE" != "$$GIT_HASH_LAST_BUILD" ]; then \
 	    docker rmi -f cm-cicada:latest; \
-	    "$(MAKE)"; \
 	  fi
 	@docker compose up -d
 
