@@ -58,7 +58,7 @@ func Init() {
 
 	// Display API Docs Dashboard when server starts
 	endpoint := getLocalIP() + ":" + config.CMCicadaConfig.CMCicada.Listen.Port
-	apiDocsDashboard := " http://" + endpoint + "/" + strings.ToLower(common.ShortModuleName) + "/swagger/index.html"
+	apiDocsDashboard := " http://" + endpoint + "/" + strings.ToLower(common.ShortModuleName) + "/api/index.html"
 
 	fmt.Println("\n ")
 	fmt.Println(" CM-Cicada repository:")
