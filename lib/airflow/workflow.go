@@ -7,9 +7,37 @@ import (
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"github.com/jollaman999/utils/logger"
+	"sync"
 )
 
+var dagRequests = make(map[string]*sync.Mutex)
+var dagRequestsLock = sync.Mutex{}
+
+func callDagRequestLock(workflowID string) func() {
+	dagRequestsLock.Lock()
+	_, exist := dagRequests[workflowID]
+	if !exist {
+		dagRequests[workflowID] = new(sync.Mutex)
+	}
+	dagRequestsLock.Unlock()
+
+	dagRequests[workflowID].Lock()
+
+	return func() {
+		dagRequests[workflowID].Unlock()
+
+		dagRequestsLock.Lock()
+		delete(dagRequests, workflowID)
+		dagRequestsLock.Unlock()
+	}
+}
+
 func (client *client) CreateDAG(workflow *model.Workflow) error {
+	deferFunc := callDagRequestLock(workflow.ID)
+	defer func() {
+		deferFunc()
+	}()
+
 	err := writeGustyYAMLs(workflow)
 	if err != nil {
 		return err
@@ -19,6 +47,11 @@ func (client *client) CreateDAG(workflow *model.Workflow) error {
 }
 
 func (client *client) GetDAG(dagID string) (airflow.DAG, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+
 	ctx, cancel := Context()
 	defer cancel()
 	resp, _, err := client.api.DAGApi.GetDag(ctx, dagID).Execute()
@@ -43,6 +76,11 @@ func (client *client) GetDAGs() (airflow.DAGCollection, error) {
 }
 
 func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+
 	dags, err := client.GetDAGs()
 	if err != nil {
 		return airflow.DAGRun{}, err
@@ -78,7 +116,12 @@ func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
 	return resp, err
 }
 
-func (client *client) DeleteDAG(dagID string) error {
+func (client *client) DeleteDAG(dagID string, deleteFolderOnly bool) error {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+
 	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dagID
 	err := fileutil.DeleteDir(dagDir)
 	if err != nil {
