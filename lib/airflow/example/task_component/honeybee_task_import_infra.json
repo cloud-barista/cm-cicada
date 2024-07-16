@@ -5,7 +5,7 @@
     "options": {
       "api_connection_id": "honeybee_api",
       "endpoint": "/honeybee/source_group/{sgId}/import/infra",
-      "method": "GET",
+      "method": "POST",
       "request_body": ""
     },
     "param_option": {
