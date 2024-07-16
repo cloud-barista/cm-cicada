@@ -376,10 +376,26 @@ func RunWorkflow(c echo.Context) error {
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
 // @Router		/cicada/workflow/{wfId} [put]
 func UpdateWorkflow(c echo.Context) error {
-	workflow := new(model.CreateWorkflowReq)
-	err := c.Bind(workflow)
+	var updateWorkflowReq model.CreateWorkflowReq
+
+	data, err := common.GetJSONRawBody(c)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			toTimeHookFunc()),
+		Result: &updateWorkflowReq,
+	})
 	if err != nil {
 		return err
+	}
+
+	err = decoder.Decode(data)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	wfId := c.Param("wfId")
@@ -388,15 +404,14 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if oldWorkflow.Name != "" {
-		oldWorkflow.Name = workflow.Name
+	if updateWorkflowReq.Name != "" {
+		oldWorkflow.Name = updateWorkflowReq.Name
 	}
 
-	workflowData, err := createDataReqToData(workflow.Data)
+	workflowData, err := createDataReqToData(updateWorkflowReq.Data)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	oldWorkflow.Data = workflowData
 
 	// Remove old task groups and tasks from the database
 	for _, tg := range oldWorkflow.Data.TaskGroups {
@@ -445,9 +460,21 @@ func UpdateWorkflow(c echo.Context) error {
 		}
 	}
 
+	oldWorkflow.Data = workflowData
+
 	err = dao.WorkflowUpdate(oldWorkflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
+	}
+
+	err = airflow.Client.CreateDAG(oldWorkflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
 	}
 
 	return c.JSONPretty(http.StatusOK, oldWorkflow, " ")
@@ -476,7 +503,7 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(workflow.ID)
+	err = airflow.Client.DeleteDAG(workflow.ID, false)
 	if err != nil {
 		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
