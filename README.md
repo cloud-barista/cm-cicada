@@ -19,6 +19,11 @@ This is a subsystem of the Cloud-Barista platform that provides workflow managem
    make run
    ```
 
+Or, you can run it within Docker by this command.
+ ```shell
+ make run_docker
+ ```
+
 * Stop binary with Airflow server
    ```shell
    make stop
