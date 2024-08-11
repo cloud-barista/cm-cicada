@@ -21,7 +21,7 @@ lint: dependency ## Lint the files
 	@if [ ! -f "${GOPATH}/bin/golangci-lint" ] && [ ! -f "$(GOROOT)/bin/golangci-lint" ]; then \
 	  ${GO_COMMAND} install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	fi
-	@golangci-lint run -E contextcheck -D unused
+	@golangci-lint run --timeout 30m -E contextcheck -D unused
 
 test: dependency ## Run unittests
 	@echo "Running tests..."
