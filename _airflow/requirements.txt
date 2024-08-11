@@ -1,4 +1,4 @@
-apache-airflow==2.9.2
+apache-airflow==2.9.3
 mysqlclient==2.2.4
 apache-airflow-providers-celery==3.7.0
 apache-airflow-providers-mysql==5.6.0
