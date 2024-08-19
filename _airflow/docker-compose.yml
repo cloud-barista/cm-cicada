@@ -24,10 +24,8 @@ services:
             - ./create_airflow_db.sql:/docker-entrypoint-initdb.d/create_airflow_db.sql
             - ./db_data:/var/lib/mysql
     airflow-server:
-        build:
-            context: .
         container_name: airflow-server
-        image: airflow-server:2.9.3
+        image: cloudbaristaorg/airflow-server:edge
         restart: always
         command: >
             /bin/bash -c "

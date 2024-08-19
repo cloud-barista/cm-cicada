@@ -2,10 +2,7 @@ services:
   cm-cicada:
     container_name: cm-cicada
     restart: always
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    image: cm-cicada:${TAG:-latest}
+    image: cloudbaristaorg/cm-cicada:edge
     volumes:
       - ./_airflow:/_airflow:rw
       - ./CM-CICADA.db:/CM-CICADA.db:rw
