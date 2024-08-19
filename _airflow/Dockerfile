@@ -1,4 +1,4 @@
-FROM python:3.12.5-slim-bookworm
+FROM python:3.12.5-slim-bookworm as prod-airflow
 USER root
 
 # MySQL Requirements
