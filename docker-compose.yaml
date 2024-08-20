@@ -5,5 +5,5 @@ services:
     image: cloudbaristaorg/cm-cicada:edge
     volumes:
       - ./_airflow:/_airflow:rw
-      - ./CM-CICADA.db:/CM-CICADA.db:rw
+      - ./_data:/root/.cm-cicada:rw
     network_mode: "host"

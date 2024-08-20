@@ -1,0 +1,4 @@
+# This folder is used to mount the data folder of the cm-cicada container.
+log/
+conf/
+*.db
