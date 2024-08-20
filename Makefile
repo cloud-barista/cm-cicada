@@ -91,13 +91,6 @@ run: run_airflow ## Run Airflow server and the built binary
 	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
 
 run_docker: run_airflow ## Run Airflow server and the built binary within Docker
-	@git diff > .diff_current
-	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
-	  GIT_HASH_MINE=`git rev-parse HEAD` && \
-	  GIT_HASH_LAST_BUILD=`cat .git_hash_last_build 2>&1 > /dev/null | true` && \
-	  if [ "$$STATUS" != "0" ] || [ "$$GIT_HASH_MINE" != "$$GIT_HASH_LAST_BUILD" ]; then \
-	    docker rmi -f cm-cicada:latest; \
-	  fi
 	@docker compose up -d
 
 stop: stop_airflow ## Stop Airflow server and the built binary
