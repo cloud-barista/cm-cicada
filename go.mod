@@ -1,6 +1,6 @@
 module github.com/cloud-barista/cm-cicada
 
-go 1.21.6
+go 1.23.0
 
 require (
 	github.com/apache/airflow-client-go/airflow v0.0.0-20230210234754-8ce0b39cfbb2
@@ -46,7 +46,7 @@ require (
 	golang.org/x/time v0.6.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	modernc.org/libc v1.59.1 // indirect
+	modernc.org/libc v1.59.9 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.32.0 // indirect
