@@ -1,10 +1,11 @@
 package route
 
 import (
+	"strings"
+
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/controller"
 	"github.com/labstack/echo/v4"
-	"strings"
 )
 
 func Workflow(e *echo.Echo) {
@@ -27,5 +28,6 @@ func Workflow(e *echo.Echo) {
 
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task_group/:tgId", controller.GetTaskGroupDirectly)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task/:taskId", controller.GetTaskDirectly)
-
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/taskTryNum/:taskTyNum/logs", controller.GetTaskLogs)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/runs", controller.GetWorkflowRuns)
 }

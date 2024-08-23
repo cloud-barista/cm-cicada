@@ -710,6 +710,35 @@ paths:
       summary: Run Workflow
       tags:
       - '[Workflow]'
+  /cicada/workflow/{wfId}/runs:
+    get:
+      consumes:
+      - application/json
+      description: Get the task Logs.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the workflowRuns.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the workflowRuns.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get workflowRuns
+      tags:
+      - '[Workflow]'
   /cicada/workflow/{wfId}/task:
     get:
       consumes:
@@ -913,6 +942,50 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task from Task Group
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs:
+    get:
+      consumes:
+      - application/json
+      description: Get the task Logs.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the workflowRunId.
+        in: path
+        name: wfRunId
+        required: true
+        type: string
+      - description: ID of the task.
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: ID of the taskTryNum.
+        in: path
+        name: taskTyNum
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the task Logs.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task Logs.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Task Logs
       tags:
       - '[Workflow]'
   /cicada/workflow/name/{wfName}:

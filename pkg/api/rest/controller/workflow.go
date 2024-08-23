@@ -2,6 +2,11 @@ package controller
 
 import (
 	"errors"
+	"net/http"
+	"reflect"
+	"strconv"
+	"time"
+
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
@@ -10,9 +15,6 @@ import (
 	"github.com/jollaman999/utils/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
-	"reflect"
-	"time"
 )
 
 func toTimeHookFunc() mapstructure.DecodeHookFunc {
@@ -861,4 +863,76 @@ func GetTaskDirectly(c echo.Context) error {
 	}
 
 	return common.ReturnErrorMsg(c, "task not found.")
+}
+
+// GetTaskLogs godoc
+//
+// @Summary		Get Task Logs
+// @Description	Get the task Logs.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		wfRunId path string true "ID of the workflowRunId."
+// @Param		taskId path string true "ID of the task."
+// @Param		taskTyNum path string true "ID of the taskTryNum."
+// @Success		200	{object}	model.Task				"Successfully get the task Logs."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task Logs."
+// @Router		/cicada/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs [get]
+func GetTaskLogs(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	wfRunId := c.Param("wfRunId")
+	if wfRunId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
+	}
+
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	}
+
+	taskTyNum := c.Param("taskTyNum")
+	if taskTyNum == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskTyNum.")
+	}
+	taskTyNumToInt, err := strconv.Atoi(taskTyNum)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
+	}
+	logs, err := airflow.Client.GetTaskLogs(wfId, wfRunId, taskId, taskTyNumToInt)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, logs, " ")
+}
+
+// workflowRuns godoc
+//
+// @Summary		Get workflowRuns
+// @Description	Get the task Logs.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Success		200	{object}	model.Task				"Successfully get the workflowRuns."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
+// @Router		/cicada/workflow/{wfId}/runs [get]
+func GetWorkflowRuns(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	
+	runList, err := airflow.Client.GetDAGRuns(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, runList, " ")
 }

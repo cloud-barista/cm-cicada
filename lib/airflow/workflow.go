@@ -2,12 +2,13 @@ package airflow
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"github.com/jollaman999/utils/logger"
-	"sync"
 )
 
 var dagRequests = make(map[string]*sync.Mutex)
@@ -71,7 +72,6 @@ func (client *client) GetDAGs() (airflow.DAGCollection, error) {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting DAGs. (Error: "+err.Error()+").")
 	}
-
 	return resp, err
 }
 
@@ -138,4 +138,52 @@ func (client *client) DeleteDAG(dagID string, deleteFolderOnly bool) error {
 	}
 
 	return err
+}
+func (client *client) GetDAGRuns(dagID string) (airflow.DAGRunCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	resp, _, err := client.api.DAGRunApi.GetDagRuns(ctx, dagID).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+	}
+	return resp, err
+}
+
+func (client *client) GetTaskInstances(dagID string, dagRunId string) (airflow.TaskInstanceCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	resp, _, err := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting TaskInstances. (Error: "+err.Error()+").")
+	}
+	return resp, err
+}
+
+func (client *client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber int) (airflow.InlineResponse200, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs, _, err := client.api.TaskInstanceApi.GetLog(ctx, dagID, dagRunID, taskID, int32(taskTryNumber)).FullContent(true).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting TaskInstance logs. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
 }
