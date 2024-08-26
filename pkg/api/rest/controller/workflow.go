@@ -936,3 +936,31 @@ func GetWorkflowRuns(c echo.Context) error {
 
 	return c.JSONPretty(http.StatusOK, runList, " ")
 }
+// taskInstances godoc
+//
+// @Summary		Get taskInstances
+// @Description	Get the task Logs.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Success		200	{object}	model.Task				"Successfully get the taskInstances."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
+// @Router		/cicada/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances [get]
+func GetTaskInstances(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	wfRunId := c.Param("wfRunId")
+	if wfRunId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
+	}
+	runList, err := airflow.Client.GetTaskInstances(wfId, wfRunId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, runList, " ")
+}
