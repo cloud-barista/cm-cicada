@@ -21,7 +21,7 @@ import (
 // @Success		200	{object}	model.TaskComponent		"Successfully register the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
-// @Router		/cicada/task_component [post]
+// @Router		/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
 	createTaskComponentReq := new(model.CreateTaskComponentReq)
 	err := c.Bind(createTaskComponentReq)
@@ -57,7 +57,7 @@ func CreateTaskComponent(c echo.Context) error {
 // @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/cicada/task_component/{tcId} [get]
+// @Router		/task_component/{tcId} [get]
 func GetTaskComponent(c echo.Context) error {
 	tcId := c.Param("tcId")
 	if tcId == "" {
@@ -81,7 +81,7 @@ func GetTaskComponent(c echo.Context) error {
 // @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/cicada/task_component/name/{tcName} [get]
+// @Router		/task_component/name/{tcName} [get]
 func GetTaskComponentByName(c echo.Context) error {
 	tcName := c.Param("tcName")
 	if tcName == "" {
@@ -106,7 +106,7 @@ func GetTaskComponentByName(c echo.Context) error {
 // @Success		200	{object}	[]model.TaskComponent	"Successfully get a list of task component."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of task component."
-// @Router			/cicada/task_component [get]
+// @Router		/task_component [get]
 func ListTaskComponent(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -132,7 +132,7 @@ func ListTaskComponent(c echo.Context) error {
 // @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
-// @Router		/cicada/task_component/{tcId} [put]
+// @Router		/task_component/{tcId} [put]
 func UpdateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.CreateTaskComponentReq)
 	err := c.Bind(taskComponent)
@@ -174,7 +174,7 @@ func UpdateTaskComponent(c echo.Context) error {
 // @Success		200	{object}	model.SimpleMsg		"Successfully delete the task component"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
-// @Router		/cicada/task_component/{tcId} [delete]
+// @Router		/task_component/{tcId} [delete]
 func DeleteTaskComponent(c echo.Context) error {
 	tcId := c.Param("tcId")
 	if tcId == "" {

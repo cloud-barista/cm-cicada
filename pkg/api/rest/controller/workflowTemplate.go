@@ -21,7 +21,7 @@ import (
 // @Success		200	{object}	model.GetWorkflowTemplate	"Successfully get the workflow template"
 // @Failure		400	{object}	common.ErrorResponse		"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse		"Failed to get the workflow template"
-// @Router		/cicada/workflow_template/{wftId} [get]
+// @Router		/workflow_template/{wftId} [get]
 func GetWorkflowTemplate(c echo.Context) error {
 	wftId := c.Param("wftId")
 	if wftId == "" {
@@ -45,7 +45,7 @@ func GetWorkflowTemplate(c echo.Context) error {
 // @Success		200	{object}	model.GetWorkflowTemplate	"Successfully get the workflow template"
 // @Failure		400	{object}	common.ErrorResponse		"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse		"Failed to get the workflow template"
-// @Router		/cicada/workflow_template/name/{wfName} [get]
+// @Router		/workflow_template/name/{wfName} [get]
 func GetWorkflowTemplateByName(c echo.Context) error {
 	wfName := c.Param("wfName")
 	if wfName == "" {
@@ -68,13 +68,13 @@ func GetWorkflowTemplateByName(c echo.Context) error {
 // @Tags		[Workflow Template]
 // @Accept		json
 // @Produce		json
-// @Param		name path string false "Name of the workflow template"
+// @Param		name query string false "Name of the workflow template"
 // @Param		page query string false "Page of the workflow template list."
 // @Param		row query string false "Row of the workflow template list."
 // @Success		200	{object}	[]model.WorkflowTemplate		"Successfully get a list of workflow template."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of workflow template."
-// @Router			/cicada/workflow_template [get]
+// @Router		/workflow_template [get]
 func ListWorkflowTemplate(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {

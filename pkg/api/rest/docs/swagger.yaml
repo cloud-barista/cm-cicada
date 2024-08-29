@@ -1,3 +1,4 @@
+basePath: /cicada
 definitions:
   github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse:
     properties:
@@ -262,8 +263,14 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Workflow management module
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: CM-Cicada REST API
+  version: latest
 paths:
-  /cicada/readyz:
+  /readyz:
     get:
       consumes:
       - application/json
@@ -282,7 +289,7 @@ paths:
       summary: Check Ready
       tags:
       - '[Admin] System management'
-  /cicada/task/{taskId}:
+  /task/{taskId}:
     get:
       consumes:
       - application/json
@@ -311,7 +318,7 @@ paths:
       summary: Get Task Directly
       tags:
       - '[Workflow]'
-  /cicada/task_component:
+  /task_component:
     get:
       consumes:
       - application/json
@@ -374,7 +381,7 @@ paths:
       summary: Create TaskComponent
       tags:
       - '[Task Component]'
-  /cicada/task_component/{tcId}:
+  /task_component/{tcId}:
     delete:
       consumes:
       - application/json
@@ -465,7 +472,7 @@ paths:
       summary: Update TaskComponent
       tags:
       - '[Task Component]'
-  /cicada/task_component/name/{tcName}:
+  /task_component/name/{tcName}:
     get:
       consumes:
       - application/json
@@ -494,7 +501,7 @@ paths:
       summary: Get TaskComponent by Name
       tags:
       - '[Task Component]'
-  /cicada/task_group/{tgId}:
+  /task_group/{tgId}:
     get:
       consumes:
       - application/json
@@ -523,14 +530,14 @@ paths:
       summary: Get TaskGroup Directly
       tags:
       - '[Workflow]'
-  /cicada/workflow:
+  /workflow:
     get:
       consumes:
       - application/json
       description: Get a workflow list.
       parameters:
       - description: Name of the workflow
-        in: path
+        in: query
         name: name
         type: string
       - description: Page of the workflow list.
@@ -590,7 +597,7 @@ paths:
       summary: Create Workflow
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}:
+  /workflow/{wfId}:
     delete:
       consumes:
       - application/json
@@ -681,7 +688,7 @@ paths:
       summary: Update Workflow
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/run:
+  /workflow/{wfId}/run:
     post:
       consumes:
       - application/json
@@ -710,7 +717,7 @@ paths:
       summary: Run Workflow
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task:
+  /workflow/{wfId}/task:
     get:
       consumes:
       - application/json
@@ -741,7 +748,7 @@ paths:
       summary: List Task
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task/{taskId}:
+  /workflow/{wfId}/task/{taskId}:
     get:
       consumes:
       - application/json
@@ -775,7 +782,7 @@ paths:
       summary: Get Task
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task_group:
+  /workflow/{wfId}/task_group:
     get:
       consumes:
       - application/json
@@ -806,7 +813,7 @@ paths:
       summary: List TaskGroup
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task_group/{tgId}:
+  /workflow/{wfId}/task_group/{tgId}:
     get:
       consumes:
       - application/json
@@ -840,7 +847,7 @@ paths:
       summary: Get TaskGroup
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task_group/{tgId}/task:
+  /workflow/{wfId}/task_group/{tgId}/task:
     get:
       consumes:
       - application/json
@@ -876,7 +883,7 @@ paths:
       summary: List Task from Task Group
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task_group/{tgId}/task/{taskId}:
+  /workflow/{wfId}/task_group/{tgId}/task/{taskId}:
     get:
       consumes:
       - application/json
@@ -915,7 +922,7 @@ paths:
       summary: Get Task from Task Group
       tags:
       - '[Workflow]'
-  /cicada/workflow/name/{wfName}:
+  /workflow/name/{wfName}:
     get:
       consumes:
       - application/json
@@ -944,14 +951,14 @@ paths:
       summary: Get Workflow by Name
       tags:
       - '[Workflow]'
-  /cicada/workflow_template:
+  /workflow_template:
     get:
       consumes:
       - application/json
       description: Get a list of workflow template.
       parameters:
       - description: Name of the workflow template
-        in: path
+        in: query
         name: name
         type: string
       - description: Page of the workflow template list.
@@ -982,7 +989,7 @@ paths:
       summary: List WorkflowTemplate
       tags:
       - '[Workflow Template]'
-  /cicada/workflow_template/{wftId}:
+  /workflow_template/{wftId}:
     get:
       consumes:
       - application/json
@@ -1011,7 +1018,7 @@ paths:
       summary: Get WorkflowTemplate
       tags:
       - '[Workflow Template]'
-  /cicada/workflow_template/name/{wfName}:
+  /workflow_template/name/{wfName}:
     get:
       consumes:
       - application/json
@@ -1040,4 +1047,6 @@ paths:
       summary: Get WorkflowTemplate by Name
       tags:
       - '[Workflow Template]'
+schemes:
+- http
 swagger: "2.0"

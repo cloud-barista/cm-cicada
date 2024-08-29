@@ -105,7 +105,7 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 // @Success		200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to create workflow."
-// @Router		/cicada/workflow [post]
+// @Router		/workflow [post]
 func CreateWorkflow(c echo.Context) error {
 	var createWorkflowReq model.CreateWorkflowReq
 
@@ -192,7 +192,7 @@ func CreateWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.Workflow			"Successfully get the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
-// @Router		/cicada/workflow/{wfId} [get]
+// @Router		/workflow/{wfId} [get]
 func GetWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -241,7 +241,7 @@ func GetWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.Workflow			"Successfully get the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
-// @Router		/cicada/workflow/name/{wfName} [get]
+// @Router		/workflow/name/{wfName} [get]
 func GetWorkflowByName(c echo.Context) error {
 	wfName := c.Param("wfName")
 	if wfName == "" {
@@ -286,13 +286,13 @@ func GetWorkflowByName(c echo.Context) error {
 // @Tags		[Workflow]
 // @Accept		json
 // @Produce		json
-// @Param		name path string false "Name of the workflow"
+// @Param		name query string false "Name of the workflow"
 // @Param		page query string false "Page of the workflow list."
 // @Param		row query string false "Row of the workflow list."
 // @Success		200	{object}	[]model.Workflow		"Successfully get a workflow list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
-// @Router		/cicada/workflow [get]
+// @Router		/workflow [get]
 func ListWorkflow(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -342,7 +342,7 @@ func ListWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.SimpleMsg			"Successfully run the workflow."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
-// @Router		/cicada/workflow/{wfId}/run [post]
+// @Router		/workflow/{wfId}/run [post]
 func RunWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -374,7 +374,7 @@ func RunWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.Workflow	"Successfully update the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
-// @Router		/cicada/workflow/{wfId} [put]
+// @Router		/workflow/{wfId} [put]
 func UpdateWorkflow(c echo.Context) error {
 	var updateWorkflowReq model.CreateWorkflowReq
 
@@ -491,7 +491,7 @@ func UpdateWorkflow(c echo.Context) error {
 // @Success		200	{object}	model.SimpleMsg			"Successfully delete the workflow"
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"
-// @Router		/cicada/workflow/{wfId} [delete]
+// @Router		/workflow/{wfId} [delete]
 func DeleteWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -549,7 +549,7 @@ func DeleteWorkflow(c echo.Context) error {
 // @Success		200	{object}	[]model.TaskGroup		"Successfully get a task group list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a task group list."
-// @Router		/cicada/workflow/{wfId}/task_group [get]
+// @Router		/workflow/{wfId}/task_group [get]
 func ListTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -579,7 +579,7 @@ func ListTaskGroup(c echo.Context) error {
 // @Success		200	{object}	model.Task				"Successfully get the task group."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
-// @Router		/cicada/workflow/{wfId}/task_group/{tgId} [get]
+// @Router		/workflow/{wfId}/task_group/{tgId} [get]
 func GetTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -616,7 +616,7 @@ func GetTaskGroup(c echo.Context) error {
 // @Success		200	{object}	model.Task				"Successfully get the task group."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
-// @Router		/cicada/task_group/{tgId} [get]
+// @Router		/task_group/{tgId} [get]
 func GetTaskGroupDirectly(c echo.Context) error {
 	tgId := c.Param("tgId")
 	if tgId == "" {
@@ -660,7 +660,7 @@ func GetTaskGroupDirectly(c echo.Context) error {
 // @Success		200	{object}	[]model.Task			"Successfully get a task list from the task group."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a task list from the task group."
-// @Router		/cicada/workflow/{wfId}/task_group/{tgId}/task [get]
+// @Router		/workflow/{wfId}/task_group/{tgId}/task [get]
 func ListTaskFromTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -701,7 +701,7 @@ func ListTaskFromTaskGroup(c echo.Context) error {
 // @Success		200	{object}	model.Task			"Successfully get the task from the task group."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task from the task group."
-// @Router		/cicada/workflow/{wfId}/task_group/{tgId}/task/{taskId} [get]
+// @Router		/workflow/{wfId}/task_group/{tgId}/task/{taskId} [get]
 func GetTaskFromTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -749,7 +749,7 @@ func GetTaskFromTaskGroup(c echo.Context) error {
 // @Success		200	{object}	[]model.Task			"Successfully get a task list."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get a task list."
-// @Router		/cicada/workflow/{wfId}/task [get]
+// @Router		/workflow/{wfId}/task [get]
 func ListTask(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -781,7 +781,7 @@ func ListTask(c echo.Context) error {
 // @Success		200	{object}	model.Task				"Successfully get the task."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
-// @Router		/cicada/workflow/{wfId}/task/{taskId} [get]
+// @Router		/workflow/{wfId}/task/{taskId} [get]
 func GetTask(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -820,7 +820,7 @@ func GetTask(c echo.Context) error {
 // @Success		200	{object}	model.TaskDirectly		"Successfully get the task."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
-// @Router		/cicada/task/{taskId} [get]
+// @Router		/task/{taskId} [get]
 func GetTaskDirectly(c echo.Context) error {
 	taskId := c.Param("taskId")
 	if taskId == "" {
