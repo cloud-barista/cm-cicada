@@ -964,3 +964,83 @@ func GetTaskInstances(c echo.Context) error {
 
 	return c.JSONPretty(http.StatusOK, runList, " ")
 }
+
+
+// taskInstances godoc
+//
+// @Summary		Clear taskInstances
+// @Description	Clear the task Instance.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		wfId path string true "ID of the workflow."
+// @Param		requestBody body	airflow.ClearTaskInstances true "Clear TaskInstance"
+// @Success		200	{object}	airflow.TaskInstanceReferenceCollection				"Successfully clear the taskInstances."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
+// @Router		/cicada/workflow/{wfId}/clear [post]
+func ClearTaskInstances(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	var clearTaskInstances interface{}
+	if err := c.Bind(&clearTaskInstances); err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Invalid request body. (Error: " + err.Error() + ").")
+	}
+
+	runList, err := airflow.Client.ClearTaskInstance(wfId,clearTaskInstances )
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, runList, " ")
+}
+
+// Eventlogs godoc
+//
+// @Summary		Get taskInstances
+// @Description	Get the task Logs.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Param		dag_id query string true "ID of the workflow."
+// @Param		run_id query string false "ID of the workflow run."
+// @Param		task_id query string false "ID of the task."
+// @Success		200	{object}	model.Task				"Successfully get the taskInstances."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
+// @Router		/cicada/eventlogs [get]
+func GetEventLogs(c echo.Context) error {
+	dagId := c.QueryParam("dag_id")
+	if dagId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the dagId.")
+	}
+	logs, err := airflow.Client.GetEventLogs(dagId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, logs, " ")
+}
+
+// ImportErrors godoc
+//
+// @Summary		Get importErrors
+// @Description	Get the importErrors.
+// @Tags		[Workflow]
+// @Accept		json
+// @Produce		json
+// @Success		200	{object}	airflow.ImportErrorCollection				"Successfully get the importErrors."
+// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure		500	{object}	common.ErrorResponse	"Failed to get the importErrors."
+// @Router		/cicada/importErrors [get]
+func GetImportErrors(c echo.Context) error {
+	logs, err := airflow.Client.GetImportErrors()
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, logs, " ")
+}

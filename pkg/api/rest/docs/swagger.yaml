@@ -1,4 +1,103 @@
 definitions:
+  airflow.ClearTaskInstances:
+    properties:
+      dag_run_id:
+        allOf:
+        - $ref: '#/definitions/airflow.NullableString'
+        description: The DagRun ID for this task instance
+      dry_run:
+        description: If set, don't actually run this operation. The response will
+          contain a list of task instances planned to be cleaned, but not modified
+          in any way.
+        type: boolean
+      end_date:
+        description: The maximum execution date to clear.
+        type: string
+      include_downstream:
+        description: If set to true, downstream tasks are also affected.
+        type: boolean
+      include_future:
+        description: If set to True, also tasks from future DAG Runs are affected.
+        type: boolean
+      include_parentdag:
+        description: Clear tasks in the parent dag of the subdag.
+        type: boolean
+      include_past:
+        description: If set to True, also tasks from past DAG Runs are affected.
+        type: boolean
+      include_subdags:
+        description: Clear tasks in subdags and clear external tasks indicated by
+          ExternalTaskMarker.
+        type: boolean
+      include_upstream:
+        description: If set to true, upstream tasks are also affected.
+        type: boolean
+      only_failed:
+        description: Only clear failed tasks.
+        type: boolean
+      only_running:
+        description: Only clear running tasks.
+        type: boolean
+      reset_dag_runs:
+        description: Set state of DAG runs to RUNNING.
+        type: boolean
+      start_date:
+        description: The minimum execution date to clear.
+        type: string
+      task_ids:
+        description: A list of task ids to clear.  *New in version 2.1.0*
+        items:
+          type: string
+        type: array
+    type: object
+  airflow.ImportError:
+    properties:
+      filename:
+        description: The filename
+        type: string
+      import_error_id:
+        description: The import error ID.
+        type: integer
+      stack_trace:
+        description: The full stackstrace..
+        type: string
+      timestamp:
+        description: The time when this error was created.
+        type: string
+    type: object
+  airflow.ImportErrorCollection:
+    properties:
+      import_errors:
+        items:
+          $ref: '#/definitions/airflow.ImportError'
+        type: array
+      total_entries:
+        description: Count of objects in the current result set.
+        type: integer
+    type: object
+  airflow.NullableString:
+    type: object
+  airflow.TaskInstanceReference:
+    properties:
+      dag_id:
+        description: The DAG ID.
+        type: string
+      dag_run_id:
+        description: The DAG run ID.
+        type: string
+      execution_date:
+        type: string
+      task_id:
+        description: The task ID.
+        type: string
+    type: object
+  airflow.TaskInstanceReferenceCollection:
+    properties:
+      task_instances:
+        items:
+          $ref: '#/definitions/airflow.TaskInstanceReference'
+        type: array
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse:
     properties:
       error:
@@ -263,6 +362,66 @@ definitions:
 info:
   contact: {}
 paths:
+  /cicada/eventlogs:
+    get:
+      consumes:
+      - application/json
+      description: Get the task Logs.
+      parameters:
+      - description: ID of the workflow.
+        in: query
+        name: dag_id
+        required: true
+        type: string
+      - description: ID of the workflow run.
+        in: query
+        name: run_id
+        type: string
+      - description: ID of the task.
+        in: query
+        name: task_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the taskInstances.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the taskInstances.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get taskInstances
+      tags:
+      - '[Workflow]'
+  /cicada/importErrors:
+    get:
+      consumes:
+      - application/json
+      description: Get the importErrors.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the importErrors.
+          schema:
+            $ref: '#/definitions/airflow.ImportErrorCollection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the importErrors.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get importErrors
+      tags:
+      - '[Workflow]'
   /cicada/readyz:
     get:
       consumes:
@@ -681,6 +840,41 @@ paths:
       summary: Update Workflow
       tags:
       - '[Workflow]'
+  /cicada/workflow/{wfId}/clear:
+    post:
+      consumes:
+      - application/json
+      description: Clear the task Instance.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: Clear TaskInstance
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/airflow.ClearTaskInstances'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully clear the taskInstances.
+          schema:
+            $ref: '#/definitions/airflow.TaskInstanceReferenceCollection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to clear the taskInstances.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Clear taskInstances
+      tags:
+      - '[Workflow]'
   /cicada/workflow/{wfId}/run:
     post:
       consumes:
@@ -986,6 +1180,35 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task Logs
+      tags:
+      - '[Workflow]'
+  /cicada/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances:
+    get:
+      consumes:
+      - application/json
+      description: Get the task Logs.
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the taskInstances.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the taskInstances.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get taskInstances
       tags:
       - '[Workflow]'
   /cicada/workflow/name/{wfName}:

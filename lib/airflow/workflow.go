@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 
+	"encoding/json"
+
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
@@ -168,7 +170,6 @@ func (client *client) GetTaskInstances(dagID string, dagRunId string) (airflow.T
 	}
 	return resp, err
 }
-
 func (client *client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber int) (airflow.InlineResponse200, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
@@ -183,6 +184,82 @@ func (client *client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber 
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting TaskInstance logs. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
+}
+
+func (client *client) ClearTaskInstance(dagID string, clearTaskInstance interface{}) (airflow.TaskInstanceReferenceCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	logger.Println(logger.ERROR, false, clearTaskInstance)
+
+	clearTaskInstanceBytes, err := json.Marshal(clearTaskInstance)
+	if err != nil {
+		logger.Println(logger.ERROR, false, "Failed to marshal clearTaskInstance: ", err)
+		return airflow.TaskInstanceReferenceCollection{}, err
+	}
+
+	var test airflow.ClearTaskInstances
+	err = json.Unmarshal(clearTaskInstanceBytes, &test)
+	if err != nil {
+		logger.Println(logger.ERROR, false, "Failed to unmarshal clearTaskInstance to ClearTaskInstances struct: ", err)
+		return airflow.TaskInstanceReferenceCollection{}, err
+	}
+	// 요청 생성
+	request := client.api.DAGApi.PostClearTaskInstances(ctx, dagID)
+
+	// ClearTaskInstances 데이터 설정
+	request = request.ClearTaskInstances(test)
+
+	// 요청 실행
+	logs, _, err := client.api.DAGApi.PostClearTaskInstancesExecute(request)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while clearing TaskInstance. (Error: " + err.Error() + ").")
+		return airflow.TaskInstanceReferenceCollection{}, err
+	}
+
+	// 결과 로그 출력
+	logger.Println(logger.INFO, false, logs)
+	return logs, nil
+}
+
+
+func (client *client) GetEventLogs(dagID string) (airflow.EventLogCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting event logs. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
+}
+
+func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs,_,err := client.api.ImportErrorApi.GetImportErrors(ctx).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting import dag errors. (Error: "+err.Error()+").")
 	}
 
 	return logs, nil
