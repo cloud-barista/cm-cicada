@@ -1047,6 +1047,4 @@ paths:
       summary: Get WorkflowTemplate by Name
       tags:
       - '[Workflow Template]'
-schemes:
-- http
 swagger: "2.0"

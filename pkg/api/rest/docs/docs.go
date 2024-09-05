@@ -1591,7 +1591,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "latest",
 	Host:             "",
 	BasePath:         "/cicada",
-	Schemes:          []string{"http"},
+	Schemes:          []string{},
 	Title:            "CM-Cicada REST API",
 	Description:      "Workflow management module",
 	InfoInstanceName: "swagger",
