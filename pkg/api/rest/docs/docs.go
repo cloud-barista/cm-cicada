@@ -29,9 +29,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Admin] System management"
+                    "[Admin]\tSystem management"
                 ],
                 "summary": "Check Ready",
+                "operationId": "health-check-readyz",
                 "responses": {
                     "200": {
                         "description": "Successfully get ready state.",
@@ -61,6 +62,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task Directly",
+                "operationId": "get-task-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -105,6 +107,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "List TaskComponent",
+                "operationId": "list-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -155,6 +158,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Create TaskComponent",
+                "operationId": "create-task-component",
                 "parameters": [
                     {
                         "description": "task component of the node.",
@@ -201,6 +205,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent by Name",
+                "operationId": "get-task-component-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -245,6 +250,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent",
+                "operationId": "get-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -287,6 +293,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Update TaskComponent",
+                "operationId": "update-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -338,6 +345,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Delete TaskComponent",
+                "operationId": "delete-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -382,6 +390,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup Directly",
+                "operationId": "get-task-group-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -426,6 +435,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Workflow",
+                "operationId": "list-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -482,6 +492,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Create Workflow",
+                "operationId": "create-workflow",
                 "parameters": [
                     {
                         "description": "Workflow content",
@@ -528,6 +539,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow by Name",
+                "operationId": "get-workflow-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -572,6 +584,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow",
+                "operationId": "get-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -614,6 +627,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Update Workflow",
+                "operationId": "update-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -665,6 +679,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
+                "operationId": "delete-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -709,6 +724,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Run Workflow",
+                "operationId": "run-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -753,6 +769,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Task",
+                "operationId": "list-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -800,6 +817,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task",
+                "operationId": "get-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -851,6 +869,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List TaskGroup",
+                "operationId": "list-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -898,6 +917,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup",
+                "operationId": "get-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -949,6 +969,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Task from Task Group",
+                "operationId": "list-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1003,6 +1024,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task from Task Group",
+                "operationId": "get-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1061,6 +1083,7 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "List WorkflowTemplate",
+                "operationId": "list-workflow-template",
                 "parameters": [
                     {
                         "type": "string",
@@ -1119,6 +1142,7 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate by Name",
+                "operationId": "get-workflow-template-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1163,6 +1187,7 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate",
+                "operationId": "get-workflow-template",
                 "parameters": [
                     {
                         "type": "string",

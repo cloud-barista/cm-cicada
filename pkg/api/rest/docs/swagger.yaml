@@ -275,6 +275,7 @@ paths:
       consumes:
       - application/json
       description: Check Cicada is ready
+      operationId: health-check-readyz
       produces:
       - application/json
       responses:
@@ -288,12 +289,13 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Check Ready
       tags:
-      - '[Admin] System management'
+      - "[Admin]\tSystem management"
   /task/{taskId}:
     get:
       consumes:
       - application/json
       description: Get the task directly.
+      operationId: get-task-directly
       parameters:
       - description: ID of the task.
         in: path
@@ -323,6 +325,7 @@ paths:
       consumes:
       - application/json
       description: Get a list of task component.
+      operationId: list-task-component
       parameters:
       - description: Page of the task component list.
         in: query
@@ -356,6 +359,7 @@ paths:
       consumes:
       - application/json
       description: Register the task component.
+      operationId: create-task-component
       parameters:
       - description: task component of the node.
         in: body
@@ -386,6 +390,7 @@ paths:
       consumes:
       - application/json
       description: Delete the task component.
+      operationId: delete-task-component
       parameters:
       - description: ID of the task component.
         in: path
@@ -414,6 +419,7 @@ paths:
       consumes:
       - application/json
       description: Get the task component.
+      operationId: get-task-component
       parameters:
       - description: ID of the TaskComponent
         in: path
@@ -442,6 +448,7 @@ paths:
       consumes:
       - application/json
       description: Update the task component.
+      operationId: update-task-component
       parameters:
       - description: ID of the TaskComponent
         in: path
@@ -477,6 +484,7 @@ paths:
       consumes:
       - application/json
       description: Get the task component by name.
+      operationId: get-task-component-by-name
       parameters:
       - description: Name of the TaskComponent
         in: path
@@ -506,6 +514,7 @@ paths:
       consumes:
       - application/json
       description: Get the task group directly.
+      operationId: get-task-group-directly
       parameters:
       - description: ID of the task group.
         in: path
@@ -535,6 +544,7 @@ paths:
       consumes:
       - application/json
       description: Get a workflow list.
+      operationId: list-workflow
       parameters:
       - description: Name of the workflow
         in: query
@@ -572,6 +582,7 @@ paths:
       consumes:
       - application/json
       description: Create a workflow.
+      operationId: create-workflow
       parameters:
       - description: Workflow content
         in: body
@@ -602,6 +613,7 @@ paths:
       consumes:
       - application/json
       description: Delete the workflow.
+      operationId: delete-workflow
       parameters:
       - description: ID of the workflow.
         in: path
@@ -630,6 +642,7 @@ paths:
       consumes:
       - application/json
       description: Get the workflow.
+      operationId: get-workflow
       parameters:
       - description: ID of the workflow.
         in: path
@@ -658,6 +671,7 @@ paths:
       consumes:
       - application/json
       description: Update the workflow content.
+      operationId: update-workflow
       parameters:
       - description: ID of the workflow.
         in: path
@@ -693,6 +707,7 @@ paths:
       consumes:
       - application/json
       description: Run the workflow.
+      operationId: run-workflow
       parameters:
       - description: ID of the workflow.
         in: path
@@ -722,6 +737,7 @@ paths:
       consumes:
       - application/json
       description: Get a task list of the workflow.
+      operationId: list-task
       parameters:
       - description: ID of the workflow.
         in: path
@@ -753,6 +769,7 @@ paths:
       consumes:
       - application/json
       description: Get the task.
+      operationId: get-task
       parameters:
       - description: ID of the workflow.
         in: path
@@ -787,6 +804,7 @@ paths:
       consumes:
       - application/json
       description: Get a task group list of the workflow.
+      operationId: list-task-group
       parameters:
       - description: ID of the workflow.
         in: path
@@ -818,6 +836,7 @@ paths:
       consumes:
       - application/json
       description: Get the task group.
+      operationId: get-task-group
       parameters:
       - description: ID of the workflow.
         in: path
@@ -852,6 +871,7 @@ paths:
       consumes:
       - application/json
       description: Get a task list from the task group.
+      operationId: list-task-from-task-group
       parameters:
       - description: ID of the workflow.
         in: path
@@ -888,6 +908,7 @@ paths:
       consumes:
       - application/json
       description: Get the task from the task group.
+      operationId: get-task-from-task-group
       parameters:
       - description: ID of the workflow.
         in: path
@@ -927,6 +948,7 @@ paths:
       consumes:
       - application/json
       description: Get the workflow by name.
+      operationId: get-workflow-by-name
       parameters:
       - description: Name of the workflow.
         in: path
@@ -956,6 +978,7 @@ paths:
       consumes:
       - application/json
       description: Get a list of workflow template.
+      operationId: list-workflow-template
       parameters:
       - description: Name of the workflow template
         in: query
@@ -994,6 +1017,7 @@ paths:
       consumes:
       - application/json
       description: Get the workflow template.
+      operationId: get-workflow-template
       parameters:
       - description: ID of the WorkflowTemplate
         in: path
@@ -1023,6 +1047,7 @@ paths:
       consumes:
       - application/json
       description: Get the workflow template by name.
+      operationId: get-workflow-template-by-name
       parameters:
       - description: Name of the WorkflowTemplate
         in: path

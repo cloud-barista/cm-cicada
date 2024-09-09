@@ -22,9 +22,10 @@
                     "application/json"
                 ],
                 "tags": [
-                    "[Admin] System management"
+                    "[Admin]\tSystem management"
                 ],
                 "summary": "Check Ready",
+                "operationId": "health-check-readyz",
                 "responses": {
                     "200": {
                         "description": "Successfully get ready state.",
@@ -54,6 +55,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get Task Directly",
+                "operationId": "get-task-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -98,6 +100,7 @@
                     "[Task Component]"
                 ],
                 "summary": "List TaskComponent",
+                "operationId": "list-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -148,6 +151,7 @@
                     "[Task Component]"
                 ],
                 "summary": "Create TaskComponent",
+                "operationId": "create-task-component",
                 "parameters": [
                     {
                         "description": "task component of the node.",
@@ -194,6 +198,7 @@
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent by Name",
+                "operationId": "get-task-component-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -238,6 +243,7 @@
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent",
+                "operationId": "get-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -280,6 +286,7 @@
                     "[Task Component]"
                 ],
                 "summary": "Update TaskComponent",
+                "operationId": "update-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -331,6 +338,7 @@
                     "[Task Component]"
                 ],
                 "summary": "Delete TaskComponent",
+                "operationId": "delete-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -375,6 +383,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup Directly",
+                "operationId": "get-task-group-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -419,6 +428,7 @@
                     "[Workflow]"
                 ],
                 "summary": "List Workflow",
+                "operationId": "list-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -475,6 +485,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Create Workflow",
+                "operationId": "create-workflow",
                 "parameters": [
                     {
                         "description": "Workflow content",
@@ -521,6 +532,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow by Name",
+                "operationId": "get-workflow-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -565,6 +577,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow",
+                "operationId": "get-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -607,6 +620,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Update Workflow",
+                "operationId": "update-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -658,6 +672,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
+                "operationId": "delete-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -702,6 +717,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Run Workflow",
+                "operationId": "run-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -746,6 +762,7 @@
                     "[Workflow]"
                 ],
                 "summary": "List Task",
+                "operationId": "list-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -793,6 +810,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get Task",
+                "operationId": "get-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -844,6 +862,7 @@
                     "[Workflow]"
                 ],
                 "summary": "List TaskGroup",
+                "operationId": "list-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -891,6 +910,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup",
+                "operationId": "get-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -942,6 +962,7 @@
                     "[Workflow]"
                 ],
                 "summary": "List Task from Task Group",
+                "operationId": "list-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -996,6 +1017,7 @@
                     "[Workflow]"
                 ],
                 "summary": "Get Task from Task Group",
+                "operationId": "get-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1054,6 +1076,7 @@
                     "[Workflow Template]"
                 ],
                 "summary": "List WorkflowTemplate",
+                "operationId": "list-workflow-template",
                 "parameters": [
                     {
                         "type": "string",
@@ -1112,6 +1135,7 @@
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate by Name",
+                "operationId": "get-workflow-template-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1156,6 +1180,7 @@
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate",
+                "operationId": "get-workflow-template",
                 "parameters": [
                     {
                         "type": "string",
