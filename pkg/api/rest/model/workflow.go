@@ -120,6 +120,7 @@ type WorkflowRun struct {
 	Conf map[string]interface{} `json:"conf,omitempty"`
 	Note string `json:"note,omitempty"`
 }
+
 func (d Data) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }

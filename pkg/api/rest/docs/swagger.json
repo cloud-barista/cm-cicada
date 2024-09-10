@@ -12,9 +12,9 @@
     },
     "basePath": "/cicada",
     "paths": {
-        "/cicada/eventlogs": {
+        "/eventlogs": {
             "get": {
-                "description": "Get the task Logs.",
+                "description": "Get Eventlog.",
                 "consumes": [
                     "application/json"
                 ],
@@ -24,7 +24,8 @@
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "Get taskInstances",
+                "summary": "Get Eventlog",
+                "operationId": "get-Eventlog",
                 "parameters": [
                     {
                         "type": "string",
@@ -36,21 +37,21 @@
                     {
                         "type": "string",
                         "description": "ID of the workflow run.",
-                        "name": "run_id",
+                        "name": "wfRunId",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "ID of the task.",
-                        "name": "task_id",
+                        "name": "taskId",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully get the taskInstances.",
+                        "description": "Successfully get the workflow.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
                     },
                     "400": {
@@ -60,7 +61,7 @@
                         }
                     },
                     "500": {
-                        "description": "Failed to get the taskInstances.",
+                        "description": "Failed to get the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -68,7 +69,7 @@
                 }
             }
         },
-        "/cicada/importErrors": {
+        "/importErrors": {
             "get": {
                 "description": "Get the importErrors.",
                 "consumes": [
@@ -103,7 +104,7 @@
                 }
             }
         },
-        "/cicada/readyz": {
+        "/readyz": {
             "get": {
                 "description": "Check Cicada is ready",
                 "consumes": [
@@ -795,8 +796,7 @@
                 }
             }
         },
-        "/workflow/{wfId}/run": {
-        "/cicada/workflow/{wfId}/clear": {
+        "/workflow/{wfId}/clear": {
             "post": {
                 "description": "Clear the task Instance.",
                 "consumes": [
@@ -849,7 +849,7 @@
                 }
             }
         },
-        "/cicada/workflow/{wfId}/run": {
+        "/workflow/{wfId}/run": {
             "post": {
                 "description": "Run the workflow.",
                 "consumes": [
@@ -894,8 +894,7 @@
                 }
             }
         },
-        "/workflow/{wfId}/task": {
-        "/cicada/workflow/{wfId}/runs": {
+        "/workflow/{wfId}/runs": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -939,7 +938,7 @@
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task": {
+        "/workflow/{wfId}/task": {
             "get": {
                 "description": "Get a task list of the workflow.",
                 "consumes": [
@@ -1253,8 +1252,7 @@
                 }
             }
         },
-        "/workflow_template": {
-        "/cicada/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -1319,7 +1317,7 @@
                 }
             }
         },
-        "/cicada/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -1363,7 +1361,7 @@
                 }
             }
         },
-        "/cicada/workflow_template": {
+        "/workflow_template": {
             "get": {
                 "description": "Get a list of workflow template.",
                 "consumes": [

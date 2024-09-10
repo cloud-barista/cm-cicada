@@ -403,11 +403,12 @@ info:
   title: CM-Cicada REST API
   version: latest
 paths:
-  /cicada/eventlogs:
+  /eventlogs:
     get:
       consumes:
       - application/json
-      description: Get the task Logs.
+      description: Get Eventlog.
+      operationId: get-Eventlog
       parameters:
       - description: ID of the workflow.
         in: query
@@ -416,31 +417,31 @@ paths:
         type: string
       - description: ID of the workflow run.
         in: query
-        name: run_id
+        name: wfRunId
         type: string
       - description: ID of the task.
         in: query
-        name: task_id
+        name: taskId
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully get the taskInstances.
+          description: Successfully get the workflow.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
         "400":
           description: Sent bad request.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
         "500":
-          description: Failed to get the taskInstances.
+          description: Failed to get the workflow.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get taskInstances
+      summary: Get Eventlog
       tags:
       - '[Workflow]'
-  /cicada/importErrors:
+  /importErrors:
     get:
       consumes:
       - application/json
@@ -463,7 +464,7 @@ paths:
       summary: Get importErrors
       tags:
       - '[Workflow]'
-  /cicada/readyz:
+  /readyz:
     get:
       consumes:
       - application/json
@@ -895,8 +896,7 @@ paths:
       summary: Update Workflow
       tags:
       - '[Workflow]'
-  /workflow/{wfId}/run:
-  /cicada/workflow/{wfId}/clear:
+  /workflow/{wfId}/clear:
     post:
       consumes:
       - application/json
@@ -931,7 +931,7 @@ paths:
       summary: Clear taskInstances
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/run:
+  /workflow/{wfId}/run:
     post:
       consumes:
       - application/json
@@ -961,8 +961,7 @@ paths:
       summary: Run Workflow
       tags:
       - '[Workflow]'
-  /workflow/{wfId}/task:
-  /cicada/workflow/{wfId}/runs:
+  /workflow/{wfId}/runs:
     get:
       consumes:
       - application/json
@@ -991,7 +990,7 @@ paths:
       summary: Get workflowRuns
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/task:
+  /workflow/{wfId}/task:
     get:
       consumes:
       - application/json
@@ -1202,8 +1201,7 @@ paths:
       summary: Get Task from Task Group
       tags:
       - '[Workflow]'
-  /workflow/name/{wfName}:
-  /cicada/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs:
+  /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs:
     get:
       consumes:
       - application/json
@@ -1247,7 +1245,7 @@ paths:
       summary: Get Task Logs
       tags:
       - '[Workflow]'
-  /cicada/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances:
+  /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances:
     get:
       consumes:
       - application/json
@@ -1276,7 +1274,7 @@ paths:
       summary: Get taskInstances
       tags:
       - '[Workflow]'
-  /cicada/workflow/name/{wfName}:
+  /workflow/name/{wfName}:
     get:
       consumes:
       - application/json

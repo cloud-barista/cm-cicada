@@ -10,14 +10,18 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cicada/eventlogs": {
+        "/eventlogs": {
             "get": {
-                "description": "Get the task Logs.",
+                "description": "Get Eventlog.",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +31,8 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "Get taskInstances",
+                "summary": "Get Eventlog",
+                "operationId": "get-Eventlog",
                 "parameters": [
                     {
                         "type": "string",
@@ -39,21 +44,21 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow run.",
-                        "name": "run_id",
+                        "name": "wfRunId",
                         "in": "query"
                     },
                     {
                         "type": "string",
                         "description": "ID of the task.",
-                        "name": "task_id",
+                        "name": "taskId",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully get the taskInstances.",
+                        "description": "Successfully get the workflow.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                         }
                     },
                     "400": {
@@ -63,7 +68,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Failed to get the taskInstances.",
+                        "description": "Failed to get the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -71,7 +76,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/importErrors": {
+        "/importErrors": {
             "get": {
                 "description": "Get the importErrors.",
                 "consumes": [
@@ -106,7 +111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/readyz": {
+        "/readyz": {
             "get": {
                 "description": "Check Cicada is ready",
                 "consumes": [
@@ -116,9 +121,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Admin] System management"
+                    "[Admin]\tSystem management"
                 ],
                 "summary": "Check Ready",
+                "operationId": "health-check-readyz",
                 "responses": {
                     "200": {
                         "description": "Successfully get ready state.",
@@ -135,7 +141,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/task/{taskId}": {
+        "/task/{taskId}": {
             "get": {
                 "description": "Get the task directly.",
                 "consumes": [
@@ -148,6 +154,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task Directly",
+                "operationId": "get-task-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -179,7 +186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/task_component": {
+        "/task_component": {
             "get": {
                 "description": "Get a list of task component.",
                 "consumes": [
@@ -192,6 +199,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "List TaskComponent",
+                "operationId": "list-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -242,6 +250,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Create TaskComponent",
+                "operationId": "create-task-component",
                 "parameters": [
                     {
                         "description": "task component of the node.",
@@ -275,7 +284,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/task_component/name/{tcName}": {
+        "/task_component/name/{tcName}": {
             "get": {
                 "description": "Get the task component by name.",
                 "consumes": [
@@ -288,6 +297,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent by Name",
+                "operationId": "get-task-component-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -319,7 +329,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/task_component/{tcId}": {
+        "/task_component/{tcId}": {
             "get": {
                 "description": "Get the task component.",
                 "consumes": [
@@ -332,6 +342,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Get TaskComponent",
+                "operationId": "get-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -374,6 +385,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Update TaskComponent",
+                "operationId": "update-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -425,6 +437,7 @@ const docTemplate = `{
                     "[Task Component]"
                 ],
                 "summary": "Delete TaskComponent",
+                "operationId": "delete-task-component",
                 "parameters": [
                     {
                         "type": "string",
@@ -456,7 +469,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/task_group/{tgId}": {
+        "/task_group/{tgId}": {
             "get": {
                 "description": "Get the task group directly.",
                 "consumes": [
@@ -469,6 +482,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup Directly",
+                "operationId": "get-task-group-directly",
                 "parameters": [
                     {
                         "type": "string",
@@ -500,7 +514,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow": {
+        "/workflow": {
             "get": {
                 "description": "Get a workflow list.",
                 "consumes": [
@@ -513,12 +527,13 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Workflow",
+                "operationId": "list-workflow",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Name of the workflow",
                         "name": "name",
-                        "in": "path"
+                        "in": "query"
                     },
                     {
                         "type": "string",
@@ -569,6 +584,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Create Workflow",
+                "operationId": "create-workflow",
                 "parameters": [
                     {
                         "description": "Workflow content",
@@ -602,7 +618,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/name/{wfName}": {
+        "/workflow/name/{wfName}": {
             "get": {
                 "description": "Get the workflow by name.",
                 "consumes": [
@@ -615,6 +631,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow by Name",
+                "operationId": "get-workflow-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -646,7 +663,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}": {
+        "/workflow/{wfId}": {
             "get": {
                 "description": "Get the workflow.",
                 "consumes": [
@@ -659,6 +676,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Workflow",
+                "operationId": "get-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -701,6 +719,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Update Workflow",
+                "operationId": "update-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -752,6 +771,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Delete Workflow",
+                "operationId": "delete-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -783,7 +803,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/clear": {
+        "/workflow/{wfId}/clear": {
             "post": {
                 "description": "Clear the task Instance.",
                 "consumes": [
@@ -836,7 +856,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/run": {
+        "/workflow/{wfId}/run": {
             "post": {
                 "description": "Run the workflow.",
                 "consumes": [
@@ -849,6 +869,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Run Workflow",
+                "operationId": "run-workflow",
                 "parameters": [
                     {
                         "type": "string",
@@ -880,7 +901,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/runs": {
+        "/workflow/{wfId}/runs": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -924,7 +945,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task": {
+        "/workflow/{wfId}/task": {
             "get": {
                 "description": "Get a task list of the workflow.",
                 "consumes": [
@@ -937,6 +958,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Task",
+                "operationId": "list-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -971,7 +993,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task/{taskId}": {
+        "/workflow/{wfId}/task/{taskId}": {
             "get": {
                 "description": "Get the task.",
                 "consumes": [
@@ -984,6 +1006,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task",
+                "operationId": "get-task",
                 "parameters": [
                     {
                         "type": "string",
@@ -1022,7 +1045,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task_group": {
+        "/workflow/{wfId}/task_group": {
             "get": {
                 "description": "Get a task group list of the workflow.",
                 "consumes": [
@@ -1035,6 +1058,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List TaskGroup",
+                "operationId": "list-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1069,7 +1093,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task_group/{tgId}": {
+        "/workflow/{wfId}/task_group/{tgId}": {
             "get": {
                 "description": "Get the task group.",
                 "consumes": [
@@ -1082,6 +1106,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get TaskGroup",
+                "operationId": "get-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1120,7 +1145,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task_group/{tgId}/task": {
+        "/workflow/{wfId}/task_group/{tgId}/task": {
             "get": {
                 "description": "Get a task list from the task group.",
                 "consumes": [
@@ -1133,6 +1158,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "List Task from Task Group",
+                "operationId": "list-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1174,7 +1200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/task_group/{tgId}/task/{taskId}": {
+        "/workflow/{wfId}/task_group/{tgId}/task/{taskId}": {
             "get": {
                 "description": "Get the task from the task group.",
                 "consumes": [
@@ -1187,6 +1213,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task from Task Group",
+                "operationId": "get-task-from-task-group",
                 "parameters": [
                     {
                         "type": "string",
@@ -1232,7 +1259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -1297,7 +1324,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -1341,7 +1368,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow_template": {
+        "/workflow_template": {
             "get": {
                 "description": "Get a list of workflow template.",
                 "consumes": [
@@ -1354,12 +1381,13 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "List WorkflowTemplate",
+                "operationId": "list-workflow-template",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Name of the workflow template",
                         "name": "name",
-                        "in": "path"
+                        "in": "query"
                     },
                     {
                         "type": "string",
@@ -1399,7 +1427,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow_template/name/{wfName}": {
+        "/workflow_template/name/{wfName}": {
             "get": {
                 "description": "Get the workflow template by name.",
                 "consumes": [
@@ -1412,6 +1440,7 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate by Name",
+                "operationId": "get-workflow-template-by-name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1443,7 +1472,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cicada/workflow_template/{wftId}": {
+        "/workflow_template/{wftId}": {
             "get": {
                 "description": "Get the workflow template.",
                 "consumes": [
@@ -1456,6 +1485,7 @@ const docTemplate = `{
                     "[Workflow Template]"
                 ],
                 "summary": "Get WorkflowTemplate",
+                "operationId": "get-workflow-template",
                 "parameters": [
                     {
                         "type": "string",
@@ -2070,12 +2100,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "latest",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/cicada",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "CM-Cicada REST API",
+	Description:      "Workflow management module",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

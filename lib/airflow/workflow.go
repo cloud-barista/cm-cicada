@@ -1,10 +1,9 @@
 package airflow
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
-
-	"encoding/json"
 
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
@@ -238,16 +237,13 @@ func (client *client) GetEventLogs(dagID string) (airflow.EventLogCollection, er
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-
-	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
-	logs, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
-	logger.Println(logger.INFO, false,logs)
+	req, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting event logs. (Error: "+err.Error()+").")
 	}
 
-	return logs, nil
+	return req, nil
 }
 
 func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {
