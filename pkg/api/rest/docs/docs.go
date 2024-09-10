@@ -906,7 +906,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the workflowRuns.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun"
                         }
                     },
                     "400": {
@@ -1991,6 +1991,57 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun": {
+            "type": "object",
+            "properties": {
+                "conf": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "data_interval_end": {
+                    "type": "string"
+                },
+                "data_interval_start": {
+                    "type": "string"
+                },
+                "duration_date": {
+                    "type": "number"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "execution_date": {
+                    "type": "string"
+                },
+                "external_trigger": {
+                    "type": "boolean"
+                },
+                "last_scheduling_decision": {
+                    "type": "string"
+                },
+                "logical_date": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "run_type": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
                     "type": "string"
                 }
             }

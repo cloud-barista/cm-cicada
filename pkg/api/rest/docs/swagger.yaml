@@ -346,6 +346,40 @@ definitions:
     - id
     - name
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun:
+    properties:
+      conf:
+        additionalProperties: true
+        type: object
+      data_interval_end:
+        type: string
+      data_interval_start:
+        type: string
+      duration_date:
+        type: number
+      end_date:
+        type: string
+      execution_date:
+        type: string
+      external_trigger:
+        type: boolean
+      last_scheduling_decision:
+        type: string
+      logical_date:
+        type: string
+      note:
+        type: string
+      run_type:
+        type: string
+      start_date:
+        type: string
+      state:
+        type: string
+      workflow_id:
+        type: string
+      workflow_run_id:
+        type: string
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate:
     properties:
       data:
@@ -921,7 +955,7 @@ paths:
         "200":
           description: Successfully get the workflowRuns.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun'
         "400":
           description: Sent bad request.
           schema:

@@ -919,22 +919,41 @@ func GetTaskLogs(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	model.Task				"Successfully get the workflowRuns."
+// @Success		200	{object}	model.WorkflowRun				"Successfully get the workflowRuns."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
 // @Router		/cicada/workflow/{wfId}/runs [get]
 func GetWorkflowRuns(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
-		return common.ReturnErrorMsg(c, "Please provide the wfId.")
-	}
-	
-	runList, err := airflow.Client.GetDAGRuns(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: " + err.Error())
+			return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	return c.JSONPretty(http.StatusOK, runList, " ")
+	runList, err := airflow.Client.GetDAGRuns(wfId)
+	if err != nil {
+			return common.ReturnErrorMsg(c, "Failed to get the workflow runs: " + err.Error())
+	}
+
+	var transformedRuns []model.WorkflowRun;
+
+	for _, dagRun := range *runList.DagRuns { 
+		transformedRun := model.WorkflowRun {
+				WorkflowID:         dagRun.DagId,         
+				WorkflowRunID:     dagRun.GetDagRunId(),      
+				DataIntervalStart: dagRun.GetDataIntervalStart(),
+				DataIntervalEnd:   dagRun.GetDataIntervalEnd(),
+				State:               string(dagRun.GetState()),
+				ExecutionDate:      dagRun.GetExecutionDate(),
+				StartDate:          dagRun.GetStartDate(),
+				EndDate:            dagRun.GetEndDate(),
+				RunType: dagRun.GetRunType(),
+				LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
+				DurationDate: (dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds()),
+		}
+		transformedRuns = append(transformedRuns,transformedRun )
+}
+
+	return c.JSONPretty(http.StatusOK, transformedRuns, " ")
 }
 // taskInstances godoc
 //

@@ -92,6 +92,34 @@ type CreateWorkflowReq struct {
 	Data CreateDataReq `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
 
+type Monit struct {
+	WorkflowID string
+	WorkflowVersion string
+	Status string
+	startTime time.Time
+	endTime time.Time
+	Duration  time.Time
+	WorkflowInput string
+	WorkflowResult string
+}
+
+type WorkflowRun struct {
+	WorkflowRunID string `json:"workflow_run_id,omitempty"`
+	WorkflowID *string `json:"workflow_id,omitempty"`
+	LogicalDate string `json:"logical_date,omitempty"`
+	ExecutionDate time.Time `json:"execution_date,omitempty"`
+	StartDate time.Time `json:"start_date,omitempty"`
+	EndDate time.Time `json:"end_date,omitempty"`
+	DurationDate  float64 `json:"duration_date,omitempty"`
+	DataIntervalStart time.Time `json:"data_interval_start,omitempty"`
+	DataIntervalEnd time.Time `json:"data_interval_end,omitempty"`
+	LastSchedulingDecision time.Time `json:"last_scheduling_decision,omitempty"`
+	RunType string `json:"run_type,omitempty"`
+	State string `json:"state,omitempty"`
+	ExternalTrigger *bool `json:"external_trigger,omitempty"`
+	Conf map[string]interface{} `json:"conf,omitempty"`
+	Note string `json:"note,omitempty"`
+}
 func (d Data) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }
