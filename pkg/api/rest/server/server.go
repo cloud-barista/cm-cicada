@@ -42,6 +42,15 @@ func getLocalIP() string {
 	return localIP[0]
 }
 
+// @title CM-Cicada REST API
+// @version latest
+// @description Workflow management module
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /cicada
+
 func Init() {
 	e := echo.New()
 

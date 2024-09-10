@@ -12,16 +12,17 @@ import (
 
 // CreateTaskComponent godoc
 //
-// @Summary		Create TaskComponent
-// @Description	Register the task component.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		TaskComponent body model.CreateTaskComponentReq true "task component of the node."
-// @Success		200	{object}	model.TaskComponent		"Successfully register the task component"
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
-// @Router		/cicada/task_component [post]
+//	@ID				create-task-component
+//	@Summary		Create TaskComponent
+//	@Description	Register the task component.
+//	@Tags		[Task Component]
+//	@Accept		json
+//	@Produce		json
+//	@Param		TaskComponent body model.CreateTaskComponentReq true "task component of the node."
+//	@Success		200	{object}	model.TaskComponent		"Successfully register the task component"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
+//	@Router		/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
 	createTaskComponentReq := new(model.CreateTaskComponentReq)
 	err := c.Bind(createTaskComponentReq)
@@ -48,16 +49,17 @@ func CreateTaskComponent(c echo.Context) error {
 
 // GetTaskComponent godoc
 //
-// @Summary		Get TaskComponent
-// @Description	Get the task component.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		tcId path string true "ID of the TaskComponent"
-// @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/cicada/task_component/{tcId} [get]
+//	@ID				get-task-component
+//	@Summary		Get TaskComponent
+//	@Description	Get the task component.
+//	@Tags		[Task Component]
+//	@Accept		json
+//	@Produce		json
+//	@Param		tcId path string true "ID of the TaskComponent"
+//	@Success		200	{object}	model.TaskComponent		"Successfully get the task component"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
+//	@Router		/task_component/{tcId} [get]
 func GetTaskComponent(c echo.Context) error {
 	tcId := c.Param("tcId")
 	if tcId == "" {
@@ -72,16 +74,17 @@ func GetTaskComponent(c echo.Context) error {
 
 // GetTaskComponentByName godoc
 //
-// @Summary		Get TaskComponent by Name
-// @Description	Get the task component by name.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		tcName path string true "Name of the TaskComponent"
-// @Success		200	{object}	model.TaskComponent		"Successfully get the task component"
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
-// @Router		/cicada/task_component/name/{tcName} [get]
+//	@ID				get-task-component-by-name
+//	@Summary		Get TaskComponent by Name
+//	@Description	Get the task component by name.
+//	@Tags		[Task Component]
+//	@Accept		json
+//	@Produce		json
+//	@Param		tcName path string true "Name of the TaskComponent"
+//	@Success		200	{object}	model.TaskComponent		"Successfully get the task component"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task component"
+//	@Router		/task_component/name/{tcName} [get]
 func GetTaskComponentByName(c echo.Context) error {
 	tcName := c.Param("tcName")
 	if tcName == "" {
@@ -96,17 +99,18 @@ func GetTaskComponentByName(c echo.Context) error {
 
 // ListTaskComponent godoc
 //
-// @Summary		List TaskComponent
-// @Description	Get a list of task component.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		page query string false "Page of the task component list."
-// @Param		row query string false "Row of the task component list."
-// @Success		200	{object}	[]model.TaskComponent	"Successfully get a list of task component."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get a list of task component."
-// @Router			/cicada/task_component [get]
+//	@ID				list-task-component
+//	@Summary		List TaskComponent
+//	@Description	Get a list of task component.
+//	@Tags			[Task Component]
+//	@Accept			json
+//	@Produce		json
+//	@Param			page query string false "Page of the task component list."
+//	@Param			row query string false "Row of the task component list."
+//	@Success		200	{object}	[]model.TaskComponent	"Successfully get a list of task component."
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to get a list of task component."
+//	@Router			/task_component [get]
 func ListTaskComponent(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -122,17 +126,18 @@ func ListTaskComponent(c echo.Context) error {
 
 // UpdateTaskComponent godoc
 //
-// @Summary		Update TaskComponent
-// @Description	Update the task component.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		tcId path string true "ID of the TaskComponent"
-// @Param		TaskComponent body model.CreateTaskComponentReq true "task component to modify."
-// @Success		200	{object}	model.TaskComponent		"Successfully update the task component"
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
-// @Router		/cicada/task_component/{tcId} [put]
+//	@ID				update-task-component
+//	@Summary		Update TaskComponent
+//	@Description	Update the task component.
+//	@Tags		[Task Component]
+//	@Accept		json
+//	@Produce		json
+//	@Param		tcId path string true "ID of the TaskComponent"
+//	@Param		TaskComponent body model.CreateTaskComponentReq true "task component to modify."
+//	@Success		200	{object}	model.TaskComponent		"Successfully update the task component"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
+//	@Router		/task_component/{tcId} [put]
 func UpdateTaskComponent(c echo.Context) error {
 	taskComponent := new(model.CreateTaskComponentReq)
 	err := c.Bind(taskComponent)
@@ -165,16 +170,17 @@ func UpdateTaskComponent(c echo.Context) error {
 
 // DeleteTaskComponent godoc
 //
-// @Summary		Delete TaskComponent
-// @Description	Delete the task component.
-// @Tags		[Task Component]
-// @Accept		json
-// @Produce		json
-// @Param		tcId path string true "ID of the task component."
-// @Success		200	{object}	model.SimpleMsg		"Successfully delete the task component"
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
-// @Router		/cicada/task_component/{tcId} [delete]
+//	@ID				delete-task-component
+//	@Summary		Delete TaskComponent
+//	@Description	Delete the task component.
+//	@Tags		[Task Component]
+//	@Accept		json
+//	@Produce		json
+//	@Param		tcId path string true "ID of the task component."
+//	@Success		200	{object}	model.SimpleMsg		"Successfully delete the task component"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to delete the task component"
+//	@Router		/task_component/{tcId} [delete]
 func DeleteTaskComponent(c echo.Context) error {
 	tcId := c.Param("tcId")
 	if tcId == "" {

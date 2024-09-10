@@ -11,15 +11,16 @@ var OkMessage = model.SimpleMsg{}
 var IsReady = false
 
 // CheckReady func is for checking Cicada server health.
-// @Summary Check Ready
-// @Description Check Cicada is ready
-// @Tags [Admin] System management
-// @Accept		json
-// @Produce		json
-// @Success		200 {object}	model.SimpleMsg			"Successfully get ready state."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to check ready state."
 //
-// @Router /cicada/readyz [get]
+//	@ID				health-check-readyz
+//	@Summary		Check Ready
+//	@Description	Check Cicada is ready
+//	@Tags [Admin]	System management
+//	@Accept			json
+//	@Produce		json
+//	@Success		200 {object}	model.SimpleMsg			"Successfully get ready state."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to check ready state."
+//	@Router			/readyz [get]
 func CheckReady(c echo.Context) error {
 	status := http.StatusOK
 
