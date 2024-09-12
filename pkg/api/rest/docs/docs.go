@@ -803,59 +803,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{wfId}/clear": {
-            "post": {
-                "description": "Clear the task Instance.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "[Workflow]"
-                ],
-                "summary": "Clear taskInstances",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID of the workflow.",
-                        "name": "wfId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Clear TaskInstance",
-                        "name": "requestBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/airflow.ClearTaskInstances"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully clear the taskInstances.",
-                        "schema": {
-                            "$ref": "#/definitions/airflow.TaskInstanceReferenceCollection"
-                        }
-                    },
-                    "400": {
-                        "description": "Sent bad request.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to clear the taskInstances.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/workflow/{wfId}/run": {
             "post": {
                 "description": "Run the workflow.",
@@ -1259,6 +1206,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear": {
+            "post": {
+                "description": "Clear the task Instance.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Clear taskInstances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the wfRunId.",
+                        "name": "wfRunId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the taskId.",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully clear the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/airflow.TaskInstanceReferenceCollection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to clear the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
             "get": {
                 "description": "Get the task Logs.",
@@ -1344,13 +1349,20 @@ const docTemplate = `{
                         "name": "wfId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfRunId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Successfully get the taskInstances.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance"
                         }
                     },
                     "400": {
@@ -1519,74 +1531,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "airflow.ClearTaskInstances": {
-            "type": "object",
-            "properties": {
-                "dag_run_id": {
-                    "description": "The DagRun ID for this task instance",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/airflow.NullableString"
-                        }
-                    ]
-                },
-                "dry_run": {
-                    "description": "If set, don't actually run this operation. The response will contain a list of task instances planned to be cleaned, but not modified in any way.",
-                    "type": "boolean"
-                },
-                "end_date": {
-                    "description": "The maximum execution date to clear.",
-                    "type": "string"
-                },
-                "include_downstream": {
-                    "description": "If set to true, downstream tasks are also affected.",
-                    "type": "boolean"
-                },
-                "include_future": {
-                    "description": "If set to True, also tasks from future DAG Runs are affected.",
-                    "type": "boolean"
-                },
-                "include_parentdag": {
-                    "description": "Clear tasks in the parent dag of the subdag.",
-                    "type": "boolean"
-                },
-                "include_past": {
-                    "description": "If set to True, also tasks from past DAG Runs are affected.",
-                    "type": "boolean"
-                },
-                "include_subdags": {
-                    "description": "Clear tasks in subdags and clear external tasks indicated by ExternalTaskMarker.",
-                    "type": "boolean"
-                },
-                "include_upstream": {
-                    "description": "If set to true, upstream tasks are also affected.",
-                    "type": "boolean"
-                },
-                "only_failed": {
-                    "description": "Only clear failed tasks.",
-                    "type": "boolean"
-                },
-                "only_running": {
-                    "description": "Only clear running tasks.",
-                    "type": "boolean"
-                },
-                "reset_dag_runs": {
-                    "description": "Set state of DAG runs to RUNNING.",
-                    "type": "boolean"
-                },
-                "start_date": {
-                    "description": "The minimum execution date to clear.",
-                    "type": "string"
-                },
-                "task_ids": {
-                    "description": "A list of task ids to clear.  *New in version 2.1.0*",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "airflow.ImportError": {
             "type": "object",
             "properties": {
@@ -1622,9 +1566,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "airflow.NullableString": {
-            "type": "object"
         },
         "airflow.TaskInstanceReference": {
             "type": "object",
@@ -1997,6 +1938,41 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
                     }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance": {
+            "type": "object",
+            "properties": {
+                "duration_date": {
+                    "type": "number"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "execution_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "try_number": {
+                    "type": "integer"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "type": "string"
                 }
             }
         },

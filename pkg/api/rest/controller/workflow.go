@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -475,10 +476,10 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
-	}
+	// err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
+	// if err != nil {
+	// 	return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
+	// }
 
 	err = airflow.Client.CreateDAG(oldWorkflow)
 	if err != nil {
@@ -978,7 +979,8 @@ func GetWorkflowRuns(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	model.Task				"Successfully get the taskInstances."
+// @Param		wfRunId path string true "ID of the workflow."
+// @Success		200	{object}	model.TaskInstance				"Successfully get the taskInstances."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
 // @Router		 /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances [get]
@@ -991,14 +993,50 @@ func GetTaskInstances(c echo.Context) error {
 	if wfRunId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
-	runList, err := airflow.Client.GetTaskInstances(wfId, wfRunId)
+	runList, err := airflow.Client.GetTaskInstances(common.UrlDecode(wfId),common.UrlDecode(wfRunId) )
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
 	}
+	var taskInstances []model.TaskInstance;
+	layout := time.RFC3339Nano
 
-	return c.JSONPretty(http.StatusOK, runList, " ")
+	for _, taskInstance := range *runList.TaskInstances { 
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(),taskInstance.GetTaskId())
+		if err != nil {
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		}
+		taskId := &taskDBInfo.ID
+		executionDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		if err != nil {
+			fmt.Println("Error parsing execution date:", err)
+			continue
+		}
+		startDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		if err != nil {
+			fmt.Println("Error parsing execution date:", err)
+			continue
+		}
+		endDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		if err != nil {
+			fmt.Println("Error parsing execution date:", err)
+			continue
+		}
+		taskInfo := model.TaskInstance {
+				WorkflowID:         taskInstance.DagId,         
+				WorkflowRunID:     taskInstance.GetDagRunId(),      
+				TaskID: *taskId,
+				TaskName:  taskInstance.GetTaskId(),
+				State:               string(taskInstance.GetState()),
+				ExecutionDate:     executionDate,
+				StartDate:          startDate,
+				EndDate:           endDate,
+				DurationDate: float64(taskInstance.GetDuration()),
+				TryNumber: int(taskInstance.GetTryNumber()),
+		}
+		taskInstances = append(taskInstances,taskInfo )
 }
-
+	return c.JSONPretty(http.StatusOK, taskInstances, " ")
+}
 
 // taskInstances godoc
 //
@@ -1008,23 +1046,33 @@ func GetTaskInstances(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Param		requestBody body	airflow.ClearTaskInstances true "Clear TaskInstance"
+// @Param		wfRunId path string true "ID of the wfRunId."
+// @Param		taskId path string true "ID of the taskId."
 // @Success		200	{object}	airflow.TaskInstanceReferenceCollection				"Successfully clear the taskInstances."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
-// @Router		 /workflow/{wfId}/clear [post]
+// @Router		 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear [post]
 func ClearTaskInstances(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
-	var clearTaskInstances interface{}
-	if err := c.Bind(&clearTaskInstances); err != nil {
-		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Invalid request body. (Error: " + err.Error() + ").")
+	wfRunId := c.Param("wfRunId")
+	if wfRunId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
+	}
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	} else {
+		taskDBInfo, err := dao.TaskGet(taskId)
+		if err != nil {
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		}
+		taskId = taskDBInfo.Name
 	}
 
-	runList, err := airflow.Client.ClearTaskInstance(wfId,clearTaskInstances )
+	runList, err := airflow.Client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId),taskId )
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
 	}

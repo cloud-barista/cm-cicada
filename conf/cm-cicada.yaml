@@ -6,6 +6,7 @@ cm-cicada:
         templates_directory: "./lib/airflow/example/workflow_template/"
     airflow-server:
         address: 127.0.0.1:8080
+        # address: 192.168.160.139:8080
         use_tls: false
         # skip_tls_verify: true
         init_retry: 5
