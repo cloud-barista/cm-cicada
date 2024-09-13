@@ -134,6 +134,17 @@ type TaskInstance struct {
 	TryNumber int `json:"try_number"`
 }
 
+type TaskInstanceReference struct {
+	// The task ID.
+	TaskId *string `json:"task_id,omitempty"`
+	TaskName string `json:"task_name,omitempty"`
+	// The DAG ID.
+	WorkflowID *string `json:"workflow_id,omitempty"`
+	// The DAG run ID.
+	WorkflowRunID *string `json:"workflow_run_id,omitempty"`
+	ExecutionDate *string `json:"execution_date,omitempty"`
+}
+
 func (d Data) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }

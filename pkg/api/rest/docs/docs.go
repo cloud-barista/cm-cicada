@@ -1246,7 +1246,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully clear the taskInstances.",
                         "schema": {
-                            "$ref": "#/definitions/airflow.TaskInstanceReferenceCollection"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference"
                         }
                     },
                     "400": {
@@ -1311,7 +1311,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the task Logs.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task"
+                            "$ref": "#/definitions/airflow.InlineResponse200"
                         }
                     },
                     "400": {
@@ -1567,34 +1567,14 @@ const docTemplate = `{
                 }
             }
         },
-        "airflow.TaskInstanceReference": {
+        "airflow.InlineResponse200": {
             "type": "object",
             "properties": {
-                "dag_id": {
-                    "description": "The DAG ID.",
+                "content": {
                     "type": "string"
                 },
-                "dag_run_id": {
-                    "description": "The DAG run ID.",
+                "continuation_token": {
                     "type": "string"
-                },
-                "execution_date": {
-                    "type": "string"
-                },
-                "task_id": {
-                    "description": "The task ID.",
-                    "type": "string"
-                }
-            }
-        },
-        "airflow.TaskInstanceReferenceCollection": {
-            "type": "object",
-            "properties": {
-                "task_instances": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/airflow.TaskInstanceReference"
-                    }
                 }
             }
         },
@@ -1972,6 +1952,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workflow_run_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference": {
+            "type": "object",
+            "properties": {
+                "execution_date": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "description": "The task ID.",
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "description": "The DAG ID.",
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "description": "The DAG run ID.",
                     "type": "string"
                 }
             }

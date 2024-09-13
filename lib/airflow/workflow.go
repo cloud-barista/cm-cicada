@@ -162,10 +162,6 @@ func (client *client) GetTaskInstances(dagID string, dagRunId string) (airflow.T
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-	// dagID = "a7192143-6aa7-4dee-856c-366caa91d126"
-	// dagRunId = "manual__2024-09-10T07:20:26.072377+00:00"
-	// req := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId)
-	// resp, _, err := client.api.TaskInstanceApi.GetTaskInstancesExecute(req)
 	resp, http, err := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId).Execute()
 	fmt.Println("test : ", http)
 	if err != nil {
