@@ -70,18 +70,6 @@ class JsonHttpRequestOperator(BaseOperator):
             except json.JSONDecodeError as e:
                 raise ValueError(f"Failed to parse data as JSON: {e}")
 
-        data = data.replace('\\n', '')
-
-        if '[\'{' in data:
-            data = data.replace('[\'{', '{')
-        else:
-            data = data.replace('[{', '{', 1)
-
-        if '}\']' in data:
-            data = replaceRight(data, '}\']', '}', -1)
-        else:
-            data = replaceRight(data, '}]', '}', 1)
-
         print("=== Request Body ===")
         print(data)
         execute_http(context, self.http_conn_id, self.method, self.endpoint, data)
