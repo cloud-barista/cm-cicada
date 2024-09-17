@@ -55,8 +55,21 @@ class JsonHttpRequestOperator(BaseOperator):
         else:
             raise ValueError(f"No xcom data found for task_id='{self.xcom_task}', key='return_value'")
 
-        print('=== xcom data (task_id=\'' + self.xcom_task + '\', key=\'return_value\') ===')
-        print(data)
+        print(f"=== endpoint='{self.endpoint}' ===")
+        if self.endpoint.startswith('/beetle/migration'):
+            try:
+                json_data = json.loads(data)
+
+                if 'targetInfra' in json_data:
+                    data = json.dumps(json_data['targetInfra'], indent=4)
+                    print("=== targetInfra content ===")
+                    print(data)
+                else:
+                    raise ValueError("targetInfra key not found in the JSON data")
+
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse data as JSON: {e}")
+
         data = data.replace('\\n', '')
 
         if '[\'{' in data:
