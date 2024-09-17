@@ -129,12 +129,14 @@ func (client *client) DeleteDAG(dagID string, deleteFolderOnly bool) error {
 			"AIRFLOW: Failed to delete dag directory. (Error: "+err.Error()+").")
 	}
 
-	ctx, cancel := Context()
-	defer cancel()
-	_, err = client.api.DAGApi.DeleteDag(ctx, dagID).Execute()
-	if err != nil {
-		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while deleting the DAG. (Error: "+err.Error()+").")
+	if !deleteFolderOnly {
+		ctx, cancel := Context()
+		defer cancel()
+		_, err = client.api.DAGApi.DeleteDag(ctx, dagID).Execute()
+		if err != nil {
+			logger.Println(logger.ERROR, false,
+				"AIRFLOW: Error occurred while deleting the DAG. (Error: "+err.Error()+").")
+		}
 	}
 
 	return err
