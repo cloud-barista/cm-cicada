@@ -116,7 +116,7 @@ func (client *client) RunDAG(dagID string) (airflow.DAGRun, error) {
 	return resp, err
 }
 
-func (client *client) DeleteDAG(dagID string) error {
+func (client *client) DeleteDAG(dagID string, deleteFolderOnly bool) error {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()

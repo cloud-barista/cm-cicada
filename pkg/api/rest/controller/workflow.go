@@ -473,6 +473,16 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
+	err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
+	}
+
+	err = airflow.Client.CreateDAG(oldWorkflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
+	}
+
 	return c.JSONPretty(http.StatusOK, oldWorkflow, " ")
 }
 
@@ -500,7 +510,7 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(workflow.ID)
+	err = airflow.Client.DeleteDAG(workflow.ID, false)
 	if err != nil {
 		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
