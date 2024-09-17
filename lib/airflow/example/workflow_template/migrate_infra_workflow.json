@@ -18,7 +18,7 @@
           },
           {
             "name": "infra_get",
-            "task_component": "honeybee_task_get_infra",
+            "task_component": "honeybee_task_get_infra_refined",
             "request_body": "",
             "path_params": {
               "sgId": "3e635238-0c4b-4f6e-9062-906f3dd5f571"
