@@ -42,6 +42,17 @@
             "dependencies": [
               "infra_recommend"
             ]
+          },
+          {
+            "name": "register_target_to_source_group",
+            "task_component": "honeybee_register_target_info_to_source_group",
+            "request_body": "infra_migration",
+            "path_params": {
+              "sgId": "3e635238-0c4b-4f6e-9062-906f3dd5f571"
+            },
+            "dependencies": [
+              "infra_migration"
+            ]
           }
         ]
       }
