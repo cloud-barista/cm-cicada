@@ -45,7 +45,16 @@ class JsonHttpRequestOperator(BaseOperator):
         super(JsonHttpRequestOperator, self).__init__(*args, **kwargs)
 
     def execute(self, context) -> None:
-        data = str(context['ti'].xcom_pull(task_ids=[self.xcom_task], key='return_value'))
+        xcom_data = context['ti'].xcom_pull(task_ids=[self.xcom_task], key='return_value')
+        data = ""
+
+        if xcom_data and len(xcom_data) > 0:
+            data = str(xcom_data[0])
+            print(f"=== xcom data (task_id='{self.xcom_task}', key='return_value') ===")
+            print(data)
+        else:
+            raise ValueError(f"No xcom data found for task_id='{self.xcom_task}', key='return_value'")
+
         print('=== xcom data (task_id=\'' + self.xcom_task + '\', key=\'return_value\') ===')
         print(data)
         data = data.replace('\\n', '')
