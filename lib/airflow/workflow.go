@@ -239,8 +239,6 @@ func (client *client) ClearTaskInstance(dagID string, dagRunID string, taskID st
 		return airflow.TaskInstanceReferenceCollection{}, err
 	}
 
-	// 결과 로그 출력
-	logger.Println(logger.INFO, false, logs)
 	return logs, nil
 }
 
@@ -252,13 +250,22 @@ func (client *client) GetEventLogs(dagID string) (airflow.EventLogCollection, er
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-	req, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
+	
+	eventLogs, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting event logs. (Error: "+err.Error()+").")
 	}
+	var filteredLogs []airflow.EventLog
+	for _, log := range eventLogs.GetEventLogs() {
+		// 로그 필터링
+		if log.GetDagId() == dagID  {
+			filteredLogs = append(filteredLogs, log)
+			fmt.Println("Filtered Event Log:", log)
+		}
+	}
 
-	return req, nil
+	return eventLogs, err
 }
 
 func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {
