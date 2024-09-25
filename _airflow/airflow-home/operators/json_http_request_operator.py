@@ -45,20 +45,30 @@ class JsonHttpRequestOperator(BaseOperator):
         super(JsonHttpRequestOperator, self).__init__(*args, **kwargs)
 
     def execute(self, context) -> None:
-        data = str(context['ti'].xcom_pull(task_ids=[self.xcom_task], key='return_value'))
-        print('=== xcom data (task_id=\'' + self.xcom_task + '\', key=\'return_value\') ===')
-        print(data)
-        data = data.replace('\\n', '')
+        xcom_data = context['ti'].xcom_pull(task_ids=[self.xcom_task], key='return_value')
+        data = ""
 
-        if '[\'{' in data:
-            data = data.replace('[\'{', '{')
+        if xcom_data and len(xcom_data) > 0:
+            data = str(xcom_data[0])
+            print(f"=== xcom data (task_id='{self.xcom_task}', key='return_value') ===")
+            print(data)
         else:
-            data = data.replace('[{', '{', 1)
+            raise ValueError(f"No xcom data found for task_id='{self.xcom_task}', key='return_value'")
 
-        if '}\']' in data:
-            data = replaceRight(data, '}\']', '}', -1)
-        else:
-            data = replaceRight(data, '}]', '}', 1)
+        print(f"=== endpoint='{self.endpoint}' ===")
+        if self.endpoint.startswith('/beetle/migration'):
+            try:
+                json_data = json.loads(data)
+
+                if 'targetInfra' in json_data:
+                    data = json.dumps(json_data['targetInfra'], indent=4)
+                    print("=== targetInfra content ===")
+                    print(data)
+                else:
+                    raise ValueError("targetInfra key not found in the JSON data")
+
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse data as JSON: {e}")
 
         print("=== Request Body ===")
         print(data)

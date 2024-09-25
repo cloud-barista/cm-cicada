@@ -170,7 +170,7 @@ func (d *CreateDataReq) Scan(value interface{}) error {
 	}
 	bytes, ok := value.([]byte)
 	if !ok {
-		return errors.New("Invalid type for Data")
+		return errors.New("Invalid type for CreateDataReq")
 	}
 	return json.Unmarshal(bytes, d)
 }

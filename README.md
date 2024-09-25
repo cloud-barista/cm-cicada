@@ -14,22 +14,25 @@ This is a subsystem of the Cloud-Barista platform that provides workflow managem
 
 ## How to run
 
-* Build and run binary with Airflow server
-   ```shell
-   make run
-   ```
+### 1. Build and run
+
+Build and run the binary with Airflow server
+```shell
+make run
+```
 
 Or, you can run it within Docker by this command.
  ```shell
  make run_docker
  ```
 
-* Stop binary with Airflow server
-   ```shell
-   make stop
-   ```
+If you want to stop the binary with Airflow server, run this command.
+```shell
+make stop
+```
 
-## About configuration file
+### 2. Write configuration file
+ 
 - Configuration file name is 'cm-cicada.yaml'
 - The configuration file must be placed in one of the following directories.
     - .cm-cicada/conf directory under user's home directory
@@ -106,6 +109,110 @@ Or, you can run it within Docker by this command.
     listen:
         port: 8083
   ```
+
+### 3. Check workflow template
+
+Check workflow template list.
+
+```shell
+curl -X 'GET' \
+  'http://127.0.0.1:8083/cicada/workflow_template' \
+  -H 'accept: application/json'
+```
+
+Get workflow template and copy the content.
+
+```shell
+curl -X 'GET' \
+  'http://127.0.0.1:8083/cicada/workflow_template/81bbeb23-2c48-4536-9f01-55796e0fa394' \
+  -H 'accept: application/json'
+```
+
+### 4. Create the workflow
+
+Create the workflow by pasting copied workflow template content.
+Modify all of 'sgId' params. (Create the source group from honeybee.)
+
+Check the ID of the created workflow.
+
+```shell
+curl -X 'POST' \
+  'http://127.0.0.1:8083/cicada/workflow' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "migrate_infra_workflow",
+  "data": {
+    "description": "Migrate Server",
+    "task_groups": [
+      {
+        "name": "migrate_infra",
+        "description": "Migrate Server",
+        "tasks": [
+          {
+            "name": "infra_import",
+            "task_component": "honeybee_task_import_infra",
+            "request_body": "",
+            "path_params": {
+              "sgId": "ba695bbb-d673-4092-9821-c9cb05676228"
+            },
+            "dependencies": []
+          },
+          {
+            "name": "infra_get",
+            "task_component": "honeybee_task_get_infra_refined",
+            "request_body": "",
+            "path_params": {
+              "sgId": "ba695bbb-d673-4092-9821-c9cb05676228"
+            },
+            "dependencies": [
+              "infra_import"
+            ]
+          },
+          {
+            "name": "infra_recommend",
+            "task_component": "beetle_task_recommend_infra",
+            "request_body": "infra_get",
+            "path_params": null,
+            "dependencies": [
+              "infra_get"
+            ]
+          },
+          {
+            "name": "infra_migration",
+            "task_component": "beetle_task_infra_migration",
+            "request_body": "infra_recommend",
+            "path_params": null,
+            "dependencies": [
+              "infra_recommend"
+            ]
+          },
+          {
+            "name": "register_target_to_source_group",
+            "task_component": "honeybee_register_target_info_to_source_group",
+            "request_body": "infra_migration",
+            "path_params": {
+              "sgId": "ba695bbb-d673-4092-9821-c9cb05676228"
+            },
+            "dependencies": [
+              "infra_migration"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}'
+```
+
+### 5. Run the workflow
+
+```shell
+curl -X 'POST' \
+  'http://127.0.0.1:8083/cicada/workflow/4420da6c-c50f-4d8b-bc2e-f02d8b557fad/run' \
+  -H 'accept: application/json' \
+  -d ''
+```
 
 ## Health-check
 
