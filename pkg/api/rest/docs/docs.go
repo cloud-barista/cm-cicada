@@ -874,7 +874,10 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the workflowRuns.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun"
+                            }
                         }
                     },
                     "400": {

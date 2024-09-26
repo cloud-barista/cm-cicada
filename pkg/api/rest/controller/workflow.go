@@ -928,7 +928,11 @@ func GetTaskLogs(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: " + err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, logs, " ")
+	taskLog := model.TaskLog {
+		Content: *logs.Content,
+	}
+
+	return c.JSONPretty(http.StatusOK, taskLog, " ")
 }
 
 // workflowRuns godoc
@@ -939,7 +943,7 @@ func GetTaskLogs(c echo.Context) error {
 // @Accept		json
 // @Produce		json
 // @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	model.WorkflowRun				"Successfully get the workflowRuns."
+// @Success		200	{object}	[]model.WorkflowRun				"Successfully get the workflowRuns."
 // @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
 // @Router		 /workflow/{wfId}/runs [get]

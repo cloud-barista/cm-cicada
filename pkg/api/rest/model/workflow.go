@@ -145,6 +145,9 @@ type TaskInstanceReference struct {
 	ExecutionDate *string `json:"execution_date,omitempty"`
 }
 
+type TaskLog struct {
+	Content string `json:"content,omitempty"`
+}
 func (d Data) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }
