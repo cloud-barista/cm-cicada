@@ -1,8 +1,13 @@
 package airflow
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/apache/airflow-client-go/airflow"
@@ -244,30 +249,59 @@ func (client *client) ClearTaskInstance(dagID string, dagRunID string, taskID st
 	return logs, nil
 }
 
-
-func (client *client) GetEventLogs(dagID string) (airflow.EventLogCollection, error) {
+func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string) (airflow.EventLogCollection, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-	
-	eventLogs, _, err := client.api.EventLogApi.GetEventLogs(ctx).Execute()
-	if err != nil {
-		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while getting event logs. (Error: "+err.Error()+").")
+
+	localBasePath, err:=client.api.GetConfig().ServerURLWithContext(ctx, "EventLogApiService.GetEventLog")
+	baseURL  :=  "http://"+client.api.GetConfig().Host+localBasePath + "/eventLogs"
+	queryParams := map[string]string{
+		"offset":          "0",
+		"limit":           "100",
+		"dag_id":          dagID,
+		"run_id":					 dagRunId,
+		"task_id":         taskId,
+		"order_by":        "-when",
+		"excluded_events": "gantt,landing_times,tries,duration,calendar,graph,grid,tree,tree_data",
 	}
-	var filteredLogs []airflow.EventLog
-	for _, log := range eventLogs.GetEventLogs() {
-		// 로그 필터링
-		if log.GetDagId() == dagID  {
-			filteredLogs = append(filteredLogs, log)
-			fmt.Println("Filtered Event Log:", log)
-		}
+	query := url.Values{}
+	for key, value := range queryParams {
+		query.Add(key, value)
+	}
+	queryString := query.Encode()
+	fullURL := fmt.Sprintf("%s?%s", baseURL, queryString)
+	httpclient := client.api.GetConfig().HTTPClient
+	// fmt.Println(&httpclient.)
+
+	// 요청 생성
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+	}
+	cred := ctx.Value(airflow.ContextBasicAuth).(airflow.BasicAuth)
+	addBasicAuth(req, cred.UserName, cred.Password)
+	res, err := httpclient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+	}
+	
+	var eventlogs airflow.EventLogCollection
+	err = json.Unmarshal(body, &eventlogs)
+	if err != nil {
+		fmt.Println("Error unmarshal response body:", err)
 	}
 
-	return eventLogs, err
+
+	return eventlogs, err
 }
 
 func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {
@@ -299,4 +333,10 @@ func (client *client) PatchDag(dagID string, dagBody airflow.DAG)  (airflow.DAG,
 	}
 
 	return logs, nil
+}
+
+func addBasicAuth(req *http.Request, username, password string) {
+	auth := username + ":" + password
+	encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
+	req.Header.Add("Authorization", "Basic "+encodedAuth)
 }

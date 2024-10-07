@@ -147,7 +147,7 @@ with DAG(
 
     update_tag_template_field = BashOperator(
         task_id="update_tag_template_field", bash_command="echo update_tag_template_field"
-    
+    )
     # Create
     create_tasks = [
         create_entry_group,

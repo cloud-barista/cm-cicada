@@ -37,7 +37,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the workflow.",
-                        "name": "dag_id",
+                        "name": "wfId",
                         "in": "query",
                         "required": true
                     },
@@ -58,7 +58,10 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the workflow.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog"
+                            }
                         }
                     },
                     "400": {
@@ -1702,6 +1705,32 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
                     }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "type": "string"
+                },
+                "extra": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "type": "string"
                 }
             }
         },

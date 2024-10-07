@@ -114,6 +114,23 @@ definitions:
     required:
     - task_groups
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog:
+    properties:
+      event:
+        type: string
+      extra:
+        type: string
+      start_date:
+        type: string
+      task_id:
+        type: string
+      task_name:
+        type: string
+      workflow_id:
+        type: string
+      workflow_run_id:
+        type: string
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.GetWorkflowTemplate:
     properties:
       data:
@@ -384,7 +401,7 @@ paths:
       parameters:
       - description: ID of the workflow.
         in: query
-        name: dag_id
+        name: wfId
         required: true
         type: string
       - description: ID of the workflow run.
@@ -401,7 +418,9 @@ paths:
         "200":
           description: Successfully get the workflow.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog'
+            type: array
         "400":
           description: Sent bad request.
           schema:

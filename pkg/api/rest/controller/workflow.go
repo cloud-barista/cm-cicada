@@ -476,10 +476,10 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	// err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
-	// if err != nil {
-	// 	return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
-	// }
+	err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
+	}
 
 	err = airflow.Client.CreateDAG(oldWorkflow)
 	if err != nil {
@@ -1113,37 +1113,61 @@ func ClearTaskInstances(c echo.Context) error {
 //	@Tags			[Workflow]
 //	@Accept			json
 //	@Produce		json
-//  @Param		dag_id query string true "ID of the workflow."
+//  @Param		wfId query string true "ID of the workflow."
 //  @Param		wfRunId query string false "ID of the workflow run."
 //  @Param		taskId query string false "ID of the task."
-//	@Success		200	{object}	model.Workflow			"Successfully get the workflow."
+//	@Success		200	{object}	[]model.EventLog			"Successfully get the workflow."
 //	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
 //	@Router			/eventlogs [get]
 func GetEventLogs(c echo.Context) error {
 	wfId := c.QueryParam("dag_id")
-	// if wfId == "" {
-	// 	return common.ReturnErrorMsg(c, "Please provide the dagId.")
-	// }
-	logs, err := airflow.Client.GetEventLogs(wfId)
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the dagId.")
+	}
+
+	var wfRunId,taskId, taskName string
+
+	if c.QueryParam("wfRunId") != "" {
+		wfRunId = c.QueryParam("wfRunId")
+	}
+	if c.QueryParam("taskId") != "" {
+		taskId = c.QueryParam("taskId")
+		taskDBInfo, err := dao.TaskGet(taskId)
+		if err != nil {
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		}
+		taskName = taskDBInfo.Name
+	}
+	var eventLogs []model.EventLog;
+	logs, err := airflow.Client.GetEventLogs(wfId,wfRunId,taskName)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
 	}
-
-	wfRunId := c.QueryParam("wfRunId")
-	if wfRunId != ""{
-		
-	}
-	taskId := c.QueryParam("taskId")
-	if taskId != ""{
 	
+	for _, log := range *logs.EventLogs { 
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(wfId,log.GetTaskId())
+		if err != nil {
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		}
+		taskId := &taskDBInfo.ID
+		eventlog := model.EventLog {
+			WorkflowID: log.GetDagId(),
+			WorkflowRunID: wfRunId,
+			TaskID: *taskId,
+			TaskName: log.GetTaskId(),
+			Extra: log.GetExtra(),
+			Event: log.GetEvent(),
+			When: log.GetWhen(),
+		}
+		eventLogs = append(eventLogs,eventlog)
 	}
 	// logs, err := airflow.Client.GetEventLogs(wfId)
 	// if err != nil {
 	// 	return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
 	// }
 
-	return c.JSONPretty(http.StatusOK, logs, " ")
+	return c.JSONPretty(http.StatusOK, eventLogs, " ")
 }
 
 // ImportErrors godoc
