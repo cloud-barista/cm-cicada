@@ -397,7 +397,7 @@ paths:
       consumes:
       - application/json
       description: Get Eventlog.
-      operationId: get-Eventlog
+      operationId: get-event-logs
       parameters:
       - description: ID of the workflow.
         in: query
@@ -437,6 +437,7 @@ paths:
       consumes:
       - application/json
       description: Get the importErrors.
+      operationId: get-import-errors
       produces:
       - application/json
       responses:
@@ -922,6 +923,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-workflow
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1164,6 +1166,7 @@ paths:
       consumes:
       - application/json
       description: Clear the task Instance.
+      operationId: clear-task-instances
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1203,6 +1206,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-task-logs
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1247,6 +1251,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-task-instances
       parameters:
       - description: ID of the workflow.
         in: path

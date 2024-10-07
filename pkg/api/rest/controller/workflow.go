@@ -883,6 +883,7 @@ func GetTaskDirectly(c echo.Context) error {
 
 // GetTaskLogs godoc
 //
+//	@ID			get-task-logs
 //	@Summary	Get Task Logs
 //	@Description	Get the task Logs.
 //	@Tags	[Workflow]
@@ -937,6 +938,7 @@ func GetTaskLogs(c echo.Context) error {
 
 // GetWorkflowRuns godoc
 //
+//	@ID			get-workflow
 //	@Summary	Get workflowRuns
 //	@Description	Get the task Logs.
 //	@Tags	[Workflow]
@@ -982,6 +984,7 @@ func GetWorkflowRuns(c echo.Context) error {
 
 // GetTaskInstances godoc
 //
+//	@ID			get-task-instances
 //	@Summary	Get taskInstances
 //	@Description	Get the task Logs.
 //	@Tags	[Workflow]
@@ -1047,8 +1050,9 @@ func GetTaskInstances(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, taskInstances, " ")
 }
 
-// taskInstances godoc
+// ClearTaskInstances godoc
 //
+//	@ID			clear-task-instances
 //	@Summary	Clear taskInstances
 //	@Description	Clear the task Instance.
 //	@Tags	[Workflow]
@@ -1107,7 +1111,7 @@ func ClearTaskInstances(c echo.Context) error {
 
 // GetEventLogs godoc
 //
-//	@ID		get-Eventlog
+//	@ID		get-event-logs
 //	@Summary	Get Eventlog
 //	@Description	Get Eventlog.
 //	@Tags		[Workflow]
@@ -1172,6 +1176,7 @@ func GetEventLogs(c echo.Context) error {
 
 // GetImportErrors godoc
 //
+//	@ID			get-import-errors
 //	@Summary	Get importErrors
 //	@Description	Get the importErrors.
 //	@Tags	[Workflow]
