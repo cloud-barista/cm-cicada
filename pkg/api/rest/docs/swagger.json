@@ -12,6 +12,101 @@
     },
     "basePath": "/cicada",
     "paths": {
+        "/eventlogs": {
+            "get": {
+                "description": "Get Eventlog.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Eventlog",
+                "operationId": "get-Eventlog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow run.",
+                        "name": "wfRunId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the task.",
+                        "name": "taskId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflow.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/importErrors": {
+            "get": {
+                "description": "Get the importErrors.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get importErrors",
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the importErrors.",
+                        "schema": {
+                            "$ref": "#/definitions/airflow.ImportErrorCollection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the importErrors.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/readyz": {
             "get": {
                 "description": "Check Cicada is ready",
@@ -749,6 +844,53 @@
                 }
             }
         },
+        "/workflow/{wfId}/runs": {
+            "get": {
+                "description": "Get the task Logs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get workflowRuns",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflowRuns.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflowRuns.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/task": {
             "get": {
                 "description": "Get a task list of the workflow.",
@@ -1063,6 +1205,180 @@
                 }
             }
         },
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear": {
+            "post": {
+                "description": "Clear the task Instance.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Clear taskInstances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the wfRunId.",
+                        "name": "wfRunId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the taskId.",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully clear the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to clear the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
+            "get": {
+                "description": "Get the task Logs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Task Logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the workflowRunId.",
+                        "name": "wfRunId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the task.",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the taskTryNum.",
+                        "name": "taskTyNum",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the task Logs.",
+                        "schema": {
+                            "$ref": "#/definitions/airflow.InlineResponse200"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the task Logs.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/workflowRun/{wfRunId}/taskInstances": {
+            "get": {
+                "description": "Get the task Logs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get taskInstances",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfRunId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the taskInstances.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow_template": {
             "get": {
                 "description": "Get a list of workflow template.",
@@ -1214,6 +1530,53 @@
         }
     },
     "definitions": {
+        "airflow.ImportError": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "description": "The filename",
+                    "type": "string"
+                },
+                "import_error_id": {
+                    "description": "The import error ID.",
+                    "type": "integer"
+                },
+                "stack_trace": {
+                    "description": "The full stackstrace..",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "The time when this error was created.",
+                    "type": "string"
+                }
+            }
+        },
+        "airflow.ImportErrorCollection": {
+            "type": "object",
+            "properties": {
+                "import_errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/airflow.ImportError"
+                    }
+                },
+                "total_entries": {
+                    "description": "Count of objects in the current result set.",
+                    "type": "integer"
+                }
+            }
+        },
+        "airflow.InlineResponse200": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "continuation_token": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -1335,6 +1698,32 @@
                     "items": {
                         "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskGroup"
                     }
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "type": "string"
+                },
+                "extra": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "type": "string"
                 }
             }
         },
@@ -1557,6 +1946,64 @@
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance": {
+            "type": "object",
+            "properties": {
+                "duration_date": {
+                    "type": "number"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "execution_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "try_number": {
+                    "type": "integer"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference": {
+            "type": "object",
+            "properties": {
+                "execution_date": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "description": "The task ID.",
+                    "type": "string"
+                },
+                "task_name": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "description": "The DAG ID.",
+                    "type": "string"
+                },
+                "workflow_run_id": {
+                    "description": "The DAG run ID.",
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow": {
             "type": "object",
             "required": [
@@ -1578,6 +2025,57 @@
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun": {
+            "type": "object",
+            "properties": {
+                "conf": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "data_interval_end": {
+                    "type": "string"
+                },
+                "data_interval_start": {
+                    "type": "string"
+                },
+                "duration_date": {
+                    "type": "number"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "execution_date": {
+                    "type": "string"
+                },
+                "external_trigger": {
+                    "type": "boolean"
+                },
+                "last_scheduling_decision": {
+                    "type": "string"
+                },
+                "logical_date": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "run_type": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_run_id": {
                     "type": "string"
                 }
             }

@@ -1,13 +1,20 @@
 package airflow
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"sync"
+
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"github.com/jollaman999/utils/logger"
-	"sync"
 )
 
 var dagRequests = make(map[string]*sync.Mutex)
@@ -71,7 +78,6 @@ func (client *client) GetDAGs() (airflow.DAGCollection, error) {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting DAGs. (Error: "+err.Error()+").")
 	}
-
 	return resp, err
 }
 
@@ -140,4 +146,197 @@ func (client *client) DeleteDAG(dagID string, deleteFolderOnly bool) error {
 	}
 
 	return err
+}
+func (client *client) GetDAGRuns(dagID string) (airflow.DAGRunCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	resp, _, err := client.api.DAGRunApi.GetDagRuns(ctx, dagID).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+	}
+	return resp, err
+}
+
+func (client *client) GetTaskInstances(dagID string, dagRunId string) (airflow.TaskInstanceCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	resp, http, err := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId).Execute()
+	fmt.Println("test : ", http)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting TaskInstances. (Error: "+err.Error()+").")
+	}
+	return resp, err
+}
+
+func (client *client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber int) (airflow.InlineResponse200, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs, _, err := client.api.TaskInstanceApi.GetLog(ctx, dagID, dagRunID, taskID, int32(taskTryNumber)).FullContent(true).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting TaskInstance logs. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
+}
+
+func (client *client) ClearTaskInstance(dagID string, dagRunID string, taskID string) (airflow.TaskInstanceReferenceCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	
+	dryRun := false
+	taskIds := []string{taskID}
+	includeDownstream := true
+	includeFuture := false
+	includeParentdag := false
+	includePast := false
+	includeSubdags := true
+	includeUpstream := false
+	onlyFailed := false
+	onlyRunning := false
+	resetDagRuns := true
+
+	clearTask := airflow.ClearTaskInstances{
+		DryRun:           &dryRun,
+		TaskIds:          &taskIds,
+		IncludeSubdags:   &includeSubdags,
+		IncludeParentdag: &includeParentdag,
+		IncludeUpstream:  &includeUpstream,
+		IncludeDownstream: &includeDownstream,
+		IncludeFuture:    &includeFuture,
+		IncludePast:      &includePast,
+		OnlyFailed:       &onlyFailed,
+		OnlyRunning:      &onlyRunning,
+		ResetDagRuns:     &resetDagRuns,
+		DagRunId:         *airflow.NewNullableString(&dagRunID),
+	}
+
+	// 요청 생성
+	request := client.api.DAGApi.PostClearTaskInstances(ctx, dagID)
+
+	// ClearTaskInstances 데이터 설정
+	request = request.ClearTaskInstances(clearTask)
+
+	// 요청 실행
+	logs, _, err := client.api.DAGApi.PostClearTaskInstancesExecute(request)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while clearing TaskInstance. (Error: " + err.Error() + ").")
+		return airflow.TaskInstanceReferenceCollection{}, err
+	}
+
+	return logs, nil
+}
+
+func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string) (airflow.EventLogCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	localBasePath, err:=client.api.GetConfig().ServerURLWithContext(ctx, "EventLogApiService.GetEventLog")
+	baseURL  :=  "http://"+client.api.GetConfig().Host+localBasePath + "/eventLogs"
+	queryParams := map[string]string{
+		"offset":          "0",
+		"limit":           "100",
+		"dag_id":          dagID,
+		"run_id":					 dagRunId,
+		"task_id":         taskId,
+		"order_by":        "-when",
+		"excluded_events": "gantt,landing_times,tries,duration,calendar,graph,grid,tree,tree_data",
+	}
+	query := url.Values{}
+	for key, value := range queryParams {
+		query.Add(key, value)
+	}
+	queryString := query.Encode()
+	fullURL := fmt.Sprintf("%s?%s", baseURL, queryString)
+	httpclient := client.api.GetConfig().HTTPClient
+	// fmt.Println(&httpclient.)
+
+	// 요청 생성
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+	}
+	cred := ctx.Value(airflow.ContextBasicAuth).(airflow.BasicAuth)
+	addBasicAuth(req, cred.UserName, cred.Password)
+	res, err := httpclient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+	}
+	
+	var eventlogs airflow.EventLogCollection
+	err = json.Unmarshal(body, &eventlogs)
+	if err != nil {
+		fmt.Println("Error unmarshal response body:", err)
+	}
+
+
+	return eventlogs, err
+}
+
+func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs,_,err := client.api.ImportErrorApi.GetImportErrors(ctx).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting import dag errors. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
+}
+
+
+func (client *client) PatchDag(dagID string, dagBody airflow.DAG)  (airflow.DAG, error){
+	ctx, cancel := Context()
+	defer cancel()
+
+	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
+	logs,_,err := client.api.DAGApi.PatchDag(ctx, dagID).DAG(dagBody).Execute()
+	logger.Println(logger.INFO, false,logs)
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting import dag errors. (Error: "+err.Error()+").")
+	}
+
+	return logs, nil
+}
+
+func addBasicAuth(req *http.Request, username, password string) {
+	auth := username + ":" + password
+	encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
+	req.Header.Add("Authorization", "Basic "+encodedAuth)
 }
