@@ -16,12 +16,12 @@ dependency: ## Get dependencies
 	@echo Checking dependencies...
 	@${GO_COMMAND} mod tidy
 
-# lint: dependency ## Lint the files
-# 	@echo "Running linter..."
-# 	@if [ ! -f "${GOPATH}/bin/golangci-lint" ] && [ ! -f "$(GOROOT)/bin/golangci-lint" ]; then \
-# 	  ${GO_COMMAND} install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3; \
-# 	fi
-# 	@golangci-lint run --timeout 30m -E contextcheck -D unused
+lint: dependency ## Lint the files
+	@echo "Running linter..."
+	@if [ ! -f "${GOPATH}/bin/golangci-lint" ] && [ ! -f "$(GOROOT)/bin/golangci-lint" ]; then \
+	  ${GO_COMMAND} install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3; \
+	fi
+	@golangci-lint run --timeout 30m -E contextcheck -D unused
 
 test: dependency ## Run unittests
 	@echo "Running tests..."
