@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -1025,12 +1026,12 @@ func GetTaskInstances(c echo.Context) error {
 		}
 		startDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
 		if err != nil {
-			fmt.Println("Error parsing execution date:", err)
+			fmt.Println("Error parsing start date:", err)
 			continue
 		}
 		endDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
 		if err != nil {
-			fmt.Println("Error parsing execution date:", err)
+			fmt.Println("Error parsing end date:", err)
 			continue
 		}
 		taskInfo := model.TaskInstance{
@@ -1114,20 +1115,20 @@ func ClearTaskInstances(c echo.Context) error {
 //	@ID		get-event-logs
 //	@Summary	Get Eventlog
 //	@Description	Get Eventlog.
-//	@Tags		[Workflow]
-//	@Accept		json
-//	@Produce	json
-//	 @Param	wfId query string true "ID of the workflow."
-//	 @Param	wfRunId query string false "ID of the workflow run."
-//	 @Param	taskId query string false "ID of the task."
-//	@Success	200	{object}	[]model.EventLog		"Successfully get the workflow."
-//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflow."
-//	@Router		/eventlogs [get]
+//	@Tags			[Workflow]
+//	@Accept			json
+//	@Produce		json
+//  @Param		wfId path string true "ID of the workflow."
+//  @Param		wfRunId query string false "ID of the workflow run."
+//  @Param		taskId query string false "ID of the task."
+//	@Success		200	{object}	[]model.EventLog			"Successfully get the workflow."
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
+//	@Router			/workflow/{wfId}/eventlogs [get]
 func GetEventLogs(c echo.Context) error {
-	wfId := c.QueryParam("dag_id")
+	wfId := c.Param("wfId")
 	if wfId == "" {
-		return common.ReturnErrorMsg(c, "Please provide the dagId.")
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
 	var wfRunId, taskId, taskName string
@@ -1143,35 +1144,42 @@ func GetEventLogs(c echo.Context) error {
 		}
 		taskName = taskDBInfo.Name
 	}
-	var eventLogs []model.EventLog
-	logs, err := airflow.Client.GetEventLogs(wfId, wfRunId, taskName)
+	var eventLogs model.EventLogs;
+	logs, err := airflow.Client.GetEventLogs(wfId,wfRunId,taskName)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
-
-	for _, log := range *logs.EventLogs {
-		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(wfId, log.GetTaskId())
+	err = json.Unmarshal(logs, &eventLogs)
 		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
-		}
-		taskId := &taskDBInfo.ID
-		eventlog := model.EventLog{
-			WorkflowID:    log.GetDagId(),
-			WorkflowRunID: wfRunId,
-			TaskID:        *taskId,
-			TaskName:      log.GetTaskId(),
-			Extra:         log.GetExtra(),
-			Event:         log.GetEvent(),
-			When:          log.GetWhen(),
-		}
-		eventLogs = append(eventLogs, eventlog)
+			fmt.Println(err)
 	}
-	// logs, err := airflow.Client.GetEventLogs(wfId)
-	// if err != nil {
-	// 	return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
-	// }
+	var logList []model.EventLog
+	for _, eventlog := range eventLogs.EventLogs { 
+		var taskID, RunId string
+			if eventlog.TaskID!= "" {
+				taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(wfId,eventlog.TaskID)
+				if err != nil {
+					return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+				}
+				taskID = taskDBInfo.ID
+			}
+			eventlog.WorkflowID = wfId
+			if eventlog.RunID != ""{
+				RunId = eventlog.RunID
+			}
 
-	return c.JSONPretty(http.StatusOK, eventLogs, " ")
+			log := model.EventLog {
+				WorkflowID: eventlog.WorkflowID,
+				WorkflowRunID: RunId,
+				TaskID: taskID,
+				TaskName: eventlog.TaskID,
+				Extra: eventlog.Extra,
+				Event: eventlog.Event,
+				When: eventlog.When,
+			}
+			logList = append(logList,log)
+		}
+	return c.JSONPretty(http.StatusOK, logList, " ")
 }
 
 // GetImportErrors godoc
