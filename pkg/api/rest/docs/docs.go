@@ -32,6 +32,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get importErrors",
+                "operationId": "get-import-errors",
                 "responses": {
                     "200": {
                         "description": "Successfully get the importErrors.",
@@ -759,7 +760,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Eventlog",
-                "operationId": "get-Eventlog",
+                "operationId": "get-event-logs",
                 "parameters": [
                     {
                         "type": "string",
@@ -864,6 +865,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get workflowRuns",
+                "operationId": "get-workflow-runs",
                 "parameters": [
                     {
                         "type": "string",
@@ -1225,6 +1227,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Clear taskInstances",
+                "operationId": "clear-task-instances",
                 "parameters": [
                     {
                         "type": "string",
@@ -1283,6 +1286,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get Task Logs",
+                "operationId": "get-task-logs",
                 "parameters": [
                     {
                         "type": "string",
@@ -1348,6 +1352,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get taskInstances",
+                "operationId": "get-task-instances",
                 "parameters": [
                     {
                         "type": "string",
@@ -1835,6 +1840,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path_params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "query_params": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"

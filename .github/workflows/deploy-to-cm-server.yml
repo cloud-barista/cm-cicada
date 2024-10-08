@@ -17,20 +17,6 @@ on:
       # - "scripts/**"
       # - "src/testclient/scripts/**"
       # - ".all-contributorsrc"
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "**.md"
-      - ".gitignore"
-      - "LICENSE"
-      - "CODEOWNERS"
-      - "docs/**"
-      - "scripts/**"
-      # - "assets/**"
-      # - "scripts/**"
-      # - "src/testclient/scripts/**"
-      # - ".all-contributorsrc"
 
 jobs:
   build-and-deploy:

@@ -198,6 +198,10 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      query_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:
@@ -399,6 +403,7 @@ paths:
       consumes:
       - application/json
       description: Get the importErrors.
+      operationId: get-import-errors
       produces:
       - application/json
       responses:
@@ -854,7 +859,7 @@ paths:
       consumes:
       - application/json
       description: Get Eventlog.
-      operationId: get-Eventlog
+      operationId: get-event-logs
       parameters:
       - description: ID of the workflow.
         in: path
@@ -924,6 +929,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-workflow-runs
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1166,6 +1172,7 @@ paths:
       consumes:
       - application/json
       description: Clear the task Instance.
+      operationId: clear-task-instances
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1205,6 +1212,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-task-logs
       parameters:
       - description: ID of the workflow.
         in: path
@@ -1249,6 +1257,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
+      operationId: get-task-instances
       parameters:
       - description: ID of the workflow.
         in: path

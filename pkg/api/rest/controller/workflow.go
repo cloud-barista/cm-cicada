@@ -100,17 +100,17 @@ func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) 
 
 // CreateWorkflow godoc
 //
-//	@ID				create-workflow
-//	@Summary		Create Workflow
+//	@ID		create-workflow
+//	@Summary	Create Workflow
 //	@Description	Create a workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			request body 	model.CreateWorkflowReq true "Workflow content"
-//	@Success		200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to create workflow."
-//	@Router			/workflow [post]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		request body 	model.CreateWorkflowReq true "Workflow content"
+//	@Success	200	{object}	model.WorkflowTemplate	"Successfully create the workflow."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to create workflow."
+//	@Router		/workflow [post]
 func CreateWorkflow(c echo.Context) error {
 	var createWorkflowReq model.CreateWorkflowReq
 
@@ -188,17 +188,17 @@ func CreateWorkflow(c echo.Context) error {
 
 // GetWorkflow godoc
 //
-//	@ID				get-workflow
-//	@Summary		Get Workflow
+//	@ID		get-workflow
+//	@Summary	Get Workflow
 //	@Description	Get the workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Success		200	{object}	model.Workflow			"Successfully get the workflow."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
-//	@Router			/workflow/{wfId} [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Success	200	{object}	model.Workflow		"Successfully get the workflow."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflow."
+//	@Router		/workflow/{wfId} [get]
 func GetWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -238,17 +238,17 @@ func GetWorkflow(c echo.Context) error {
 
 // GetWorkflowByName godoc
 //
-//	@ID				get-workflow-by-name
-//	@Summary		Get Workflow by Name
+//	@ID		get-workflow-by-name
+//	@Summary	Get Workflow by Name
 //	@Description	Get the workflow by name.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfName path string true "Name of the workflow."
-//	@Success		200	{object}	model.Workflow			"Successfully get the workflow."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the workflow."
-//	@Router			/workflow/name/{wfName} [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfName path string true "Name of the workflow."
+//	@Success	200	{object}	model.Workflow		"Successfully get the workflow."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflow."
+//	@Router		/workflow/name/{wfName} [get]
 func GetWorkflowByName(c echo.Context) error {
 	wfName := c.Param("wfName")
 	if wfName == "" {
@@ -288,19 +288,19 @@ func GetWorkflowByName(c echo.Context) error {
 
 // ListWorkflow godoc
 //
-//	@ID				list-workflow
-//	@Summary		List Workflow
+//	@ID		list-workflow
+//	@Summary	List Workflow
 //	@Description	Get a workflow list.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			name query string false "Name of the workflow"
-//	@Param			page query string false "Page of the workflow list."
-//	@Param			row query string false "Row of the workflow list."
-//	@Success		200	{object}	[]model.Workflow		"Successfully get a workflow list."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get a workflow list."
-//	@Router			/workflow [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		name query string false "Name of the workflow"
+//	@Param		page query string false "Page of the workflow list."
+//	@Param		row query string false "Row of the workflow list."
+//	@Success	200	{object}	[]model.Workflow	"Successfully get a workflow list."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get a workflow list."
+//	@Router		/workflow [get]
 func ListWorkflow(c echo.Context) error {
 	page, row, err := common.CheckPageRow(c)
 	if err != nil {
@@ -341,17 +341,17 @@ func ListWorkflow(c echo.Context) error {
 
 // RunWorkflow godoc
 //
-//	@ID				run-workflow
-//	@Summary		Run Workflow
+//	@ID		run-workflow
+//	@Summary	Run Workflow
 //	@Description	Run the workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Success		200	{object}	model.SimpleMsg			"Successfully run the workflow."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to run the Workflow"
-//	@Router			/workflow/{wfId}/run [post]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Success	200	{object}	model.SimpleMsg		"Successfully run the workflow."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to run the Workflow"
+//	@Router		/workflow/{wfId}/run [post]
 func RunWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -373,18 +373,18 @@ func RunWorkflow(c echo.Context) error {
 
 // UpdateWorkflow godoc
 //
-//	@ID				update-workflow
-//	@Summary		Update Workflow
+//	@ID		update-workflow
+//	@Summary	Update Workflow
 //	@Description	Update the workflow content.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Param			Workflow body 	model.CreateWorkflowReq true "Workflow to modify."
-//	@Success		200	{object}	model.Workflow	"Successfully update the workflow"
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to update the workflow"
-//	@Router			/workflow/{wfId} [put]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Param		Workflow body 	model.CreateWorkflowReq true "Workflow to modify."
+//	@Success	200	{object}	model.Workflow	"Successfully update the workflow"
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to update the workflow"
+//	@Router		/workflow/{wfId} [put]
 func UpdateWorkflow(c echo.Context) error {
 	var updateWorkflowReq model.CreateWorkflowReq
 
@@ -492,17 +492,17 @@ func UpdateWorkflow(c echo.Context) error {
 
 // DeleteWorkflow godoc
 //
-//	@ID				delete-workflow
-//	@Summary		Delete Workflow
+//	@ID		delete-workflow
+//	@Summary	Delete Workflow
 //	@Description	Delete the workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Success		200	{object}	model.SimpleMsg			"Successfully delete the workflow"
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to delete the workflow"
-//	@Router			/workflow/{wfId} [delete]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Success	200	{object}	model.SimpleMsg		"Successfully delete the workflow"
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to delete the workflow"
+//	@Router		/workflow/{wfId} [delete]
 func DeleteWorkflow(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -551,17 +551,17 @@ func DeleteWorkflow(c echo.Context) error {
 
 // ListTaskGroup godoc
 //
-//	@ID				list-task-group
-//	@Summary		List TaskGroup
+//	@ID		list-task-group
+//	@Summary	List TaskGroup
 //	@Description	Get a task group list of the workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Success		200	{object}	[]model.TaskGroup		"Successfully get a task group list."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get a task group list."
-//	@Router			/workflow/{wfId}/task_group [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Success	200	{object}	[]model.TaskGroup	"Successfully get a task group list."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task group list."
+//	@Router		/workflow/{wfId}/task_group [get]
 func ListTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -581,18 +581,18 @@ func ListTaskGroup(c echo.Context) error {
 
 // GetTaskGroup godoc
 //
-//	@ID				get-task-group
-//	@Summary		Get TaskGroup
+//	@ID		get-task-group
+//	@Summary	Get TaskGroup
 //	@Description	Get the task group.
-//	@Tags		[Workflow]
-//	@Accept		json
-//	@Produce		json
-//	@Param		wfId path string true "ID of the workflow."
-//	@Param		tgId path string true "ID of the task group."
-//	@Success		200	{object}	model.Task				"Successfully get the task group."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
-//	@Router		/workflow/{wfId}/task_group/{tgId} [get]
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Param	tgId path string true "ID of the task group."
+//	@Success	200	{object}	model.Task		"Successfully get the task group."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task group."
+//	@Router	/workflow/{wfId}/task_group/{tgId} [get]
 func GetTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -620,17 +620,17 @@ func GetTaskGroup(c echo.Context) error {
 
 // GetTaskGroupDirectly godoc
 //
-//	@ID				get-task-group-directly
-//	@Summary		Get TaskGroup Directly
+//	@ID		get-task-group-directly
+//	@Summary	Get TaskGroup Directly
 //	@Description	Get the task group directly.
-//	@Tags		[Workflow]
-//	@Accept		json
-//	@Produce		json
-//	@Param		tgId path string true "ID of the task group."
-//	@Success		200	{object}	model.Task				"Successfully get the task group."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task group."
-//	@Router		/task_group/{tgId} [get]
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	tgId path string true "ID of the task group."
+//	@Success	200	{object}	model.Task		"Successfully get the task group."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task group."
+//	@Router	/task_group/{tgId} [get]
 func GetTaskGroupDirectly(c echo.Context) error {
 	tgId := c.Param("tgId")
 	if tgId == "" {
@@ -664,18 +664,18 @@ func GetTaskGroupDirectly(c echo.Context) error {
 
 // ListTaskFromTaskGroup godoc
 //
-//	@ID				list-task-from-task-group
-//	@Summary		List Task from Task Group
+//	@ID		list-task-from-task-group
+//	@Summary	List Task from Task Group
 //	@Description	Get a task list from the task group.
-//	@Tags		[Workflow]
-//	@Accept		json
-//	@Produce		json
-//	@Param		wfId path string true "ID of the workflow."
-//	@Param		tgId path string true "ID of the task group."
-//	@Success		200	{object}	[]model.Task			"Successfully get a task list from the task group."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get a task list from the task group."
-//	@Router		/workflow/{wfId}/task_group/{tgId}/task [get]
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Param	tgId path string true "ID of the task group."
+//	@Success	200	{object}	[]model.Task		"Successfully get a task list from the task group."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task list from the task group."
+//	@Router	/workflow/{wfId}/task_group/{tgId}/task [get]
 func ListTaskFromTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -705,19 +705,19 @@ func ListTaskFromTaskGroup(c echo.Context) error {
 
 // GetTaskFromTaskGroup godoc
 //
-//	@ID				get-task-from-task-group
-//	@Summary		Get Task from Task Group
+//	@ID		get-task-from-task-group
+//	@Summary	Get Task from Task Group
 //	@Description	Get the task from the task group.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Param			tgId path string true "ID of the task group."
-//	@Param			taskId path string true "ID of the task."
-//	@Success		200	{object}	model.Task			"Successfully get the task from the task group."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task from the task group."
-//	@Router			/workflow/{wfId}/task_group/{tgId}/task/{taskId} [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Param		tgId path string true "ID of the task group."
+//	@Param		taskId path string true "ID of the task."
+//	@Success	200	{object}	model.Task		"Successfully get the task from the task group."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task from the task group."
+//	@Router		/workflow/{wfId}/task_group/{tgId}/task/{taskId} [get]
 func GetTaskFromTaskGroup(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -756,17 +756,17 @@ func GetTaskFromTaskGroup(c echo.Context) error {
 
 // ListTask godoc
 //
-//	@ID				list-task
-//	@Summary		List Task
+//	@ID		list-task
+//	@Summary	List Task
 //	@Description	Get a task list of the workflow.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Success		200	{object}	[]model.Task			"Successfully get a task list."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get a task list."
-//	@Router			/workflow/{wfId}/task [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Success	200	{object}	[]model.Task		"Successfully get a task list."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task list."
+//	@Router		/workflow/{wfId}/task [get]
 func ListTask(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -788,18 +788,18 @@ func ListTask(c echo.Context) error {
 
 // GetTask godoc
 //
-//	@ID				get-task
-//	@Summary		Get Task
+//	@ID		get-task
+//	@Summary	Get Task
 //	@Description	Get the task.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			wfId path string true "ID of the workflow."
-//	@Param			taskId path string true "ID of the task."
-//	@Success		200	{object}	model.Task				"Successfully get the task."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
-//	@Router			/workflow/{wfId}/task/{taskId} [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "ID of the workflow."
+//	@Param		taskId path string true "ID of the task."
+//	@Success	200	{object}	model.Task		"Successfully get the task."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task."
+//	@Router		/workflow/{wfId}/task/{taskId} [get]
 func GetTask(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -829,17 +829,17 @@ func GetTask(c echo.Context) error {
 
 // GetTaskDirectly godoc
 //
-//	@ID				get-task-directly
-//	@Summary		Get Task Directly
+//	@ID		get-task-directly
+//	@Summary	Get Task Directly
 //	@Description	Get the task directly.
-//	@Tags			[Workflow]
-//	@Accept			json
-//	@Produce		json
-//	@Param			taskId path string true "ID of the task."
-//	@Success		200	{object}	model.TaskDirectly		"Successfully get the task."
-//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure		500	{object}	common.ErrorResponse	"Failed to get the task."
-//	@Router			/task/{taskId} [get]
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		taskId path string true "ID of the task."
+//	@Success	200	{object}	model.TaskDirectly	"Successfully get the task."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task."
+//	@Router		/task/{taskId} [get]
 func GetTaskDirectly(c echo.Context) error {
 	taskId := c.Param("taskId")
 	if taskId == "" {
@@ -884,19 +884,20 @@ func GetTaskDirectly(c echo.Context) error {
 
 // GetTaskLogs godoc
 //
-// @Summary		Get Task Logs
-// @Description	Get the task Logs.
-// @Tags		[Workflow]
-// @Accept		json
-// @Produce		json
-// @Param		wfId path string true "ID of the workflow."
-// @Param		wfRunId path string true "ID of the workflowRunId."
-// @Param		taskId path string true "ID of the task."
-// @Param		taskTyNum path string true "ID of the taskTryNum."
-// @Success		200	{object}	airflow.InlineResponse200				"Successfully get the task Logs."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the task Logs."
-// @Router		 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs [get]
+//	@ID			get-task-logs
+//	@Summary	Get Task Logs
+//	@Description	Get the task Logs.
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfRunId path string true "ID of the workflowRunId."
+//	@Param	taskId path string true "ID of the task."
+//	@Param	taskTyNum path string true "ID of the taskTryNum."
+//	@Success	200	{object}	airflow.InlineResponse200		"Successfully get the task Logs."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task Logs."
+//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs [get]
 func GetTaskLogs(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -911,7 +912,7 @@ func GetTaskLogs(c echo.Context) error {
 	if taskId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the taskId.")
 	}
-	taskInfo, err  := dao.TaskGet(taskId)
+	taskInfo, err := dao.TaskGet(taskId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
 	}
@@ -926,73 +927,76 @@ func GetTaskLogs(c echo.Context) error {
 	}
 	logs, err := airflow.Client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
 
-	taskLog := model.TaskLog {
+	taskLog := model.TaskLog{
 		Content: *logs.Content,
 	}
 
 	return c.JSONPretty(http.StatusOK, taskLog, " ")
 }
 
-// workflowRuns godoc
+// GetWorkflowRuns godoc
 //
-// @Summary		Get workflowRuns
-// @Description	Get the task Logs.
-// @Tags		[Workflow]
-// @Accept		json
-// @Produce		json
-// @Param		wfId path string true "ID of the workflow."
-// @Success		200	{object}	[]model.WorkflowRun				"Successfully get the workflowRuns."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
-// @Router		 /workflow/{wfId}/runs [get]
+//	@ID			get-workflow-runs
+//	@Summary	Get workflowRuns
+//	@Description	Get the task Logs.
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Success	200	{object}	[]model.WorkflowRun		"Successfully get the workflowRuns."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
+//	@Router	 /workflow/{wfId}/runs [get]
 func GetWorkflowRuns(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
-			return common.ReturnErrorMsg(c, "Please provide the wfId.")
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
 	runList, err := airflow.Client.GetDAGRuns(wfId)
 	if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the workflow runs: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: "+err.Error())
 	}
 
-	var transformedRuns []model.WorkflowRun;
+	var transformedRuns []model.WorkflowRun
 
-	for _, dagRun := range *runList.DagRuns { 
-		transformedRun := model.WorkflowRun {
-				WorkflowID:         dagRun.DagId,         
-				WorkflowRunID:     dagRun.GetDagRunId(),      
-				DataIntervalStart: dagRun.GetDataIntervalStart(),
-				DataIntervalEnd:   dagRun.GetDataIntervalEnd(),
-				State:               string(dagRun.GetState()),
-				ExecutionDate:      dagRun.GetExecutionDate(),
-				StartDate:          dagRun.GetStartDate(),
-				EndDate:            dagRun.GetEndDate(),
-				RunType: dagRun.GetRunType(),
-				LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
-				DurationDate: (dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds()),
+	for _, dagRun := range *runList.DagRuns {
+		transformedRun := model.WorkflowRun{
+			WorkflowID:             dagRun.DagId,
+			WorkflowRunID:          dagRun.GetDagRunId(),
+			DataIntervalStart:      dagRun.GetDataIntervalStart(),
+			DataIntervalEnd:        dagRun.GetDataIntervalEnd(),
+			State:                  string(dagRun.GetState()),
+			ExecutionDate:          dagRun.GetExecutionDate(),
+			StartDate:              dagRun.GetStartDate(),
+			EndDate:                dagRun.GetEndDate(),
+			RunType:                dagRun.GetRunType(),
+			LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
+			DurationDate:           (dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds()),
 		}
-		transformedRuns = append(transformedRuns,transformedRun )
-}
+		transformedRuns = append(transformedRuns, transformedRun)
+	}
 
 	return c.JSONPretty(http.StatusOK, transformedRuns, " ")
 }
-// taskInstances godoc
+
+// GetTaskInstances godoc
 //
-// @Summary		Get taskInstances
-// @Description	Get the task Logs.
-// @Tags		[Workflow]
-// @Accept		json
-// @Produce		json
-// @Param		wfId path string true "ID of the workflow."
-// @Param		wfRunId path string true "ID of the workflow."
-// @Success		200	{object}	model.TaskInstance				"Successfully get the taskInstances."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
-// @Router		 /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances [get]
+//	@ID			get-task-instances
+//	@Summary	Get taskInstances
+//	@Description	Get the task Logs.
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfRunId path string true "ID of the workflow."
+//	@Success	200	{object}	model.TaskInstance		"Successfully get the taskInstances."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
+//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances [get]
 func GetTaskInstances(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -1002,65 +1006,66 @@ func GetTaskInstances(c echo.Context) error {
 	if wfRunId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
-	runList, err := airflow.Client.GetTaskInstances(common.UrlDecode(wfId),common.UrlDecode(wfRunId) )
+	runList, err := airflow.Client.GetTaskInstances(common.UrlDecode(wfId), common.UrlDecode(wfRunId))
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
-	var taskInstances []model.TaskInstance;
+	var taskInstances []model.TaskInstance
 	layout := time.RFC3339Nano
 
-	for _, taskInstance := range *runList.TaskInstances { 
-		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(),taskInstance.GetTaskId())
+	for _, taskInstance := range *runList.TaskInstances {
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
 		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
 		taskId := &taskDBInfo.ID
-		executionDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		executionDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
 		if err != nil {
 			fmt.Println("Error parsing execution date:", err)
 			continue
 		}
-		startDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		startDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
 		if err != nil {
 			fmt.Println("Error parsing start date:", err)
 			continue
 		}
-		endDate, err:= time.Parse(layout, taskInstance.GetExecutionDate())
+		endDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
 		if err != nil {
 			fmt.Println("Error parsing end date:", err)
 			continue
 		}
-		taskInfo := model.TaskInstance {
-				WorkflowID:         taskInstance.DagId,         
-				WorkflowRunID:     taskInstance.GetDagRunId(),      
-				TaskID: *taskId,
-				TaskName:  taskInstance.GetTaskId(),
-				State:               string(taskInstance.GetState()),
-				ExecutionDate:     executionDate,
-				StartDate:          startDate,
-				EndDate:           endDate,
-				DurationDate: float64(taskInstance.GetDuration()),
-				TryNumber: int(taskInstance.GetTryNumber()),
+		taskInfo := model.TaskInstance{
+			WorkflowID:    taskInstance.DagId,
+			WorkflowRunID: taskInstance.GetDagRunId(),
+			TaskID:        *taskId,
+			TaskName:      taskInstance.GetTaskId(),
+			State:         string(taskInstance.GetState()),
+			ExecutionDate: executionDate,
+			StartDate:     startDate,
+			EndDate:       endDate,
+			DurationDate:  float64(taskInstance.GetDuration()),
+			TryNumber:     int(taskInstance.GetTryNumber()),
 		}
-		taskInstances = append(taskInstances,taskInfo )
-}
+		taskInstances = append(taskInstances, taskInfo)
+	}
 	return c.JSONPretty(http.StatusOK, taskInstances, " ")
 }
 
-// taskInstances godoc
+// ClearTaskInstances godoc
 //
-// @Summary		Clear taskInstances
-// @Description	Clear the task Instance.
-// @Tags		[Workflow]
-// @Accept		json
-// @Produce		json
-// @Param		wfId path string true "ID of the workflow."
-// @Param		wfRunId path string true "ID of the wfRunId."
-// @Param		taskId path string true "ID of the taskId."
-// @Success		200	{object}	model.TaskInstanceReference				"Successfully clear the taskInstances."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
-// @Router		 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear [post]
+//	@ID			clear-task-instances
+//	@Summary	Clear taskInstances
+//	@Description	Clear the task Instance.
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfRunId path string true "ID of the wfRunId."
+//	@Param	taskId path string true "ID of the taskId."
+//	@Success	200	{object}	model.TaskInstanceReference		"Successfully clear the taskInstances."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
+//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear [post]
 func ClearTaskInstances(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -1076,40 +1081,39 @@ func ClearTaskInstances(c echo.Context) error {
 	} else {
 		taskDBInfo, err := dao.TaskGet(taskId)
 		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
 		taskId = taskDBInfo.Name
 	}
-	var TaskInstanceReferences []model.TaskInstanceReference;
-	clearList, err := airflow.Client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId),taskId )
+	var TaskInstanceReferences []model.TaskInstanceReference
+	clearList, err := airflow.Client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskId)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
 
-	for _, taskInstance := range *clearList.TaskInstances { 
-		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(),taskInstance.GetTaskId())
+	for _, taskInstance := range *clearList.TaskInstances {
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
 		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
 		taskId := &taskDBInfo.ID
-		taskInfo := model.TaskInstanceReference {
-				WorkflowID:         taskInstance.DagId,         
-				WorkflowRunID:     taskInstance.DagRunId,      
-				TaskId: taskId,
-				TaskName:  taskInstance.GetTaskId(),
-				ExecutionDate:     taskInstance.ExecutionDate,
+		taskInfo := model.TaskInstanceReference{
+			WorkflowID:    taskInstance.DagId,
+			WorkflowRunID: taskInstance.DagRunId,
+			TaskId:        taskId,
+			TaskName:      taskInstance.GetTaskId(),
+			ExecutionDate: taskInstance.ExecutionDate,
 		}
-		TaskInstanceReferences = append(TaskInstanceReferences,taskInfo )
+		TaskInstanceReferences = append(TaskInstanceReferences, taskInfo)
 	}
-
 
 	return c.JSONPretty(http.StatusOK, TaskInstanceReferences, " ")
 }
 
-// Eventlogs godoc
+// GetEventLogs godoc
 //
-//	@ID				get-Eventlog
-//	@Summary		Get Eventlog
+//	@ID		get-event-logs
+//	@Summary	Get Eventlog
 //	@Description	Get Eventlog.
 //	@Tags			[Workflow]
 //	@Accept			json
@@ -1127,7 +1131,7 @@ func GetEventLogs(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	var wfRunId,taskId, taskName string
+	var wfRunId, taskId, taskName string
 
 	if c.QueryParam("wfRunId") != "" {
 		wfRunId = c.QueryParam("wfRunId")
@@ -1136,14 +1140,14 @@ func GetEventLogs(c echo.Context) error {
 		taskId = c.QueryParam("taskId")
 		taskDBInfo, err := dao.TaskGet(taskId)
 		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
 		taskName = taskDBInfo.Name
 	}
 	var eventLogs model.EventLogs;
 	logs, err := airflow.Client.GetEventLogs(wfId,wfRunId,taskName)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
 	err = json.Unmarshal(logs, &eventLogs)
 		if err != nil {
@@ -1178,21 +1182,22 @@ func GetEventLogs(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, logList, " ")
 }
 
-// ImportErrors godoc
+// GetImportErrors godoc
 //
-// @Summary		Get importErrors
-// @Description	Get the importErrors.
-// @Tags		[Workflow]
-// @Accept		json
-// @Produce		json
-// @Success		200	{object}	airflow.ImportErrorCollection				"Successfully get the importErrors."
-// @Failure		400	{object}	common.ErrorResponse	"Sent bad request."
-// @Failure		500	{object}	common.ErrorResponse	"Failed to get the importErrors."
-// @Router		 /importErrors [get]
+//	@ID			get-import-errors
+//	@Summary	Get importErrors
+//	@Description	Get the importErrors.
+//	@Tags	[Workflow]
+//	@Accept	json
+//	@Produce	json
+//	@Success	200	{object}	airflow.ImportErrorCollection		"Successfully get the importErrors."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the importErrors."
+//	@Router	 /importErrors [get]
 func GetImportErrors(c echo.Context) error {
 	logs, err := airflow.Client.GetImportErrors()
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: " + err.Error())
+		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
 
 	return c.JSONPretty(http.StatusOK, logs, " ")
