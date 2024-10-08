@@ -296,12 +296,6 @@ func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 	}
-	
-	// var eventlogs airflow.EventLogCollection
-	// err = json.Unmarshal(body, &eventlogs)
-	// if err != nil {
-	// 	fmt.Println("Error unmarshal response body:", err)
-	// }
 
 	return body, err
 }
