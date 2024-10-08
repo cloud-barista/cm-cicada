@@ -120,11 +120,13 @@ definitions:
         type: string
       extra:
         type: string
-      start_date:
+      run_id:
         type: string
       task_id:
         type: string
       task_name:
+        type: string
+      when:
         type: string
       workflow_id:
         type: string
@@ -392,46 +394,6 @@ info:
   title: CM-Cicada REST API
   version: latest
 paths:
-  /eventlogs:
-    get:
-      consumes:
-      - application/json
-      description: Get Eventlog.
-      operationId: get-Eventlog
-      parameters:
-      - description: ID of the workflow.
-        in: query
-        name: wfId
-        required: true
-        type: string
-      - description: ID of the workflow run.
-        in: query
-        name: wfRunId
-        type: string
-      - description: ID of the task.
-        in: query
-        name: taskId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully get the workflow.
-          schema:
-            items:
-              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog'
-            type: array
-        "400":
-          description: Sent bad request.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-        "500":
-          description: Failed to get the workflow.
-          schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get Eventlog
-      tags:
-      - '[Workflow]'
   /importErrors:
     get:
       consumes:
@@ -885,6 +847,46 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Update Workflow
+      tags:
+      - '[Workflow]'
+  /workflow/{wfId}/eventlogs:
+    get:
+      consumes:
+      - application/json
+      description: Get Eventlog.
+      operationId: get-Eventlog
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the workflow run.
+        in: query
+        name: wfRunId
+        type: string
+      - description: ID of the task.
+        in: query
+        name: taskId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the workflow.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Eventlog
       tags:
       - '[Workflow]'
   /workflow/{wfId}/run:

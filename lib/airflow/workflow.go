@@ -2,7 +2,6 @@ package airflow
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -169,8 +168,7 @@ func (client *client) GetTaskInstances(dagID string, dagRunId string) (airflow.T
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-	resp, http, err := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId).Execute()
-	fmt.Println("test : ", http)
+	resp, _, err := client.api.TaskInstanceApi.GetTaskInstances(ctx, dagID, dagRunId).Execute()
 	if err != nil {
 		logger.Println(logger.ERROR, false,
 			"AIRFLOW: Error occurred while getting TaskInstances. (Error: "+err.Error()+").")
@@ -248,8 +246,7 @@ func (client *client) ClearTaskInstance(dagID string, dagRunID string, taskID st
 
 	return logs, nil
 }
-
-func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string) (airflow.EventLogCollection, error) {
+func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string) ([]byte, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()
@@ -294,14 +291,13 @@ func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string)
 		fmt.Println("Error reading response body:", err)
 	}
 	
-	var eventlogs airflow.EventLogCollection
-	err = json.Unmarshal(body, &eventlogs)
-	if err != nil {
-		fmt.Println("Error unmarshal response body:", err)
-	}
+	// var eventlogs airflow.EventLogCollection
+	// err = json.Unmarshal(body, &eventlogs)
+	// if err != nil {
+	// 	fmt.Println("Error unmarshal response body:", err)
+	// }
 
-
-	return eventlogs, err
+	return body, err
 }
 
 func (client *client) GetImportErrors() (airflow.ImportErrorCollection, error) {

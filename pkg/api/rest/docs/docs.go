@@ -19,66 +19,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/eventlogs": {
-            "get": {
-                "description": "Get Eventlog.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "[Workflow]"
-                ],
-                "summary": "Get Eventlog",
-                "operationId": "get-Eventlog",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID of the workflow.",
-                        "name": "wfId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID of the workflow run.",
-                        "name": "wfRunId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID of the task.",
-                        "name": "taskId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully get the workflow.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Sent bad request.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to get the workflow.",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/importErrors": {
             "get": {
                 "description": "Get the importErrors.",
@@ -799,6 +739,66 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to delete the workflow",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/eventlogs": {
+            "get": {
+                "description": "Get Eventlog.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Eventlog",
+                "operationId": "get-Eventlog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the workflow run.",
+                        "name": "wfRunId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the task.",
+                        "name": "taskId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the workflow.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.EventLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -1717,13 +1717,16 @@ const docTemplate = `{
                 "extra": {
                     "type": "string"
                 },
-                "start_date": {
+                "run_id": {
                     "type": "string"
                 },
                 "task_id": {
                     "type": "string"
                 },
                 "task_name": {
+                    "type": "string"
+                },
+                "when": {
                     "type": "string"
                 },
                 "workflow_id": {
