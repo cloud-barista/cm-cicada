@@ -13,6 +13,7 @@ type Task struct {
 	TaskComponent string            `json:"task_component" mapstructure:"task_component" validate:"required"`
 	RequestBody   string            `json:"request_body" mapstructure:"request_body" validate:"required"`
 	PathParams    map[string]string `json:"path_params" mapstructure:"path_params"`
+	QueryParams   map[string]string `json:"query_params" mapstructure:"query_params"`
 	Dependencies  []string          `json:"dependencies" mapstructure:"dependencies"`
 }
 
@@ -93,51 +94,51 @@ type CreateWorkflowReq struct {
 }
 
 type Monit struct {
-	WorkflowID string
+	WorkflowID      string
 	WorkflowVersion string
-	Status string
-	startTime time.Time
-	endTime time.Time
-	Duration  time.Time
-	WorkflowInput string
-	WorkflowResult string
+	Status          string
+	startTime       time.Time
+	endTime         time.Time
+	Duration        time.Time
+	WorkflowInput   string
+	WorkflowResult  string
 }
 
 type WorkflowRun struct {
-	WorkflowRunID string `json:"workflow_run_id,omitempty"`
-	WorkflowID *string `json:"workflow_id,omitempty"`
-	LogicalDate string `json:"logical_date,omitempty"`
-	ExecutionDate time.Time `json:"execution_date,omitempty"`
-	StartDate time.Time `json:"start_date,omitempty"`
-	EndDate time.Time `json:"end_date,omitempty"`
-	DurationDate  float64 `json:"duration_date,omitempty"`
-	DataIntervalStart time.Time `json:"data_interval_start,omitempty"`
-	DataIntervalEnd time.Time `json:"data_interval_end,omitempty"`
-	LastSchedulingDecision time.Time `json:"last_scheduling_decision,omitempty"`
-	RunType string `json:"run_type,omitempty"`
-	State string `json:"state,omitempty"`
-	ExternalTrigger *bool `json:"external_trigger,omitempty"`
-	Conf map[string]interface{} `json:"conf,omitempty"`
-	Note string `json:"note,omitempty"`
+	WorkflowRunID          string                 `json:"workflow_run_id,omitempty"`
+	WorkflowID             *string                `json:"workflow_id,omitempty"`
+	LogicalDate            string                 `json:"logical_date,omitempty"`
+	ExecutionDate          time.Time              `json:"execution_date,omitempty"`
+	StartDate              time.Time              `json:"start_date,omitempty"`
+	EndDate                time.Time              `json:"end_date,omitempty"`
+	DurationDate           float64                `json:"duration_date,omitempty"`
+	DataIntervalStart      time.Time              `json:"data_interval_start,omitempty"`
+	DataIntervalEnd        time.Time              `json:"data_interval_end,omitempty"`
+	LastSchedulingDecision time.Time              `json:"last_scheduling_decision,omitempty"`
+	RunType                string                 `json:"run_type,omitempty"`
+	State                  string                 `json:"state,omitempty"`
+	ExternalTrigger        *bool                  `json:"external_trigger,omitempty"`
+	Conf                   map[string]interface{} `json:"conf,omitempty"`
+	Note                   string                 `json:"note,omitempty"`
 }
 
 type TaskInstance struct {
-	WorkflowRunID string `json:"workflow_run_id,omitempty"`
-	WorkflowID *string `json:"workflow_id,omitempty"`
-	TaskID string `json:"task_id,omitempty"`
-	TaskName string `json:"task_name,omitempty"`
-	State string `json:"state,omitempty"`
-	StartDate time.Time `json:"start_date,omitempty"`
-	EndDate time.Time `json:"end_date,omitempty"`
-	DurationDate  float64 `json:"duration_date"`
+	WorkflowRunID string    `json:"workflow_run_id,omitempty"`
+	WorkflowID    *string   `json:"workflow_id,omitempty"`
+	TaskID        string    `json:"task_id,omitempty"`
+	TaskName      string    `json:"task_name,omitempty"`
+	State         string    `json:"state,omitempty"`
+	StartDate     time.Time `json:"start_date,omitempty"`
+	EndDate       time.Time `json:"end_date,omitempty"`
+	DurationDate  float64   `json:"duration_date"`
 	ExecutionDate time.Time `json:"execution_date,omitempty"`
-	TryNumber int `json:"try_number"`
+	TryNumber     int       `json:"try_number"`
 }
 
 type TaskInstanceReference struct {
 	// The task ID.
-	TaskId *string `json:"task_id,omitempty"`
-	TaskName string `json:"task_name,omitempty"`
+	TaskId   *string `json:"task_id,omitempty"`
+	TaskName string  `json:"task_name,omitempty"`
 	// The DAG ID.
 	WorkflowID *string `json:"workflow_id,omitempty"`
 	// The DAG run ID.
@@ -150,13 +151,13 @@ type TaskLog struct {
 }
 
 type EventLog struct {
-	WorkflowRunID string `json:"workflow_run_id,omitempty"`
-	WorkflowID string `json:"workflow_id"`
-	TaskID string `json:"task_id"`
-	TaskName string `json:"task_name"`
-	Event string `json:"event,omitempty"`
-	When time.Time `json:"start_date,omitempty"`
-	Extra string `json:"extra,omitempty"`
+	WorkflowRunID string    `json:"workflow_run_id,omitempty"`
+	WorkflowID    string    `json:"workflow_id"`
+	TaskID        string    `json:"task_id"`
+	TaskName      string    `json:"task_name"`
+	Event         string    `json:"event,omitempty"`
+	When          time.Time `json:"start_date,omitempty"`
+	Extra         string    `json:"extra,omitempty"`
 }
 
 func (d Data) Value() (driver.Value, error) {

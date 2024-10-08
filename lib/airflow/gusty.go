@@ -2,6 +2,7 @@ package airflow
 
 import (
 	"errors"
+	"fmt"
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/config"
@@ -67,10 +68,19 @@ func isTaskExist(workflow *model.Workflow, taskID string) bool {
 	return false
 }
 
-func parseEndpoint(pathParams map[string]string, endpoint string) string {
-	keys := reflect.ValueOf(pathParams).MapKeys()
-	for _, key := range keys {
+func parseEndpoint(pathParams map[string]string, queryParams map[string]string, endpoint string) string {
+	pathParamKeys := reflect.ValueOf(pathParams).MapKeys()
+	for _, key := range pathParamKeys {
 		endpoint = strings.ReplaceAll(endpoint, "{"+key.String()+"}", pathParams[key.String()])
+	}
+
+	queryParamKeys := reflect.ValueOf(pathParams).MapKeys()
+	if len(queryParamKeys) > 0 {
+		endpoint += "?"
+		for _, key := range queryParamKeys {
+			endpoint += fmt.Sprintf("%v=%v&", key.String(), queryParams[key.String()])
+		}
+		endpoint = strings.TrimRight(endpoint, "&")
 	}
 
 	return endpoint
@@ -176,7 +186,7 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			}
 
 			taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-			taskOptions["endpoint"] = parseEndpoint(t.PathParams, taskComponent.Data.Options.Endpoint)
+			taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
 			taskOptions["method"] = taskComponent.Data.Options.Method
 
 			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
