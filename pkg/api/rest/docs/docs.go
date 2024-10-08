@@ -865,7 +865,7 @@ const docTemplate = `{
                     "[Workflow]"
                 ],
                 "summary": "Get workflowRuns",
-                "operationId": "get-workflow",
+                "operationId": "get-workflow-runs",
                 "parameters": [
                     {
                         "type": "string",
@@ -1837,6 +1837,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path_params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "query_params": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"

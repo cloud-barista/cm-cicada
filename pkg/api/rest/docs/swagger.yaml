@@ -196,6 +196,10 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      query_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:
@@ -923,7 +927,7 @@ paths:
       consumes:
       - application/json
       description: Get the task Logs.
-      operationId: get-workflow
+      operationId: get-workflow-runs
       parameters:
       - description: ID of the workflow.
         in: path

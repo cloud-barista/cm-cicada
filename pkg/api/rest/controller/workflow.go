@@ -938,7 +938,7 @@ func GetTaskLogs(c echo.Context) error {
 
 // GetWorkflowRuns godoc
 //
-//	@ID			get-workflow
+//	@ID			get-workflow-runs
 //	@Summary	Get workflowRuns
 //	@Description	Get the task Logs.
 //	@Tags	[Workflow]
