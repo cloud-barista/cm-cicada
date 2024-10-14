@@ -149,15 +149,20 @@ type TaskInstanceReference struct {
 type TaskLog struct {
 	Content string `json:"content,omitempty"`
 }
+type EventLogs struct {
+	EventLogs []EventLog `json:"event_logs"`
+	TotalEntries int `json:"total_entries"`
+}
 
 type EventLog struct {
-	WorkflowRunID string    `json:"workflow_run_id,omitempty"`
-	WorkflowID    string    `json:"workflow_id"`
-	TaskID        string    `json:"task_id"`
-	TaskName      string    `json:"task_name"`
-	Event         string    `json:"event,omitempty"`
-	When          time.Time `json:"start_date,omitempty"`
-	Extra         string    `json:"extra,omitempty"`
+	WorkflowRunID string `json:"workflow_run_id"`
+	RunID string `json:"run_id,omitempty"`
+	WorkflowID string `json:"workflow_id"`
+	TaskID string `json:"task_id"`	
+	TaskName string `json:"task_name"`
+	Event string `json:"event,omitempty"`
+	When time.Time `json:"when,omitempty"`
+	Extra string `json:"extra,omitempty"`
 }
 
 func (d Data) Value() (driver.Value, error) {
