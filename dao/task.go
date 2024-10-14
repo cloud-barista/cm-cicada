@@ -49,7 +49,7 @@ func TaskGetByWorkflowIDAndName(workflowID string, name string) (*model.TaskDBMo
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("taskGroup not found with the provided id")
+			return nil, errors.New("task not found with the provided name")
 		}
 		return nil, err
 	}

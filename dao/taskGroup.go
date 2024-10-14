@@ -29,7 +29,7 @@ func TaskGroupGet(id string) (*model.TaskGroupDBModel, error) {
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("taskGroup not found with the provided id")
+			return nil, errors.New("task_group not found with the provided id")
 		}
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func TaskGroupGetByWorkflowIDAndName(workflowID string, name string) (*model.Tas
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("taskGroup not found with the provided id")
+			return nil, errors.New("task_group not found with the provided name")
 		}
 		return nil, err
 	}
