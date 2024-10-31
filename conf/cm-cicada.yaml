@@ -27,14 +27,6 @@ cm-cicada:
             schema: http
             login: default
             password: default
-          - id: tumblebug_api
-            type: http
-            description: TumbleBug API
-            host: 192.168.110.14
-            port: 1323
-            schema: http
-            login: default
-            password: default
     dag_directory_host: "./_airflow/airflow-home/dags"
     dag_directory_container: "/usr/local/airflow/dags" # Use dag_directory_host for dag_directory_container, if this value is empty
     listen:

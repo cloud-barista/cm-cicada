@@ -1,30 +1,7 @@
 {
   "name": "honeybee_task_get_infra_refined",
   "description": "Get refined infra information from honeybee.",
-  "data": {
-    "options": {
-      "api_connection_id": "honeybee_api",
-      "endpoint": "/honeybee/source_group/{sgId}/infra/refined",
-      "method": "GET",
-      "request_body": ""
-    },
-    "param_option": {
-      "params": {
-        "required": [],
-        "properties": {
-        }
-      },
-      "path_params": {
-        "required": [
-          "sgId"
-        ],
-        "properties": {
-          "sgId": {
-            "type": "string",
-            "description": "ID of the source group."
-          }
-        }
-      }
-    }
-  }
+  "api_connection_id": "honeybee_api",
+  "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
+  "endpoint": "/source_group/{sgId}/infra/refined"
 }

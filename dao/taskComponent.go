@@ -61,10 +61,12 @@ func TaskComponentGetList(page int, row int) (*[]model.TaskComponent, error) {
 }
 
 func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskComponent, error) {
-	taskComponent.CreatedAt = time.Now()
-	taskComponent.UpdatedAt = time.Now()
+	now := time.Now()
 
-	result := db.DB.Create(taskComponent)
+	taskComponent.CreatedAt = now
+	taskComponent.UpdatedAt = now
+
+	result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(taskComponent)
 	err := result.Error
 	if err != nil {
 		return nil, err
@@ -74,6 +76,8 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 }
 
 func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
+	taskComponent.UpdatedAt = time.Now()
+
 	result := db.DB.Model(&model.TaskComponent{}).Where("id = ?", taskComponent.ID).Updates(taskComponent)
 	err := result.Error
 	if err != nil {

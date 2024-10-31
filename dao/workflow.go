@@ -9,10 +9,12 @@ import (
 )
 
 func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
-	workflow.CreatedAt = time.Now()
-	workflow.UpdatedAt = time.Now()
+	now := time.Now()
 
-	result := db.DB.Create(workflow)
+	workflow.CreatedAt = now
+	workflow.UpdatedAt = now
+
+	result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(workflow)
 	err := result.Error
 	if err != nil {
 		return nil, err
