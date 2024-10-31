@@ -8,10 +8,14 @@ import (
 )
 
 type PropertyDef struct {
-	Type       string                 `json:"type"`
-	Required   []string               `json:"required,omitempty"`
-	Properties map[string]PropertyDef `json:"properties,omitempty"`
-	Items      *PropertyDef           `json:"items,omitempty"`
+	Type        string                 `json:"type"`
+	Required    []string               `json:"required,omitempty"`
+	Properties  map[string]PropertyDef `json:"properties,omitempty"`
+	Items       *PropertyDef           `json:"items,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Default     interface{}            `json:"default,omitempty"`
+	Enum        []string               `json:"enum,omitempty"`
+	Example     interface{}            `json:"example,omitempty"`
 }
 
 type ParameterStructure struct {

@@ -156,6 +156,14 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef:
     properties:
+      default: {}
+      description:
+        type: string
+      enum:
+        items:
+          type: string
+        type: array
+      example: {}
       items:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
       properties:

@@ -20,7 +20,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ConfigFile represents the structure of the input JSON configuration
 type ConfigFile struct {
 	Name                string `json:"name"`
 	Description         string `json:"description"`
@@ -29,7 +28,6 @@ type ConfigFile struct {
 	Endpoint            string `json:"endpoint"`
 }
 
-// SwaggerSpec represents the root of Swagger 2.0 specification
 type SwaggerSpec struct {
 	Swagger     string                 `yaml:"swagger"`
 	BasePath    string                 `yaml:"basePath"`
@@ -38,11 +36,15 @@ type SwaggerSpec struct {
 }
 
 type SchemaModel struct {
-	Type       string                 `yaml:"type"`
-	Required   []string               `yaml:"required"`
-	Properties map[string]SchemaModel `yaml:"properties"`
-	Items      *SchemaModel           `yaml:"items,omitempty"`
-	Ref        string                 `yaml:"$ref,omitempty"`
+	Type        string                 `yaml:"type"`
+	Required    []string               `yaml:"required"`
+	Properties  map[string]SchemaModel `yaml:"properties"`
+	Items       *SchemaModel           `yaml:"items,omitempty"`
+	Ref         string                 `yaml:"$ref,omitempty"`
+	Description string                 `yaml:"description,omitempty"`
+	Default     interface{}            `yaml:"default,omitempty"`
+	Enum        []string               `yaml:"enum,omitempty"`
+	Example     interface{}            `yaml:"example,omitempty"`
 }
 
 type PathItem map[string]Operation
@@ -60,11 +62,15 @@ type ParameterSchema struct {
 }
 
 type Parameter struct {
-	Name     string           `yaml:"name"`
-	In       string           `yaml:"in"`
-	Required bool             `yaml:"required"`
-	Type     string           `yaml:"type"`
-	Schema   *ParameterSchema `yaml:"schema,omitempty"`
+	Name        string           `yaml:"name"`
+	In          string           `yaml:"in"`
+	Required    bool             `yaml:"required"`
+	Type        string           `yaml:"type"`
+	Schema      *ParameterSchema `yaml:"schema,omitempty"`
+	Description string           `yaml:"description,omitempty"`
+	Default     interface{}      `yaml:"default,omitempty"`
+	Enum        []string         `yaml:"enum,omitempty"`
+	Example     interface{}      `yaml:"example,omitempty"`
 }
 
 func TaskComponentGetByName(name string) *model.TaskComponent {
@@ -223,29 +229,44 @@ func resolveSchemaRef(ref string, definitions map[string]SchemaModel) SchemaMode
 	defName := parts[len(parts)-1]
 	schema := definitions[defName]
 
-	// Properties 내부의 ref 처리
 	for name, prop := range schema.Properties {
 		if prop.Ref != "" {
-			// reference가 있는 경우 재귀적으로 처리
 			resolved := resolveSchemaRef(prop.Ref, definitions)
+
+			if prop.Description != "" {
+				resolved.Description = prop.Description
+			}
+			if prop.Default != nil {
+				resolved.Default = prop.Default
+			}
+			if len(prop.Enum) > 0 {
+				resolved.Enum = prop.Enum
+			}
+			if prop.Example != nil {
+				resolved.Example = prop.Example
+			}
 			schema.Properties[name] = resolved
 		} else if prop.Items != nil && prop.Items.Ref != "" {
-			// 배열 아이템의 reference 처리
 			resolvedItem := resolveSchemaRef(prop.Items.Ref, definitions)
+
+			if prop.Items.Description != "" {
+				resolvedItem.Description = prop.Items.Description
+			}
+			if prop.Items.Default != nil {
+				resolvedItem.Default = prop.Items.Default
+			}
+			if len(prop.Items.Enum) > 0 {
+				resolvedItem.Enum = prop.Items.Enum
+			}
+			if prop.Items.Example != nil {
+				resolvedItem.Example = prop.Items.Example
+			}
 			prop.Items = &resolvedItem
 			prop.Type = "array"
 			schema.Properties[name] = prop
 		}
 	}
 
-	// Items 내부의 ref 처리
-	if schema.Items != nil && schema.Items.Ref != "" {
-		resolvedItem := resolveSchemaRef(schema.Items.Ref, definitions)
-		schema.Items = &resolvedItem
-		schema.Type = "array"
-	}
-
-	// Type이 비어있는 경우 처리
 	if schema.Type == "" {
 		if len(schema.Properties) > 0 {
 			schema.Type = "object"
@@ -261,40 +282,49 @@ func getPropertyType(schema SchemaModel) string {
 	if schema.Type != "" {
 		return schema.Type
 	}
+
 	if schema.Ref != "" {
-		return "object" // reference가 있는 경우 object로 처리
+		return "object"
 	}
+
 	if len(schema.Properties) > 0 {
 		return "object"
 	}
+
 	if schema.Items != nil {
 		return "array"
 	}
+
 	return "object"
 }
 
 func convertToPropertyDef(schema SchemaModel) model.PropertyDef {
 	property := model.PropertyDef{
-		Type:       getPropertyType(schema),
-		Required:   schema.Required,
-		Properties: make(map[string]model.PropertyDef),
+		Type:        getPropertyType(schema),
+		Required:    schema.Required,
+		Properties:  make(map[string]model.PropertyDef),
+		Description: schema.Description,
+		Default:     schema.Default,
+		Enum:        schema.Enum,
+		Example:     schema.Example,
 	}
 
-	// 객체 타입인 경우 모든 하위 속성 처리
 	if property.Type == "object" || len(schema.Properties) > 0 {
 		for name, prop := range schema.Properties {
 			property.Properties[name] = convertToPropertyDef(prop)
 		}
 	}
 
-	// 배열 타입인 경우
 	if property.Type == "array" && schema.Items != nil {
 		property.Items = &model.PropertyDef{
-			Type:       getPropertyType(*schema.Items),
-			Properties: make(map[string]model.PropertyDef),
+			Type:        getPropertyType(*schema.Items),
+			Properties:  make(map[string]model.PropertyDef),
+			Description: schema.Items.Description,
+			Default:     schema.Items.Default,
+			Enum:        schema.Items.Enum,
+			Example:     schema.Items.Example,
 		}
 
-		// 배열의 items가 객체인 경우 해당 객체의 모든 속성 처리
 		if len(schema.Items.Properties) > 0 {
 			for name, prop := range schema.Items.Properties {
 				property.Items.Properties[name] = convertToPropertyDef(prop)
@@ -334,7 +364,6 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint stri
 					},
 				}
 
-				// Parameters 처리
 				pathParams := model.ParameterStructure{
 					Properties: make(map[string]model.PropertyDef),
 				}
@@ -349,14 +378,20 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint stri
 							pathParams.Required = append(pathParams.Required, param.Name)
 						}
 						pathParams.Properties[param.Name] = model.PropertyDef{
-							Type: param.Type,
+							Type:        param.Type,
+							Description: param.Description,
+							Default:     param.Default,
+							Enum:        param.Enum,
 						}
 					case "query":
 						if param.Required {
 							queryParams.Required = append(queryParams.Required, param.Name)
 						}
 						queryParams.Properties[param.Name] = model.PropertyDef{
-							Type: param.Type,
+							Type:        param.Type,
+							Description: param.Description,
+							Default:     param.Default,
+							Enum:        param.Enum,
 						}
 					case "body":
 						if param.Schema != nil && param.Schema.Ref != "" {
