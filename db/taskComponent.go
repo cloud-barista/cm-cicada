@@ -352,6 +352,56 @@ func convertSchemaToParams(schema SchemaModel) model.ParameterStructure {
 	return params
 }
 
+func generateExampleValue(schema SchemaModel) interface{} {
+	if schema.Example != nil {
+		return schema.Example
+	}
+
+	switch schema.Type {
+	case "string":
+		if len(schema.Enum) > 0 {
+			return schema.Enum[0]
+		}
+		return "string"
+	case "integer":
+		return 0
+	case "number":
+		return 0.0
+	case "boolean":
+		return false
+	case "array":
+		if schema.Items != nil {
+			return []interface{}{generateExampleValue(*schema.Items)}
+		}
+		return []interface{}{}
+	case "object":
+		if len(schema.Properties) > 0 {
+			obj := make(map[string]interface{})
+			for name, prop := range schema.Properties {
+				obj[name] = generateExampleValue(prop)
+			}
+			return obj
+		}
+		return make(map[string]interface{})
+	default:
+		return nil
+	}
+}
+
+func generateRequestBodyExample(schema SchemaModel) string {
+	example := generateExampleValue(schema)
+	if example == nil {
+		return ""
+	}
+
+	jsonBytes, err := json.MarshalIndent(example, "", "    ")
+	if err != nil {
+		return ""
+	}
+
+	return string(jsonBytes)
+}
+
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 
@@ -401,6 +451,11 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint stri
 						if param.Schema != nil && param.Schema.Ref != "" {
 							schema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
 							taskComponent.Data.BodyParams = convertSchemaToParams(schema)
+
+							requestBodyExample := generateRequestBodyExample(schema)
+							if requestBodyExample != "" {
+								taskComponent.Data.Options.RequestBody = requestBodyExample
+							}
 						}
 					}
 				}

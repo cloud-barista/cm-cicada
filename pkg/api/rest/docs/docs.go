@@ -1916,6 +1916,9 @@ const docTemplate = `{
                 },
                 "method": {
                     "type": "string"
+                },
+                "request_body": {
+                    "type": "string"
                 }
             }
         },
