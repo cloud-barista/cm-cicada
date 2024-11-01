@@ -20,8 +20,9 @@ type ParamOption struct {
 }
 
 type TaskData struct {
-	Options     Options     `json:"options" mapstructure:"options" validate:"required"`
-	ParmaOption ParamOption `json:"param_option" mapstructure:"param_option" validate:"required"`
+	Options     Options     `json:"options" mapstructure:"options" `
+	ParmaOption ParamOption `json:"param_option" mapstructure:"param_option"`
+	Extra 			map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
 }
 
 type TaskComponent struct {

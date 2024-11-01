@@ -34,4 +34,6 @@ func Workflow(e *echo.Echo) {
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/clear", controller.ClearTaskInstances)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/eventlogs", controller.GetEventLogs)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/importErrors", controller.GetImportErrors)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version", controller.ListWorkflowVersion)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version/:verId", controller.GetWorkflowVersion)
 }

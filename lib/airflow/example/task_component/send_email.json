@@ -1,0 +1,13 @@
+{
+  "name": "send_email",
+  "description": "smtp send email",
+  "data": {
+    "extra": {
+      "operator": "airflow.operators.email.EmailOperator",
+      "to": "yby987654@gmail.com",
+      "subject": "Workflow Execution Report : {{ dag.dag_id }}",
+      "html_content": "<h3>Workflow Execution Complete</h3><p><strong>Workflow ID:</strong> {{ dag.dag_id }}</p><p><strong>Workflow Run ID:</strong> {{ run_id }}</p><p><strong>Workflow 상태:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks', key='dag_state') }}</p>{% if ti.xcom_pull(task_ids='collect_failed_tasks', key='failed_tasks') %}<p><strong>실패한 Tasks:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks', key='failed_tasks') }}</p><p><strong>Task Try Number:</strong> {{ ti.try_number }}</p>{% else %}<p>모든 Tasks가 성공적으로 완료되었습니다.</p>{% endif %}",
+      "trigger_rule": "all_done"
+    }
+  }
+}

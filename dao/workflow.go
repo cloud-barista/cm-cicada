@@ -2,10 +2,11 @@ package dao
 
 import (
 	"errors"
+	"time"
+
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"gorm.io/gorm"
-	"time"
 )
 
 func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
@@ -117,4 +118,60 @@ func WorkflowDelete(workflow *model.Workflow) error {
 	}
 
 	return nil
+}
+
+func WorkflowVersionGetList(workflowVersion *model.WorkflowVersion, page int, row int) (*[]model.WorkflowVersion, error) {
+	WorkflowVersionList := &[]model.WorkflowVersion{}
+	// Ensure db.DB is not nil to avoid runtime panics
+	if db.DB == nil {
+		return nil, errors.New("database connection is not initialized")
+	}
+
+	result := db.DB.Scopes(func(d *gorm.DB) *gorm.DB {
+		var filtered = d
+
+		if len(workflowVersion.WorkflowID) != 0 {
+			filtered = filtered.Where("workflowId LIKE ?", "%"+workflowVersion.WorkflowID+"%")
+		}
+
+		if page != 0 && row != 0 {
+			offset := (page - 1) * row
+
+			return filtered.Offset(offset).Limit(row)
+		} else if row != 0 && page == 0 {
+			filtered.Error = errors.New("row is not 0 but page is 0")
+			return filtered
+		} else if page != 0 && row == 0 {
+			filtered.Error = errors.New("page is not 0 but row is 0")
+			return filtered
+		}
+		return filtered
+	}).Find(WorkflowVersionList)
+
+	err := result.Error
+	if err != nil {
+		return nil, err
+	}
+
+	return WorkflowVersionList, nil
+}
+
+func WorkflowVersionGet(id string, wkId string) (*model.WorkflowVersion, error) {
+	workflowVersion := &model.WorkflowVersion{}
+
+	// Ensure db.DB is not nil to avoid runtime panics
+	if db.DB == nil {
+		return nil, errors.New("database connection is not initialized")
+	}
+
+	result := db.DB.Where("id = ? and workflowId = ?", id, wkId).First(workflowVersion)
+	err := result.Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("workflow not found with the provided id")
+		}
+		return nil, err
+	}
+
+	return workflowVersion, nil
 }

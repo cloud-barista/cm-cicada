@@ -1,13 +1,14 @@
 package db
 
 import (
+	"strconv"
+
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/glebarez/sqlite"
 	"github.com/jollaman999/utils/logger"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 var DB *gorm.DB
@@ -40,6 +41,11 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	err = DB.AutoMigrate(&model.WorkflowVersion{})
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+	
 	err = DB.AutoMigrate(&model.Workflow{})
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)

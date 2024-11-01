@@ -1214,6 +1214,118 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/{wfId}/version": {
+            "get": {
+                "description": "Get a workflowVersion list.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "List workflowVersion",
+                "operationId": "list-workflowVersion",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wfId of the workflow",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Page of the workflowVersion list.",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Row of the workflowVersion list.",
+                        "name": "row",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get a workflowVersion list.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowVersion"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get a workflowVersion list.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/version/{verId}": {
+            "get": {
+                "description": "Get the WorkflowVersion.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get WorkflowVersion",
+                "operationId": "get-WorkflowVersion",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wfId of the workflow",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the WorkflowVersion.",
+                        "name": "verId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the WorkflowVersion.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the WorkflowVersion.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear": {
             "post": {
                 "description": "Clear the task Instance.",
@@ -1833,6 +1945,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1886,11 +2002,11 @@ const docTemplate = `{
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData": {
             "type": "object",
-            "required": [
-                "options",
-                "param_option"
-            ],
             "properties": {
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "options": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options"
                 },
@@ -2116,6 +2232,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowVersion": {
+            "type": "object",
+            "required": [
+                "action",
+                "id",
+                "workflowId"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "workflowId": {
                     "type": "string"
                 }
             }

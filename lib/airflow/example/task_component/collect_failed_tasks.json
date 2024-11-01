@@ -1,0 +1,12 @@
+{
+  "name": "collect_failed_tasks",
+  "description": "collect failed tasks Info",
+  "data": {
+    "extra": {
+      "operator": "airflow.operators.python.PythonOperator",
+      "python_callable": "collect_failed_tasks",
+      "provide_context": true,
+      "trigger_rule": "all_done"
+    }
+  }
+}

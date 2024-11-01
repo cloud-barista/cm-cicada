@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Task struct {
@@ -14,6 +16,7 @@ type Task struct {
 	RequestBody   string            `json:"request_body" mapstructure:"request_body" validate:"required"`
 	PathParams    map[string]string `json:"path_params" mapstructure:"path_params"`
 	QueryParams   map[string]string `json:"query_params" mapstructure:"query_params"`
+	Extra 				map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
 	Dependencies  []string          `json:"dependencies" mapstructure:"dependencies"`
 }
 
@@ -88,21 +91,19 @@ type Workflow struct {
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
 }
 
+type WorkflowVersion struct {
+	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	WorkflowID string `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
+  Data       Workflow `gorm:"column:data" json:"data" mapstructure:"data"`
+	Action string `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
+	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
+}
+
 type CreateWorkflowReq struct {
 	Name string        `gorm:"column:name" json:"name" mapstructure:"name" validate:"required"`
 	Data CreateDataReq `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
 
-type Monit struct {
-	WorkflowID      string
-	WorkflowVersion string
-	Status          string
-	startTime       time.Time
-	endTime         time.Time
-	Duration        time.Time
-	WorkflowInput   string
-	WorkflowResult  string
-}
 
 type WorkflowRun struct {
 	WorkflowRunID          string                 `json:"workflow_run_id,omitempty"`
@@ -193,4 +194,61 @@ func (d *CreateDataReq) Scan(value interface{}) error {
 		return errors.New("Invalid type for CreateDataReq")
 	}
 	return json.Unmarshal(bytes, d)
+}
+func (d Workflow) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+func (d *Workflow) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("Invalid type for Data")
+	}
+	return json.Unmarshal(bytes, d)
+}
+
+// AfterCreate Hook for Workflow to add WorkflowVersion on create
+func (w *Workflow) AfterCreate(tx *gorm.DB) (err error) {
+	workflowVersion := WorkflowVersion{
+		ID:         "create_" + time.Now().String(),
+		WorkflowID: w.ID,
+		// Version:    "",  // 기본 버전
+		Data:       *w,
+		Action:     "create",
+		CreatedAt:  time.Now(),
+	}
+
+	if err := tx.Create(&workflowVersion).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// AfterUpdate Hook for Workflow to add WorkflowVersion on update
+func (w *Workflow) AfterUpdate(tx *gorm.DB) (err error) {
+	workflowVersion := WorkflowVersion{
+		ID: 				"update_" + time.Now().String(),
+		// ID:         uuid.New().String(),
+		WorkflowID: w.ID,
+		// Version:    "new_version", // 새로운 버전 설정 로직 추가 가능
+		Data:       *w,
+		Action:     "update",
+		CreatedAt:  time.Now(),
+	}
+
+	if err := tx.Create(&workflowVersion).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// BeforeDelete Hook for Workflow to delete WorkflowVersion on delete
+func (w *Workflow) BeforeDelete(tx *gorm.DB) (err error) {
+	if err := tx.Where("workflowId = ?", w.ID).Delete(&WorkflowVersion{}).Error; err != nil {
+		return err
+	}
+	return nil
 }
