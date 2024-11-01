@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/jollaman999/utils/logger"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
@@ -175,7 +176,8 @@ func TaskComponentInit() error {
 
 		spec, err := fetchAndParseYAML(connection, configFile.SwaggerYAMLEndpoint)
 		if err != nil {
-			return fmt.Errorf("failed to fetch and parse swagger spec: %v", err)
+			logger.Println(logger.WARN, true, fmt.Sprintf("failed to fetch and parse swagger spec: %v", err))
+			continue
 		}
 
 		endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
