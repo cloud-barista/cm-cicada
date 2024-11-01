@@ -523,7 +523,7 @@ paths:
       description: Register the task component.
       operationId: create-task-component
       parameters:
-      - description: task component of the node.
+      - description: task component to create.
         in: body
         name: TaskComponent
         required: true

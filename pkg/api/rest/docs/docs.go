@@ -197,7 +197,7 @@ const docTemplate = `{
                 "operationId": "create-task-component",
                 "parameters": [
                     {
-                        "description": "task component of the node.",
+                        "description": "task component to create.",
                         "name": "TaskComponent",
                         "in": "body",
                         "required": true,
