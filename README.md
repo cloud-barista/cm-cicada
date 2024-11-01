@@ -214,6 +214,152 @@ curl -X 'POST' \
   -d ''
 ```
 
+## About Task Component
+Each task in the workflow references a Task Component.
+
+The Task Component part frequently leads to mistakes, and when the Request Body structure is complex or changes, it becomes difficult to keep up. Therefore, we have implemented a feature that automatically generates Task Components by reading JSON files.
+
+As shown below, using JSONs containing name, description, api_connection_id, swagger_yaml_endpoint, and endpoint, the cicada reads the Swagger YAML and finds the endpoint to automatically construct task components.
+
+The api_connection_id corresponds to one of the connection ids defined in https://github.com/cloud-barista/cm-cicada/blob/main/conf/cm-cicada.yaml
+
+```json
+{
+  "name": "beetle_task_infra_migration",
+  "description": "Do infra migration with beetle.",
+  "api_connection_id": "beetle_api",
+  "swagger_yaml_endpoint": "/beetle/api/doc.yaml",
+  "endpoint": "/migration/ns/{nsId}/mci"
+}
+```
+
+Examples of these JSONs can be found at:
+https://github.com/cloud-barista/cm-cicada/tree/main/lib/airflow/example/task_component
+
+The Task Component automatically generated from the above JSON is as follows:
+
+```json
+{
+  "id": "ee259e89-2c10-4c23-b75f-4c7aef200f9b",
+  "name": "beetle_task_infra_migration",
+  "description": "Do infra migration with beetle.",
+  "data": {
+    "options": {
+      "api_connection_id": "beetle_api",
+      "endpoint": "/beetle/migration/ns/{nsId}/mci",
+      "method": "POST"
+    },
+    "body_params": {
+      "required": [
+        "name",
+        "vm"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Made in CB-TB"
+        },
+        "installMonAgent": {
+          "type": "string",
+          "description": "InstallMonAgent Option for CB-Dragonfly agent installation ([yes/no] default:yes)",
+          "default": "no",
+          "enum": [
+            "yes",
+            "no"
+          ],
+          "example": "no"
+        },
+        "label": {
+          "type": "object",
+          "description": "Label is for describing the object by keywords"
+        },
+        "name": {
+          "type": "string",
+          "example": "mci01"
+        },
+        "systemLabel": {
+          "type": "string",
+          "description": "SystemLabel is for describing the mci in a keyword (any string can be used) for special System purpose",
+          "example": ""
+        },
+        "vm": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "commonImage": {
+                "type": "string",
+                "description": "CommonImage is field for id of a image in common namespace",
+                "example": "ubuntu18.04"
+              },
+              "commonSpec": {
+                "type": "string",
+                "description": "CommonSpec is field for id of a spec in common namespace",
+                "example": "aws+ap-northeast-2+t2.small"
+              },
+              "connectionName": {
+                "type": "string",
+                "description": "if ConnectionName is given, the VM tries to use associtated credential.\nif not, it will use predefined ConnectionName in Spec objects"
+              },
+              "description": {
+                "type": "string",
+                "example": "Description"
+              },
+              "label": {
+                "type": "object",
+                "description": "Label is for describing the object by keywords"
+              },
+              "name": {
+                "type": "string",
+                "description": "VM name or subGroup name if is (not empty) && (> 0). If it is a group, actual VM name will be generated with -N postfix.",
+                "example": "g1-1"
+              },
+              "rootDiskSize": {
+                "type": "string",
+                "description": "\"default\", Integer (GB): [\"50\", ..., \"1000\"]",
+                "default": "default",
+                "example": "default, 30, 42, ..."
+              },
+              "rootDiskType": {
+                "type": "string",
+                "description": "\"\", \"default\", \"TYPE1\", AWS: [\"standard\", \"gp2\", \"gp3\"], Azure: [\"PremiumSSD\", \"StandardSSD\", \"StandardHDD\"], GCP: [\"pd-standard\", \"pd-balanced\", \"pd-ssd\", \"pd-extreme\"], ALIBABA: [\"cloud_efficiency\", \"cloud\", \"cloud_essd\"], TENCENT: [\"CLOUD_PREMIUM\", \"CLOUD_SSD\"]",
+                "default": "default",
+                "example": "default, TYPE1, ..."
+              },
+              "subGroupSize": {
+                "type": "string",
+                "description": "if subGroupSize is (not empty) && (> 0), subGroup will be generated. VMs will be created accordingly.",
+                "default": "1",
+                "example": "3"
+              },
+              "vmUserPassword": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "path_params": {
+      "required": [
+        "nsId"
+      ],
+      "properties": {
+        "nsId": {
+          "type": "string",
+          "description": "Namespace ID",
+          "default": "mig01"
+        }
+      }
+    },
+    "query_params": {}
+  },
+  "created_at": "2024-11-01T03:48:44.279763985+09:00",
+  "updated_at": "2024-11-01T12:19:49.202743886+09:00",
+  "is_example": true
+}
+```
+
 ## Health-check
 
 Check if CM-Cicada is running
