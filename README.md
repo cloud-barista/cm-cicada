@@ -238,6 +238,9 @@ https://github.com/cloud-barista/cm-cicada/tree/main/lib/airflow/example/task_co
 
 The Task Component automatically generated from the above JSON is as follows:
 
+<details>
+    <summary>Expand</summary>
+
 ```json
 {
   "id": "ee259e89-2c10-4c23-b75f-4c7aef200f9b",
@@ -359,6 +362,8 @@ The Task Component automatically generated from the above JSON is as follows:
   "is_example": true
 }
 ```
+
+</details>
 
 ## Health-check
 
