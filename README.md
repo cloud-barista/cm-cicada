@@ -225,11 +225,11 @@ The api_connection_id corresponds to one of the connection ids defined in https:
 
 ```json
 {
-  "name": "beetle_task_infra_migration",
-  "description": "Do infra migration with beetle.",
-  "api_connection_id": "beetle_api",
-  "swagger_yaml_endpoint": "/beetle/api/doc.yaml",
-  "endpoint": "/migration/ns/{nsId}/mci"
+  "name": "tumblebug_mci_dynamic",
+  "description": "Create MCI Dynamically from common spec and image.",
+  "api_connection_id": "tumblebug_api",
+  "swagger_yaml_endpoint": "/tumblebug/api/doc.yaml",
+  "endpoint": "/ns/{nsId}/mciDynamic"
 }
 ```
 
@@ -243,14 +243,15 @@ The Task Component automatically generated from the above JSON is as follows:
 
 ```json
 {
-  "id": "ee259e89-2c10-4c23-b75f-4c7aef200f9b",
-  "name": "beetle_task_infra_migration",
-  "description": "Do infra migration with beetle.",
+  "id": "796645fc-c594-4263-a9ff-243051d1f3a5",
+  "name": "tumblebug_mci_dynamic",
+  "description": "Create MCI Dynamically from common spec and image.",
   "data": {
     "options": {
-      "api_connection_id": "beetle_api",
-      "endpoint": "/beetle/migration/ns/{nsId}/mci",
-      "method": "POST"
+      "api_connection_id": "tumblebug_api",
+      "endpoint": "/tumblebug/ns/{nsId}/mciDynamic",
+      "method": "POST",
+      "request_body": "{\n    \"description\": \"Made in CB-TB\",\n    \"installMonAgent\": \"no\",\n    \"label\": {},\n    \"name\": \"mci01\",\n    \"systemLabel\": \"\",\n    \"vm\": [\n        {\n            \"commonImage\": \"ubuntu18.04\",\n            \"commonSpec\": \"aws+ap-northeast-2+t2.small\",\n            \"connectionName\": \"string\",\n            \"description\": \"Description\",\n            \"label\": {},\n            \"name\": \"g1-1\",\n            \"rootDiskSize\": \"default, 30, 42, ...\",\n            \"rootDiskType\": \"default, TYPE1, ...\",\n            \"subGroupSize\": \"3\",\n            \"vmUserPassword\": \"string\"\n        }\n    ]\n}"
     },
     "body_params": {
       "required": [
@@ -264,7 +265,7 @@ The Task Component automatically generated from the above JSON is as follows:
         },
         "installMonAgent": {
           "type": "string",
-          "description": "InstallMonAgent Option for CB-Dragonfly agent installation ([yes/no] default:yes)",
+          "description": "InstallMonAgent Option for CB-Dragonfly agent installation ([yes/no] default:no)",
           "default": "no",
           "enum": [
             "yes",
@@ -351,14 +352,24 @@ The Task Component automatically generated from the above JSON is as follows:
         "nsId": {
           "type": "string",
           "description": "Namespace ID",
-          "default": "mig01"
+          "default": "default"
         }
       }
     },
-    "query_params": {}
+    "query_params": {
+      "properties": {
+        "option": {
+          "type": "string",
+          "description": "Option for MCI creation",
+          "enum": [
+            "hold"
+          ]
+        }
+      }
+    }
   },
-  "created_at": "2024-11-01T03:48:44.279763985+09:00",
-  "updated_at": "2024-11-01T12:19:49.202743886+09:00",
+  "created_at": "2024-11-01T14:16:21.541043563+09:00",
+  "updated_at": "2024-11-01T17:03:37.326385637+09:00",
   "is_example": true
 }
 ```
