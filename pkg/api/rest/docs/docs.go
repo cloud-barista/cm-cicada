@@ -1877,6 +1877,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_example": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },

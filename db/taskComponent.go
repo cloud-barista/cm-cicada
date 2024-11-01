@@ -199,6 +199,8 @@ func TaskComponentInit() error {
 			taskComponent.UpdatedAt = now
 		}
 
+		taskComponent.IsExample = true
+
 		if err := DB.Session(&gorm.Session{SkipHooks: true}).Save(taskComponent).Error; err != nil {
 			return fmt.Errorf("failed to save task component: %v", err)
 		}

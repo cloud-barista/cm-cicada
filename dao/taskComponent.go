@@ -65,6 +65,7 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 
 	taskComponent.CreatedAt = now
 	taskComponent.UpdatedAt = now
+	taskComponent.IsExample = false
 
 	result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(taskComponent)
 	err := result.Error
@@ -76,6 +77,10 @@ func TaskComponentCreate(taskComponent *model.TaskComponent) (*model.TaskCompone
 }
 
 func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
+	if taskComponent.IsExample {
+		return errors.New("example task component can't be updated")
+	}
+
 	taskComponent.UpdatedAt = time.Now()
 
 	result := db.DB.Model(&model.TaskComponent{}).Where("id = ?", taskComponent.ID).Updates(taskComponent)
@@ -88,6 +93,10 @@ func TaskComponentUpdate(taskComponent *model.TaskComponent) error {
 }
 
 func TaskComponentDelete(taskComponent *model.TaskComponent) error {
+	if taskComponent.IsExample {
+		return errors.New("example task component can't be deleted")
+	}
+
 	result := db.DB.Delete(taskComponent)
 	err := result.Error
 	if err != nil {

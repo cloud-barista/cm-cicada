@@ -43,6 +43,7 @@ type TaskComponent struct {
 	Data        TaskComponentData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 	CreatedAt   time.Time         `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
 	UpdatedAt   time.Time         `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
+	IsExample   bool              `gorm:"column:is_example" json:"is_example" mapstructure:"is_example"`
 }
 
 type CreateTaskComponentReq struct {

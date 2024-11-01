@@ -220,6 +220,8 @@ definitions:
         type: string
       id:
         type: string
+      is_example:
+        type: boolean
       name:
         type: string
       updated_at:
