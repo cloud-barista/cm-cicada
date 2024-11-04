@@ -27,6 +27,7 @@ type TaskComponentOptions struct {
 	APIConnectionID string `json:"api_connection_id"`
 	Endpoint        string `json:"endpoint"`
 	Method          string `json:"method"`
+	RequestBody     string `json:"request_body"`
 }
 
 type TaskComponentData struct {

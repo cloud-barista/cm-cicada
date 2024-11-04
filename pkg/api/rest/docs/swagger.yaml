@@ -256,6 +256,8 @@ definitions:
         type: string
       method:
         type: string
+      request_body:
+        type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskDirectly:
     properties:
