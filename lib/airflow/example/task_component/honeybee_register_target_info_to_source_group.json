@@ -1,65 +1,7 @@
 {
   "name": "honeybee_register_target_info_to_source_group",
   "description": "Register target information to the source group by honeybee.",
-  "data": {
-    "options": {
-      "api_connection_id": "honeybee_api",
-      "endpoint": "/honeybee/source_group/{sgId}/target",
-      "method": "POST",
-      "request_body": ""
-    },
-    "param_option": {
-      "params": {
-        "required": [],
-        "properties": {
-        }
-      }
-    },
-    "path_params": {
-      "required": [
-        "sgId"
-      ],
-      "properties": {
-        "TargetInfo": {
-          "type": "object",
-          "required": [
-            "id",
-            "resourceType"
-          ],
-          "properties": {
-            "description": {
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            },
-            "label": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "resourceType": {
-              "type": "string"
-            },
-            "systemLabel": {
-              "type": "string"
-            },
-            "systemMessage": {
-              "type": "string"
-            },
-            "targetAction": {
-              "type": "string"
-            },
-            "targetStatus": {
-              "type": "string"
-            },
-            "uid": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    }
-  }
+  "api_connection_id": "honeybee_api",
+  "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
+  "endpoint": "/source_group/{sgId}/target"
 }

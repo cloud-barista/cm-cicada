@@ -7,35 +7,49 @@ import (
 	"time"
 )
 
-type Options struct {
-	APIConnectionID string `json:"api_connection_id" mapstructure:"api_connection_id" validate:"required"`
-	Endpoint        string `json:"endpoint" mapstructure:"endpoint" validate:"required"`
-	Method          string `json:"method" mapstructure:"method" validate:"required"`
-	RequestBody     string `json:"request_body" mapstructure:"request_body" validate:"required"`
+type PropertyDef struct {
+	Type        string                 `json:"type"`
+	Required    []string               `json:"required,omitempty"`
+	Properties  map[string]PropertyDef `json:"properties,omitempty"`
+	Items       *PropertyDef           `json:"items,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Default     interface{}            `json:"default,omitempty"`
+	Enum        []string               `json:"enum,omitempty"`
+	Example     interface{}            `json:"example,omitempty"`
 }
 
-type ParamOption struct {
-	Params     Params `json:"params" mapstructure:"params" validate:"required"`
-	PathParams Params `json:"path_params" mapstructure:"path_params"`
+type ParameterStructure struct {
+	Required   []string               `json:"required,omitempty"`
+	Properties map[string]PropertyDef `json:"properties,omitempty"`
 }
 
-type TaskData struct {
-	Options     Options     `json:"options" mapstructure:"options" `
-	ParmaOption ParamOption `json:"param_option" mapstructure:"param_option"`
-	Extra 			map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
+type TaskComponentOptions struct {
+	APIConnectionID string `json:"api_connection_id"`
+	Endpoint        string `json:"endpoint"`
+	Method          string `json:"method"`
+}
+
+type TaskComponentData struct {
+	Options     TaskComponentOptions `json:"options"`
+	Extra 			map[string]interface{} `json:"extra,omitempty"`
+	BodyParams  ParameterStructure   `json:"body_params,omitempty"`
+	PathParams  ParameterStructure   `json:"path_params,omitempty"`
+	QueryParams ParameterStructure   `json:"query_params,omitempty"`
 }
 
 type TaskComponent struct {
-	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name      string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
-	Data      TaskData  `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
+	ID          string            `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name        string            `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
+	Description string            `gorm:"column:description" json:"description"`
+	Data        TaskComponentData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	CreatedAt   time.Time         `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt   time.Time         `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
+	IsExample   bool              `gorm:"column:is_example" json:"is_example" mapstructure:"is_example"`
 }
 
 type CreateTaskComponentReq struct {
-	Name string   `json:"name" mapstructure:"name" validate:"required"`
-	Data TaskData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	Name string            `json:"name" mapstructure:"name" validate:"required"`
+	Data TaskComponentData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
 
 type Params struct {
@@ -43,11 +57,11 @@ type Params struct {
 	Properties interface{} `json:"properties" mapstructure:"properties" validate:"required"`
 }
 
-func (d TaskData) Value() (driver.Value, error) {
+func (d TaskComponentData) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }
 
-func (d *TaskData) Scan(value interface{}) error {
+func (d *TaskComponentData) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}

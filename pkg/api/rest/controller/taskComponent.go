@@ -18,7 +18,7 @@ import (
 //	@Tags		[Task Component]
 //	@Accept		json
 //	@Produce		json
-//	@Param		TaskComponent body model.CreateTaskComponentReq true "task component of the node."
+//	@Param		TaskComponent body model.CreateTaskComponentReq true "task component to create."
 //	@Success		200	{object}	model.TaskComponent		"Successfully register the task component"
 //	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"

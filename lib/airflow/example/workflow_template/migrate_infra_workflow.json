@@ -17,22 +17,13 @@
             "dependencies": []
           },
           {
-            "name": "infra_get",
-            "task_component": "honeybee_task_get_infra_refined_for_recommendation_request",
-            "request_body": "",
-            "path_params": {
-              "sgId": "3e635238-0c4b-4f6e-9062-906f3dd5f571",
+            "name": "infra_recommend",
+            "task_component": "beetle_task_recommend_infra",
+            "request_body": "infra_import",
+            "query_params": {
               "CSP": "aws",
               "region": "ap-northeast-2"
             },
-            "dependencies": [
-              "infra_import"
-            ]
-          },
-          {
-            "name": "infra_recommend",
-            "task_component": "beetle_task_recommend_infra",
-            "request_body": "infra_get",
             "dependencies": [
               "infra_get"
             ]

@@ -87,8 +87,8 @@ type Workflow struct {
 	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
 	Name      string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
 	Data      Data      `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at" mapstructure:"updated_at"`
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
 }
 
 type WorkflowVersion struct {
@@ -151,19 +151,19 @@ type TaskLog struct {
 	Content string `json:"content,omitempty"`
 }
 type EventLogs struct {
-	EventLogs []EventLog `json:"event_logs"`
-	TotalEntries int `json:"total_entries"`
+	EventLogs    []EventLog `json:"event_logs"`
+	TotalEntries int        `json:"total_entries"`
 }
 
 type EventLog struct {
-	WorkflowRunID string `json:"workflow_run_id"`
-	RunID string `json:"run_id,omitempty"`
-	WorkflowID string `json:"workflow_id"`
-	TaskID string `json:"task_id"`	
-	TaskName string `json:"task_name"`
-	Event string `json:"event,omitempty"`
-	When time.Time `json:"when,omitempty"`
-	Extra string `json:"extra,omitempty"`
+	WorkflowRunID string    `json:"workflow_run_id"`
+	RunID         string    `json:"run_id,omitempty"`
+	WorkflowID    string    `json:"workflow_id"`
+	TaskID        string    `json:"task_id"`
+	TaskName      string    `json:"task_name"`
+	Event         string    `json:"event,omitempty"`
+	When          time.Time `json:"when,omitempty"`
+	Extra         string    `json:"extra,omitempty"`
 }
 
 func (d Data) Value() (driver.Value, error) {

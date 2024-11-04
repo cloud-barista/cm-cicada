@@ -51,7 +51,7 @@ definitions:
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq:
     properties:
       data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData'
       name:
         type: string
     required:
@@ -143,41 +143,39 @@ definitions:
     - data
     - name
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options:
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure:
     properties:
-      api_connection_id:
-        type: string
-      endpoint:
-        type: string
-      method:
-        type: string
-      request_body:
-        type: string
-    required:
-    - api_connection_id
-    - endpoint
-    - method
-    - request_body
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParamOption:
-    properties:
-      params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
-      path_params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params'
-    required:
-    - params
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Params:
-    properties:
-      properties: {}
+      properties:
+        additionalProperties:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
+        type: object
       required:
         items:
           type: string
         type: array
-    required:
-    - properties
-    - required
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef:
+    properties:
+      default: {}
+      description:
+        type: string
+      enum:
+        items:
+          type: string
+        type: array
+      example: {}
+      items:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
+      properties:
+        additionalProperties:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
+        type: object
+      required:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg:
     properties:
@@ -220,9 +218,13 @@ definitions:
       created_at:
         type: string
       data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData'
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData'
+      description:
+        type: string
       id:
         type: string
+      is_example:
+        type: boolean
       name:
         type: string
       updated_at:
@@ -232,15 +234,28 @@ definitions:
     - id
     - name
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskData:
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData:
     properties:
+      body_params:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
       extra:
         additionalProperties: true
         type: object
       options:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Options'
-      param_option:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParamOption'
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions'
+      path_params:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
+      query_params:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions:
+    properties:
+      api_connection_id:
+        type: string
+      endpoint:
+        type: string
+      method:
+        type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskDirectly:
     properties:
@@ -533,7 +548,7 @@ paths:
       description: Register the task component.
       operationId: create-task-component
       parameters:
-      - description: task component of the node.
+      - description: task component to create.
         in: body
         name: TaskComponent
         required: true
