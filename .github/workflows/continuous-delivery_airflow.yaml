@@ -17,17 +17,8 @@ on:
     tags:
       # Only trigger on semver shaped tags.
       - "v*.*.*"
-    paths-ignore:
-      - ".github/**"
-      - "docs/**"
-      - "scripts/**"
-      - "**.md"
-      - ".gitignore"
-      - "LICENSE"
-      - "CODEOWNERS"
-      # - '.all-contributorsrc'
-      # - 'assets/**'
-      # - 'src/testclient/scripts/**'
+    paths:
+      - "_airflow"
   # workflow trigger button
   # workflow_dispatch:
 
