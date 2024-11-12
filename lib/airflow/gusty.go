@@ -69,9 +69,12 @@ func isTaskExist(workflow *model.Workflow, taskID string) bool {
 	return false
 }
 
-func parseEndpoint(pathParams map[string]string, queryParams map[string]string, endpoint string) string {
+func parseEndpoint(pathParams map[string]string, queryParams map[string]string, endpoint string) (string, error) {
 	pathParamKeys := reflect.ValueOf(pathParams).MapKeys()
 	for _, key := range pathParamKeys {
+		if pathParams[key.String()] == "" {
+			return endpoint, fmt.Errorf("path parameter %s is empty", pathParams[key.String()])
+		}
 		endpoint = strings.ReplaceAll(endpoint, "{"+key.String()+"}", pathParams[key.String()])
 	}
 
@@ -81,12 +84,15 @@ func parseEndpoint(pathParams map[string]string, queryParams map[string]string, 
 			endpoint += "?"
 		}
 		for _, key := range queryParamKeys {
+			if queryParams[key.String()] == "" {
+				continue
+			}
 			endpoint += fmt.Sprintf("%v=%v&", key.String(), queryParams[key.String()])
 		}
 		endpoint = strings.TrimRight(endpoint, "&")
 	}
 
-	return endpoint
+	return endpoint, nil
 }
 
 func writeModelToYAMLFile(model any, filePath string) error {
@@ -187,7 +193,11 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 				}
 
 				taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-				taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+				endpoint, err := parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+				if err != nil {
+					return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
+				}
+				taskOptions["endpoint"] = endpoint
 				taskOptions["method"] = taskComponent.Data.Options.Method
 			}
 
