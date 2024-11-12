@@ -19,6 +19,12 @@ cm-cicada:
             host: 192.168.110.14
             port: 8081
             schema: http
+          - id: grasshopper_api
+            type: http
+            description: Grasshopper API
+            host: 192.168.110.14
+            port: 8084
+            schema: http
           - id: beetle_api
             type: http
             description: Beetle API
