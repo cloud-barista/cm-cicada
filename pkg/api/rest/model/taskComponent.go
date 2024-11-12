@@ -28,11 +28,11 @@ type TaskComponentOptions struct {
 	Endpoint        string `json:"endpoint"`
 	Method          string `json:"method"`
 	RequestBody     string `json:"request_body"`
+	Extra 			map[string]interface{} `json:"extra,omitempty"`
 }
 
 type TaskComponentData struct {
 	Options     TaskComponentOptions `json:"options"`
-	Extra 			map[string]interface{} `json:"extra,omitempty"`
 	BodyParams  ParameterStructure   `json:"body_params,omitempty"`
 	PathParams  ParameterStructure   `json:"path_params,omitempty"`
 	QueryParams ParameterStructure   `json:"query_params,omitempty"`

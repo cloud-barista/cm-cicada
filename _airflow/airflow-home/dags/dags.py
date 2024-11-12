@@ -1,7 +1,6 @@
 import os
 import airflow
 from gusty import create_dag
-from utils import collect_failed_tasks
 from airflow.utils.state import State
 
 #####################

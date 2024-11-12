@@ -161,40 +161,40 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 		for _, t := range tg.Tasks {
 			taskOptions := make(map[string]any)
 			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
-
 			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
-			fmt.Println("0 : ", taskComponent )
-			if taskComponent.Data.Extra != nil {
-				fmt.Println("1 : ", t.Name )
-				taskOptions = taskComponent.Data.Extra
+			if taskComponent.Data.Options.Extra != nil {
+				taskOptions = taskComponent.Data.Options.Extra
+
 			} else {
-				fmt.Println("2 : ", t.Name )
 				if isTaskExist(workflow, t.RequestBody) {
 					taskOptions["operator"] = "local.JsonHttpRequestOperator"
 					taskOptions["xcom_task"] = t.RequestBody
 				} else {
 					taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
-	
+
 					type headers struct {
 						ContentType string `json:"Content-Type" yaml:"Content-Type"`
 					}
 					taskOptions["headers"] = headers{
 						ContentType: "application/json",
 					}
-	
+
 					taskOptions["log_response"] = true
-	
+
 					taskOptions["data"] = t.RequestBody
-				}	
-			
-			taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-			taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
-			taskOptions["method"] = taskComponent.Data.Options.Method
-		}
+				}
+
+				taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
+				taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+				taskOptions["method"] = taskComponent.Data.Options.Method
+			}
+
 			taskOptions["dependencies"] = t.Dependencies
+
 			taskOptions["task_id"] = t.Name
+
 			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
 
 			err = writeModelToYAMLFile(taskOptions, filePath)

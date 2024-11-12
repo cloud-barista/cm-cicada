@@ -32,11 +32,14 @@ def collect_failed_tasks(**context):
             if task_instance.state != State.SUCCESS:
                 failed_tasks.append(task_instance.task_id)
 
+        # DAG 상태를 실패한 태스크가 1개 이상인 경우 "failed"로 설정
+        dag_state = "failed" if failed_tasks else "success"
+
         # 결과 반환
         return {
             "dag_id": source_dag_id,
             "dag_run_id": source_dag_run_id,
-            "dag_state": source_dag_run.state,
+            "dag_state": dag_state,
             "failed_tasks": failed_tasks
         }
 
@@ -59,7 +62,7 @@ with DAG(
     # EmailOperator 설정
     email_task = EmailOperator(
         task_id='send_email',
-        to='yourEmail@gmail.com',
+        to='Your Email',
         subject='DAG 상태 보고서',
         html_content="""<h3>Workflow Execution Complete</h3>
             <p><strong>Workflow ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_id') }}</p>

@@ -238,9 +238,6 @@ definitions:
     properties:
       body_params:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
-      extra:
-        additionalProperties: true
-        type: object
       options:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions'
       path_params:
@@ -254,6 +251,9 @@ definitions:
         type: string
       endpoint:
         type: string
+      extra:
+        additionalProperties: true
+        type: object
       method:
         type: string
       request_body:

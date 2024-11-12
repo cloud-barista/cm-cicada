@@ -2010,10 +2010,6 @@ const docTemplate = `{
                 "body_params": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure"
                 },
-                "extra": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "options": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions"
                 },
@@ -2033,6 +2029,10 @@ const docTemplate = `{
                 },
                 "endpoint": {
                     "type": "string"
+                },
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "method": {
                     "type": "string"
