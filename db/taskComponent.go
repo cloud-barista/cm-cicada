@@ -180,7 +180,6 @@ func TaskComponentInit() error {
 			if !connectionFound {
 				logger.Println(logger.WARN, true, fmt.Sprintf("failed to find connection with ID %s", configFile.APIConnectionID))
 				continue
-				// return fmt.Errorf("failed to find connection with ID %s", configFile.APIConnectionID)
 			}
 
 			spec, err := fetchAndParseYAML(connection, configFile.SwaggerYAMLEndpoint)
@@ -194,7 +193,6 @@ func TaskComponentInit() error {
 			if err != nil {
 				logger.Println(logger.WARN, true, fmt.Sprintf("failed to process endpoint: %v", err))
 				continue
-				// return fmt.Errorf("failed to process endpoint: %v", err)
 			}
 		}
 		taskComponent.Name = configFile.Name

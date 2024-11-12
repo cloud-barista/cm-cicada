@@ -276,7 +276,6 @@ func (client *client) GetEventLogs(dagID string, dagRunId string, taskId string)
 	queryString := query.Encode()
 	fullURL := fmt.Sprintf("%s?%s", baseURL, queryString)
 	httpclient := client.api.GetConfig().HTTPClient
-	// fmt.Println(&httpclient.)
 
 	// 요청 생성
 	req, err := http.NewRequest("GET", fullURL, nil)

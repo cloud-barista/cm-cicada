@@ -17,7 +17,6 @@ func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
 	workflow.UpdatedAt = now
 
 	result := db.DB.Create(workflow)
-	// result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(workflow)
 	err := result.Error
 	if err != nil {
 		return nil, err
