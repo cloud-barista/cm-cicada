@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cloud-barista/cm-cicada/dao"
@@ -42,54 +43,78 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 	}
 }
 
-func createDataReqToData(createDataReq model.CreateDataReq) (model.Data, error) {
+func createDataReqToData(specVersion string, createDataReq model.CreateDataReq) (model.Data, error) {
+	specVersionSpilit := strings.Split(specVersion, ".")
+	if len(specVersionSpilit) != 2 {
+		return model.Data{}, errors.New("invalid workflow spec version: " + specVersion)
+	}
+
+	specVersionMajor, err := strconv.Atoi(specVersionSpilit[0])
+	if err != nil {
+		return model.Data{}, errors.New("invalid workflow spec version: " + specVersion)
+	}
+
+	specVersionMinor, err := strconv.Atoi(specVersionSpilit[1])
+	if err != nil {
+		return model.Data{}, errors.New("invalid workflow spec version: " + specVersion)
+	}
+
 	var taskGroups []model.TaskGroup
 	var allTasks []model.Task
 
-	for _, tgReq := range createDataReq.TaskGroups {
-		var tasks []model.Task
-		for _, tReq := range tgReq.Tasks {
-			tasks = append(tasks, model.Task{
-				ID:            uuid.New().String(),
-				Name:          tReq.Name,
-				TaskComponent: tReq.TaskComponent,
-				RequestBody:   tReq.RequestBody,
-				PathParams:    tReq.PathParams,
-				Dependencies:  tReq.Dependencies,
-			})
-		}
-
-		allTasks = append(allTasks, tasks...)
-		taskGroups = append(taskGroups, model.TaskGroup{
-			ID:          uuid.New().String(),
-			Name:        tgReq.Name,
-			Description: tgReq.Description,
-			Tasks:       tasks,
-		})
-	}
-
-	for i, tgReq := range createDataReq.TaskGroups {
-		for j, tg := range taskGroups {
-			if tgReq.Name == tg.Name {
-				if i == j {
-					continue
+	if specVersionMajor > 0 && specVersionMajor <= 1 {
+		if specVersionMinor == 0 {
+			// v1.0
+			for _, tgReq := range createDataReq.TaskGroups {
+				var tasks []model.Task
+				for _, tReq := range tgReq.Tasks {
+					tasks = append(tasks, model.Task{
+						ID:            uuid.New().String(),
+						Name:          tReq.Name,
+						TaskComponent: tReq.TaskComponent,
+						RequestBody:   tReq.RequestBody,
+						PathParams:    tReq.PathParams,
+						Dependencies:  tReq.Dependencies,
+					})
 				}
 
-				return model.Data{}, errors.New("Duplicated task group name: " + tg.Name)
+				allTasks = append(allTasks, tasks...)
+				taskGroups = append(taskGroups, model.TaskGroup{
+					ID:          uuid.New().String(),
+					Name:        tgReq.Name,
+					Description: tgReq.Description,
+					Tasks:       tasks,
+				})
 			}
-		}
-	}
 
-	for i, tCheck := range allTasks {
-		for j, t := range allTasks {
-			if tCheck.Name == t.Name {
-				if i == j {
-					continue
+			for i, tgReq := range createDataReq.TaskGroups {
+				for j, tg := range taskGroups {
+					if tgReq.Name == tg.Name {
+						if i == j {
+							continue
+						}
+
+						return model.Data{}, errors.New("Duplicated task group name: " + tg.Name)
+					}
 				}
-
-				return model.Data{}, errors.New("Duplicated task name: " + t.Name)
 			}
+
+			for i, tCheck := range allTasks {
+				for j, t := range allTasks {
+					if tCheck.Name == t.Name {
+						if i == j {
+							continue
+						}
+
+						return model.Data{}, errors.New("Duplicated task name: " + t.Name)
+					}
+				}
+			}
+		} else {
+			return model.Data{}, errors.New("Unsupported workflow spec version: " + specVersion)
 		}
+	} else {
+		return model.Data{}, errors.New("Unsupported workflow spec version: " + specVersion)
 	}
 
 	return model.Data{
@@ -138,13 +163,19 @@ func CreateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the name.")
 	}
 
-	workflowData, err := createDataReqToData(createWorkflowReq.Data)
+	var specVersion = model.WorkflowSpecVersion_LATEST
+	if createWorkflowReq.SpecVersion != "" {
+		specVersion = createWorkflowReq.SpecVersion
+	}
+
+	workflowData, err := createDataReqToData(specVersion, createWorkflowReq.Data)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	var workflow model.Workflow
 	workflow.ID = uuid.New().String()
+	workflow.SpecVersion = specVersion
 	workflow.Name = createWorkflowReq.Name
 	workflow.Data = workflowData
 
@@ -418,7 +449,12 @@ func UpdateWorkflow(c echo.Context) error {
 		oldWorkflow.Name = updateWorkflowReq.Name
 	}
 
-	workflowData, err := createDataReqToData(updateWorkflowReq.Data)
+	var specVersion = model.WorkflowSpecVersion_LATEST
+	if updateWorkflowReq.SpecVersion != "" {
+		specVersion = updateWorkflowReq.SpecVersion
+	}
+
+	workflowData, err := createDataReqToData(specVersion, updateWorkflowReq.Data)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}

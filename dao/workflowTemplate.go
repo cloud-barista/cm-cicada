@@ -25,8 +25,9 @@ func WorkflowTemplateGet(id string) (*model.GetWorkflowTemplate, error) {
 	}
 
 	return &model.GetWorkflowTemplate{
-		Name: workflowTemplate.Name,
-		Data: workflowTemplate.Data,
+		SpecVersion: workflowTemplate.SpecVersion,
+		Name:        workflowTemplate.Name,
+		Data:        workflowTemplate.Data,
 	}, nil
 }
 

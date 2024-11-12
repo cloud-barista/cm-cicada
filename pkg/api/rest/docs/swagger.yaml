@@ -99,6 +99,8 @@ definitions:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq'
       name:
         type: string
+      spec_version:
+        type: string
     required:
     - data
     - name
@@ -139,9 +141,12 @@ definitions:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq'
       name:
         type: string
+      spec_version:
+        type: string
     required:
     - data
     - name
+    - spec_version
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure:
     properties:
@@ -355,12 +360,15 @@ definitions:
         type: string
       name:
         type: string
+      spec_version:
+        type: string
       updated_at:
         type: string
     required:
     - data
     - id
     - name
+    - spec_version
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowRun:
     properties:
@@ -404,10 +412,13 @@ definitions:
         type: string
       name:
         type: string
+      spec_version:
+        type: string
     required:
     - data
     - id
     - name
+    - spec_version
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowVersion:
     properties:
@@ -419,11 +430,14 @@ definitions:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
       id:
         type: string
+      spec_version:
+        type: string
       workflowId:
         type: string
     required:
     - action
     - id
+    - spec_version
     - workflowId
     type: object
 info:

@@ -1805,6 +1805,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "spec_version": {
+                    "type": "string"
                 }
             }
         },
@@ -1858,13 +1861,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "data",
-                "name"
+                "name",
+                "spec_version"
             ],
             "properties": {
                 "data": {
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "spec_version": {
                     "type": "string"
                 }
             }
@@ -2173,7 +2180,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "id",
-                "name"
+                "name",
+                "spec_version"
             ],
             "properties": {
                 "created_at": {
@@ -2186,6 +2194,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "spec_version": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -2249,7 +2260,8 @@ const docTemplate = `{
             "required": [
                 "data",
                 "id",
-                "name"
+                "name",
+                "spec_version"
             ],
             "properties": {
                 "data": {
@@ -2260,6 +2272,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "spec_version": {
+                    "type": "string"
                 }
             }
         },
@@ -2268,6 +2283,7 @@ const docTemplate = `{
             "required": [
                 "action",
                 "id",
+                "spec_version",
                 "workflowId"
             ],
             "properties": {
@@ -2281,6 +2297,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "spec_version": {
                     "type": "string"
                 },
                 "workflowId": {

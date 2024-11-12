@@ -58,8 +58,9 @@ func GetWorkflowTemplateByName(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "workflow template not found with the provided name")
 	}
 	return c.JSONPretty(http.StatusOK, model.GetWorkflowTemplate{
-		Name: workflowTemplate.Name,
-		Data: workflowTemplate.Data,
+		SpecVersion: workflowTemplate.SpecVersion,
+		Name:        workflowTemplate.Name,
+		Data:        workflowTemplate.Data,
 	}, "")
 }
 

@@ -9,6 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	WorkflowSpecVersion_1_0 = "1.0"
+)
+
+const (
+	WorkflowSpecVersion_LATEST = WorkflowSpecVersion_1_0
+)
+
 type Task struct {
 	ID            string                 `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
 	Name          string                 `json:"name" mapstructure:"name" validate:"required"`
@@ -84,24 +92,27 @@ type CreateDataReq struct {
 }
 
 type Workflow struct {
-	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name      string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
-	Data      Data      `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
+	ID          string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	SpecVersion string    `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
+	Name        string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
+	Data        Data      `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
 }
 
 type WorkflowVersion struct {
-	ID         string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	WorkflowID string    `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
-	Data       Workflow  `gorm:"column:data" json:"data" mapstructure:"data"`
-	Action     string    `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
-	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
+	ID          string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	SpecVersion string    `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
+	WorkflowID  string    `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
+	Data        Workflow  `gorm:"column:data" json:"data" mapstructure:"data"`
+	Action      string    `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
+	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
 }
 
 type CreateWorkflowReq struct {
-	Name string        `gorm:"column:name" json:"name" mapstructure:"name" validate:"required"`
-	Data CreateDataReq `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	SpecVersion string        `json:"spec_version" mapstructure:"spec_version"`
+	Name        string        `json:"name" mapstructure:"name" validate:"required"`
+	Data        CreateDataReq `json:"data" mapstructure:"data" validate:"required"`
 }
 
 type WorkflowRun struct {
