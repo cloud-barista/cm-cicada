@@ -8,44 +8,27 @@
         "description": "Migrate Server",
         "tasks": [
           {
-            "name": "infra_import",
-            "task_component": "honeybee_task_import_infra",
-            "request_body": "",
-            "path_params": {
-              "sgId": "3e635238-0c4b-4f6e-9062-906f3dd5f571"
-            },
-            "dependencies": []
-          },
-          {
-            "name": "infra_recommend",
-            "task_component": "beetle_task_recommend_infra",
-            "request_body": "infra_import",
-            "query_params": {
-              "CSP": "aws",
-              "region": "ap-northeast-2"
-            },
-            "dependencies": [
-              "infra_get"
-            ]
-          },
-          {
             "name": "infra_migration",
             "task_component": "beetle_task_infra_migration",
-            "request_body": "infra_recommend",
-            "dependencies": [
-              "infra_recommend"
-            ]
+            "request_body": "{\n    \"name\": \"mmci01\",\n    \"installMonAgent\": \"no\",\n    \"description\": \"A cloud infra recommended by CM-Beetle\",\n    \"vm\": [\n        {\n            \"name\": \"rehosted-test-cm-nfs\",\n            \"subGroupSize\": \"\",\n            \"label\": null,\n            \"description\": \"a recommended virtual machine\",\n            \"commonSpec\": \"azure+koreacentral+standard_b2ls_v2\",\n            \"commonImage\": \"azure+koreacentral+ubuntu22.04\"\n        },\n        {\n            \"name\": \"rehosted-test-cm-web\",\n            \"subGroupSize\": \"\",\n            \"label\": null,\n            \"description\": \"a recommended virtual machine\",\n            \"commonSpec\": \"azure+koreacentral+standard_b2ls_v2\",\n            \"commonImage\": \"azure+koreacentral+ubuntu22.04\"\n        }\n    ]\n}\n\n",
+            "path_params": {
+              "nsId": "mig01"
+            }
           },
           {
             "name": "register_target_to_source_group",
             "task_component": "honeybee_register_target_info_to_source_group",
             "request_body": "infra_migration",
             "path_params": {
-              "sgId": "3e635238-0c4b-4f6e-9062-906f3dd5f571"
+              "sgId": "ddcfa917-17e0-4718-a878-f1e99f97ed6d"
             },
             "dependencies": [
               "infra_migration"
             ]
+          },
+          {
+            "name": "send_result_via_email",
+            "task_component": "trigger_email"
           }
         ]
       }
