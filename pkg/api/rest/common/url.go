@@ -5,7 +5,7 @@ import (
 	"net/url"
 )
 
-func UrlDecode(text string) (string) {
+func UrlDecode(text string) string {
 	decodedStr, err := url.QueryUnescape(text)
 	if err != nil {
 		fmt.Println("Error decoding URL:", err)
@@ -15,8 +15,8 @@ func UrlDecode(text string) (string) {
 	}
 }
 
-func UrlEncode(text string) (string) {
+func UrlEncode(text string) string {
 	encodedStr := url.QueryEscape(text)
-	
+
 	return encodedStr
 }

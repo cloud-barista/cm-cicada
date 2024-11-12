@@ -9,5 +9,5 @@ type Connection struct {
 	Schema      string `json:"schema" yaml:"schema" mapstructure:"schema"`
 	Login       string `json:"login" yaml:"login" mapstructure:"login"`
 	Password    string `json:"password" yaml:"password" mapstructure:"password"`
-	Extra 			string `json:"extra" yaml:"extra" mapstructure:"extra"`
+	Extra       string `json:"extra" yaml:"extra" mapstructure:"extra"`
 }

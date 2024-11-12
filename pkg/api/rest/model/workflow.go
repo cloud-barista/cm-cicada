@@ -10,14 +10,14 @@ import (
 )
 
 type Task struct {
-	ID            string            `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name          string            `json:"name" mapstructure:"name" validate:"required"`
-	TaskComponent string            `json:"task_component" mapstructure:"task_component" validate:"required"`
-	RequestBody   string            `json:"request_body" mapstructure:"request_body" validate:"required"`
-	PathParams    map[string]string `json:"path_params" mapstructure:"path_params"`
-	QueryParams   map[string]string `json:"query_params" mapstructure:"query_params"`
-	Extra 				map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
-	Dependencies  []string          `json:"dependencies" mapstructure:"dependencies"`
+	ID            string                 `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name          string                 `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string                 `json:"task_component" mapstructure:"task_component" validate:"required"`
+	RequestBody   string                 `json:"request_body" mapstructure:"request_body" validate:"required"`
+	PathParams    map[string]string      `json:"path_params" mapstructure:"path_params"`
+	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
+	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
+	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
 }
 
 type TaskDirectly struct {
@@ -92,10 +92,10 @@ type Workflow struct {
 }
 
 type WorkflowVersion struct {
-	ID        string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	WorkflowID string `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
-  Data       Workflow `gorm:"column:data" json:"data" mapstructure:"data"`
-	Action string `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
+	ID         string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	WorkflowID string    `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
+	Data       Workflow  `gorm:"column:data" json:"data" mapstructure:"data"`
+	Action     string    `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
 	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
 }
 
@@ -103,7 +103,6 @@ type CreateWorkflowReq struct {
 	Name string        `gorm:"column:name" json:"name" mapstructure:"name" validate:"required"`
 	Data CreateDataReq `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
 }
-
 
 type WorkflowRun struct {
 	WorkflowRunID          string                 `json:"workflow_run_id,omitempty"`
@@ -216,9 +215,9 @@ func (w *Workflow) AfterCreate(tx *gorm.DB) (err error) {
 		ID:         "create_" + time.Now().String(),
 		WorkflowID: w.ID,
 		// Version:    "",  // 기본 버전
-		Data:       *w,
-		Action:     "create",
-		CreatedAt:  time.Now(),
+		Data:      *w,
+		Action:    "create",
+		CreatedAt: time.Now(),
 	}
 
 	if err := tx.Create(&workflowVersion).Error; err != nil {
@@ -230,13 +229,13 @@ func (w *Workflow) AfterCreate(tx *gorm.DB) (err error) {
 // AfterUpdate Hook for Workflow to add WorkflowVersion on update
 func (w *Workflow) AfterUpdate(tx *gorm.DB) (err error) {
 	workflowVersion := WorkflowVersion{
-		ID: 				"update_" + time.Now().String(),
+		ID: "update_" + time.Now().String(),
 		// ID:         uuid.New().String(),
 		WorkflowID: w.ID,
 		// Version:    "new_version", // 새로운 버전 설정 로직 추가 가능
-		Data:       *w,
-		Action:     "update",
-		CreatedAt:  time.Now(),
+		Data:      *w,
+		Action:    "update",
+		CreatedAt: time.Now(),
 	}
 
 	if err := tx.Create(&workflowVersion).Error; err != nil {

@@ -23,12 +23,12 @@ import (
 )
 
 type ConfigFile struct {
-	Name                string `json:"name"`
-	Description         string `json:"description"`
-	APIConnectionID     string `json:"api_connection_id"`
-	SwaggerYAMLEndpoint string `json:"swagger_yaml_endpoint"`
-	Endpoint            string `json:"endpoint"`
-	Extra 							map[string]interface{} `json:"extra"`
+	Name                string                 `json:"name"`
+	Description         string                 `json:"description"`
+	APIConnectionID     string                 `json:"api_connection_id"`
+	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint"`
+	Endpoint            string                 `json:"endpoint"`
+	Extra               map[string]interface{} `json:"extra"`
 }
 
 type SwaggerSpec struct {
@@ -190,7 +190,7 @@ func TaskComponentInit() error {
 			}
 
 			endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
-			taskComponent, err = processEndpoint(connection.ID, spec, endpoint )
+			taskComponent, err = processEndpoint(connection.ID, spec, endpoint)
 			if err != nil {
 				logger.Println(logger.WARN, true, fmt.Sprintf("failed to process endpoint: %v", err))
 				continue
