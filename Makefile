@@ -42,7 +42,7 @@ coverhtml: coverage ## Generate global code coverage report in HTML
 
 gofmt: ## Run gofmt for go files
 	@echo "Running gofmt..."
-	@find -type f -name '*.go' -not -path "./vendor/*" -exec $(GOROOT)/bin/gofmt -s -w {} \;
+	@find . -\( -path "./_airflow" -o -path "./vendor" \) -prune -o -type f -name '*.go' -exec $(GOROOT)/bin/gofmt -s -w {} \;
 
 update: ## Update all of module dependencies
 	@echo Updating dependencies...
