@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cloud-barista/cm-cicada/db"
@@ -15,7 +16,8 @@ func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
 	workflow.CreatedAt = now
 	workflow.UpdatedAt = now
 
-	result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(workflow)
+	result := db.DB.Create(workflow)
+	// result := db.DB.Session(&gorm.Session{SkipHooks: true}).Create(workflow)
 	err := result.Error
 	if err != nil {
 		return nil, err
@@ -167,6 +169,7 @@ func WorkflowVersionGet(id string, wkId string) (*model.WorkflowVersion, error) 
 	}
 
 	result := db.DB.Where("id = ? and workflowId = ?", id, wkId).First(workflowVersion)
+	fmt.Println("result : ", result)
 	err := result.Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
