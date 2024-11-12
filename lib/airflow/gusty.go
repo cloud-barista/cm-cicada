@@ -3,15 +3,16 @@ package airflow
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
 	"gopkg.in/yaml.v3"
-	"reflect"
-	"strings"
-	"time"
 )
 
 func checkWorkflow(workflow *model.Workflow) error {
@@ -159,37 +160,40 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 
 		for _, t := range tg.Tasks {
 			taskOptions := make(map[string]any)
+			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
+			if taskComponent == nil {
+				return errors.New("task component '" + t.TaskComponent + "' not found")
+			}
+			if taskComponent.Data.Options.Extra != nil {
+				taskOptions = taskComponent.Data.Options.Extra
 
-			if isTaskExist(workflow, t.RequestBody) {
-				taskOptions["operator"] = "local.JsonHttpRequestOperator"
-				taskOptions["xcom_task"] = t.RequestBody
 			} else {
-				taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
+				if isTaskExist(workflow, t.RequestBody) {
+					taskOptions["operator"] = "local.JsonHttpRequestOperator"
+					taskOptions["xcom_task"] = t.RequestBody
+				} else {
+					taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
 
-				type headers struct {
-					ContentType string `json:"Content-Type" yaml:"Content-Type"`
+					type headers struct {
+						ContentType string `json:"Content-Type" yaml:"Content-Type"`
+					}
+					taskOptions["headers"] = headers{
+						ContentType: "application/json",
+					}
+
+					taskOptions["log_response"] = true
+
+					taskOptions["data"] = t.RequestBody
 				}
-				taskOptions["headers"] = headers{
-					ContentType: "application/json",
-				}
 
-				taskOptions["log_response"] = true
-
-				taskOptions["data"] = t.RequestBody
+				taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
+				taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+				taskOptions["method"] = taskComponent.Data.Options.Method
 			}
 
 			taskOptions["dependencies"] = t.Dependencies
 
 			taskOptions["task_id"] = t.Name
-
-			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
-			if taskComponent == nil {
-				return errors.New("task component '" + t.TaskComponent + "' not found")
-			}
-
-			taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-			taskOptions["endpoint"] = parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
-			taskOptions["method"] = taskComponent.Data.Options.Method
 
 			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
 

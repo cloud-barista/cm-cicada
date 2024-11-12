@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/jollaman999/utils/logger"
-	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"os"
@@ -14,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jollaman999/utils/logger"
+	"gorm.io/gorm"
 
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
@@ -27,6 +28,7 @@ type ConfigFile struct {
 	APIConnectionID     string `json:"api_connection_id"`
 	SwaggerYAMLEndpoint string `json:"swagger_yaml_endpoint"`
 	Endpoint            string `json:"endpoint"`
+	Extra 							map[string]interface{} `json:"extra"`
 }
 
 type SwaggerSpec struct {
@@ -161,29 +163,39 @@ func TaskComponentInit() error {
 		if err := json.Unmarshal(configData, &configFile); err != nil {
 			return fmt.Errorf("failed to parse config file %s: %v", file, err)
 		}
+		var taskComponent *model.TaskComponent
+		if configFile.Extra != nil {
+			taskComponent = &model.TaskComponent{}
+			taskComponent.Data.Options.Extra = configFile.Extra
 
-		var connectionFound bool
-		var connection model.Connection
-		for _, connection = range config.CMCicadaConfig.CMCicada.AirflowServer.Connections {
-			if connection.ID == configFile.APIConnectionID {
-				connectionFound = true
-				break
+		} else {
+			var connectionFound bool
+			var connection model.Connection
+			for _, connection = range config.CMCicadaConfig.CMCicada.AirflowServer.Connections {
+				if connection.ID == configFile.APIConnectionID {
+					connectionFound = true
+					break
+				}
 			}
-		}
-		if !connectionFound {
-			return fmt.Errorf("failed to find connection with ID %s", configFile.APIConnectionID)
-		}
+			if !connectionFound {
+				logger.Println(logger.WARN, true, fmt.Sprintf("failed to find connection with ID %s", configFile.APIConnectionID))
+				continue
+				// return fmt.Errorf("failed to find connection with ID %s", configFile.APIConnectionID)
+			}
 
-		spec, err := fetchAndParseYAML(connection, configFile.SwaggerYAMLEndpoint)
-		if err != nil {
-			logger.Println(logger.WARN, true, fmt.Sprintf("failed to fetch and parse swagger spec: %v", err))
-			continue
-		}
+			spec, err := fetchAndParseYAML(connection, configFile.SwaggerYAMLEndpoint)
+			if err != nil {
+				logger.Println(logger.WARN, true, fmt.Sprintf("failed to fetch and parse swagger spec: %v", err))
+				continue
+			}
 
-		endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
-		taskComponent, err := processEndpoint(connection.ID, spec, endpoint)
-		if err != nil {
-			return fmt.Errorf("failed to process endpoint: %v", err)
+			endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
+			taskComponent, err = processEndpoint(connection.ID, spec, endpoint )
+			if err != nil {
+				logger.Println(logger.WARN, true, fmt.Sprintf("failed to process endpoint: %v", err))
+				continue
+				// return fmt.Errorf("failed to process endpoint: %v", err)
+			}
 		}
 		taskComponent.Name = configFile.Name
 		taskComponent.Description = configFile.Description
@@ -404,7 +416,6 @@ func generateRequestBodyExample(schema SchemaModel) string {
 
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
-
 	for path, pathItem := range spec.Paths {
 		if normalizePath(path) == targetEndpoint {
 			for method, operation := range pathItem {

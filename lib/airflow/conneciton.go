@@ -2,6 +2,7 @@ package airflow
 
 import (
 	"errors"
+
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
@@ -26,6 +27,9 @@ func (client *client) RegisterConnection(connection *model.Connection) error {
 	port := airflow.NullableInt32{}
 	port.Set(&connection.Port)
 
+	extra := airflow.NullableString{}
+	extra.Set(&connection.Extra)
+
 	conn := airflow.Connection{
 		ConnectionId: &connection.ID,
 		ConnType:     &connection.Type,
@@ -35,7 +39,7 @@ func (client *client) RegisterConnection(connection *model.Connection) error {
 		Schema:       schema,
 		Port:         port,
 		Password:     &connection.Password,
-		Extra:        airflow.NullableString{},
+		Extra:        extra,
 	}
 
 	_, _ = client.api.ConnectionApi.DeleteConnection(ctx, connection.ID).Execute()

@@ -188,6 +188,9 @@ definitions:
         items:
           type: string
         type: array
+      extra:
+        additionalProperties: true
+        type: object
       id:
         type: string
       name:
@@ -248,6 +251,9 @@ definitions:
         type: string
       endpoint:
         type: string
+      extra:
+        additionalProperties: true
+        type: object
       method:
         type: string
       request_body:
@@ -402,6 +408,23 @@ definitions:
     - data
     - id
     - name
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowVersion:
+    properties:
+      action:
+        type: string
+      created_at:
+        type: string
+      data:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+      id:
+        type: string
+      workflowId:
+        type: string
+    required:
+    - action
+    - id
+    - workflowId
     type: object
 info:
   contact: {}
@@ -1179,6 +1202,81 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task from Task Group
+      tags:
+      - '[Workflow]'
+  /workflow/{wfId}/version:
+    get:
+      consumes:
+      - application/json
+      description: Get a workflowVersion list.
+      operationId: list-workflowVersion
+      parameters:
+      - description: wfId of the workflow
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: Page of the workflowVersion list.
+        in: query
+        name: page
+        type: string
+      - description: Row of the workflowVersion list.
+        in: query
+        name: row
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get a workflowVersion list.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowVersion'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get a workflowVersion list.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List workflowVersion
+      tags:
+      - '[Workflow]'
+  /workflow/{wfId}/version/{verId}:
+    get:
+      consumes:
+      - application/json
+      description: Get the WorkflowVersion.
+      operationId: get-WorkflowVersion
+      parameters:
+      - description: wfId of the workflow
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the WorkflowVersion.
+        in: path
+        name: verId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get the WorkflowVersion.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the WorkflowVersion.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get WorkflowVersion
       tags:
       - '[Workflow]'
   /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear:

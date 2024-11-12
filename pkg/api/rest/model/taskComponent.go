@@ -28,6 +28,7 @@ type TaskComponentOptions struct {
 	Endpoint        string `json:"endpoint"`
 	Method          string `json:"method"`
 	RequestBody     string `json:"request_body"`
+	Extra 			map[string]interface{} `json:"extra,omitempty"`
 }
 
 type TaskComponentData struct {
