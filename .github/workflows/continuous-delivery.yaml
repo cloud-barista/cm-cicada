@@ -25,9 +25,7 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "CODEOWNERS"
-      # - '.all-contributorsrc'
-      # - 'assets/**'
-      # - 'src/testclient/scripts/**'
+      - "_airflow"
   # workflow trigger button
   # workflow_dispatch:
 

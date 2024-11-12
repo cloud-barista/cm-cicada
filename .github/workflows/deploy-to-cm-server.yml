@@ -13,11 +13,7 @@ on:
       - "CODEOWNERS"
       - "docs/**"
       - "scripts/**"
-      # - "assets/**"
-      # - "scripts/**"
-      # - "src/testclient/scripts/**"
-      # - ".all-contributorsrc"
-
+      - "_airflow"
 jobs:
   build-and-deploy:
     name: Build and deploy
