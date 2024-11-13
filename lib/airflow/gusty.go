@@ -78,7 +78,7 @@ func parseEndpoint(pathParams map[string]string, queryParams map[string]string, 
 		endpoint = strings.ReplaceAll(endpoint, "{"+key.String()+"}", pathParams[key.String()])
 	}
 
-	queryParamKeys := reflect.ValueOf(pathParams).MapKeys()
+	queryParamKeys := reflect.ValueOf(queryParams).MapKeys()
 	if len(queryParamKeys) > 0 {
 		var queryParamsString string
 
