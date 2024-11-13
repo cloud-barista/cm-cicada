@@ -80,16 +80,23 @@ func parseEndpoint(pathParams map[string]string, queryParams map[string]string, 
 
 	queryParamKeys := reflect.ValueOf(pathParams).MapKeys()
 	if len(queryParamKeys) > 0 {
-		if !strings.Contains(endpoint, "?") {
-			endpoint += "?"
-		}
+		var queryParamsString string
+
 		for _, key := range queryParamKeys {
 			if queryParams[key.String()] == "" {
 				continue
 			}
-			endpoint += fmt.Sprintf("%v=%v&", key.String(), queryParams[key.String()])
+			queryParamsString += fmt.Sprintf("%v=%v&", key.String(), queryParams[key.String()])
 		}
-		endpoint = strings.TrimRight(endpoint, "&")
+
+		if queryParamsString != "" {
+			queryParamsString = strings.TrimRight(queryParamsString, "&")
+
+			if !strings.HasSuffix(endpoint, "?") {
+				endpoint += "?"
+			}
+			endpoint += queryParamsString
+		}
 	}
 
 	return endpoint, nil
