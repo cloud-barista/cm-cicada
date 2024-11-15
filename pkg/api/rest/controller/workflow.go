@@ -186,7 +186,12 @@ func CreateWorkflow(c echo.Context) error {
 		}
 	}
 
-	err = airflow.Client.CreateDAG(&workflow)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	err = client.CreateDAG(&workflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
 	}
@@ -259,7 +264,12 @@ func GetWorkflow(c echo.Context) error {
 		}
 	}
 
-	_, err = airflow.Client.GetDAG(wfId)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	_, err = client.GetDAG(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
@@ -309,7 +319,12 @@ func GetWorkflowByName(c echo.Context) error {
 		}
 	}
 
-	_, err = airflow.Client.GetDAG(workflow.ID)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	_, err = client.GetDAG(workflow.ID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
@@ -394,7 +409,12 @@ func RunWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = airflow.Client.RunDAG(workflow.ID)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	_, err = client.RunDAG(workflow.ID)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
@@ -513,12 +533,17 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(oldWorkflow.ID, true)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	err = client.DeleteDAG(oldWorkflow.ID, true)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
 	}
 
-	err = airflow.Client.CreateDAG(oldWorkflow)
+	err = client.CreateDAG(oldWorkflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
 	}
@@ -550,7 +575,12 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = airflow.Client.DeleteDAG(workflow.ID, false)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	err = client.DeleteDAG(workflow.ID, false)
 	if err != nil {
 		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
@@ -961,7 +991,11 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
 	}
-	logs, err := airflow.Client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
@@ -992,7 +1026,12 @@ func GetWorkflowRuns(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	runList, err := airflow.Client.GetDAGRuns(wfId)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	runList, err := client.GetDAGRuns(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: "+err.Error())
 	}
@@ -1042,7 +1081,11 @@ func GetTaskInstances(c echo.Context) error {
 	if wfRunId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
-	runList, err := airflow.Client.GetTaskInstances(common.UrlDecode(wfId), common.UrlDecode(wfRunId))
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	runList, err := client.GetTaskInstances(common.UrlDecode(wfId), common.UrlDecode(wfRunId))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1122,7 +1165,11 @@ func ClearTaskInstances(c echo.Context) error {
 		taskId = taskDBInfo.Name
 	}
 	var TaskInstanceReferences []model.TaskInstanceReference
-	clearList, err := airflow.Client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskId)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	clearList, err := client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1181,7 +1228,11 @@ func GetEventLogs(c echo.Context) error {
 		taskName = taskDBInfo.Name
 	}
 	var eventLogs model.EventLogs
-	logs, err := airflow.Client.GetEventLogs(wfId, wfRunId, taskName)
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	logs, err := client.GetEventLogs(wfId, wfRunId, taskName)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1231,7 +1282,11 @@ func GetEventLogs(c echo.Context) error {
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the importErrors."
 //	@Router	 /importErrors [get]
 func GetImportErrors(c echo.Context) error {
-	logs, err := airflow.Client.GetImportErrors()
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	logs, err := client.GetImportErrors()
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1239,7 +1294,7 @@ func GetImportErrors(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, logs, " ")
 }
 
-// ListWorkflow godoc
+// ListWorkflowVersion godoc
 //
 //	@ID		list-workflowVersion
 //	@Summary	List workflowVersion

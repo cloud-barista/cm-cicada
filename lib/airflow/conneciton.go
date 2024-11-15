@@ -8,7 +8,7 @@ import (
 	"github.com/jollaman999/utils/logger"
 )
 
-func (client *client) RegisterConnection(connection *model.Connection) error {
+func (client *Client) RegisterConnection(connection *model.Connection) error {
 	ctx, cancel := Context()
 	defer cancel()
 
@@ -42,9 +42,9 @@ func (client *client) RegisterConnection(connection *model.Connection) error {
 		Extra:        extra,
 	}
 
-	_, _ = client.api.ConnectionApi.DeleteConnection(ctx, connection.ID).Execute()
+	_, _ = client.ConnectionApi.DeleteConnection(ctx, connection.ID).Execute()
 
-	_, _, err := client.api.ConnectionApi.PostConnection(ctx).Connection(conn).Execute()
+	_, _, err := client.ConnectionApi.PostConnection(ctx).Connection(conn).Execute()
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while registering connection. (ConnID: " + connection.ID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)

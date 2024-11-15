@@ -3,6 +3,7 @@ package airflow
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
@@ -11,11 +12,19 @@ import (
 	"time"
 )
 
-type client struct {
-	api *airflow.APIClient
+type Client struct {
+	*airflow.APIClient
 }
 
-var Client *client
+var airflowClient *Client
+
+func GetClient() (*Client, error) {
+	if airflowClient == nil {
+		return nil, errors.New("airflow client not initialized")
+	}
+
+	return airflowClient, nil
+}
 
 func ping(url string) error {
 	timeout, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
@@ -55,7 +64,7 @@ func checkPing(url string) {
 func registerConnections() {
 	for _, connection := range config.CMCicadaConfig.CMCicada.AirflowServer.Connections {
 		logger.Println(logger.INFO, false, "Registering connection: ", connection)
-		err := Client.RegisterConnection(&connection)
+		err := airflowClient.RegisterConnection(&connection)
 		if err != nil {
 			logger.Println(logger.ERROR, false, err.Error())
 		}
@@ -93,11 +102,11 @@ func Init() {
 	checkPing(conf.Scheme + "://" + conf.Host)
 
 	cli := airflow.NewAPIClient(conf)
-	conn := client{
-		api: cli,
+	conn := Client{
+		cli,
 	}
 
-	Client = &conn
+	airflowClient = &conn
 
 	registerConnections()
 }
