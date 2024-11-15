@@ -33,7 +33,11 @@
           },
           {
             "name": "send_result_via_email",
-            "task_component": "trigger_email"
+            "task_component": "trigger_email",
+            "dependencies": [
+              "software_migration_nfs_server",
+              "software_migration_web_server"
+            ]
           }
         ]
       }

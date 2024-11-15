@@ -29,7 +29,10 @@
           },
           {
             "name": "send_result_via_email",
-            "task_component": "trigger_email"
+            "task_component": "trigger_email",
+            "dependencies": [
+              "register_target_to_source_group"
+            ]
           }
         ]
       }
