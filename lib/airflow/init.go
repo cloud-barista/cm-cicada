@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -18,9 +20,14 @@ type Client struct {
 
 var airflowClient *Client
 
+var initLock sync.Mutex
+
 func GetClient() (*Client, error) {
 	if airflowClient == nil {
-		return nil, errors.New("airflow client not initialized")
+		go func() {
+			Init()
+		}()
+		return nil, fmt.Errorf("Airflow client not initialized. Try again later or check the Airflow server.")
 	}
 
 	return airflowClient, nil
@@ -35,7 +42,7 @@ func ping(url string) error {
 	return err
 }
 
-func checkPing(url string) {
+func checkPing(url string) error {
 	var err error
 	var i int
 	timeout, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
@@ -53,12 +60,14 @@ func checkPing(url string) {
 	}
 
 	if err != nil {
-		logger.Panicln(logger.ERROR, true, err.Error())
+		return err
 	}
 
 	if i == retry {
-		logger.Panicln(logger.ERROR, false, "Airflow Server is not responding!")
+		return errors.New("Airflow Server is not responding!")
 	}
+
+	return nil
 }
 
 func registerConnections() {
@@ -82,6 +91,11 @@ func Context() (context.Context, func()) {
 }
 
 func Init() {
+	if !initLock.TryLock() {
+		return
+	}
+	defer initLock.Unlock()
+
 	conf := airflow.NewConfiguration()
 	conf.Host = config.CMCicadaConfig.CMCicada.AirflowServer.Address
 	useTLS, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.AirflowServer.UseTLS)
@@ -99,7 +113,11 @@ func Init() {
 		conf.Scheme = "http"
 	}
 
-	checkPing(conf.Scheme + "://" + conf.Host)
+	err := checkPing(conf.Scheme + "://" + conf.Host)
+	if err != nil {
+		logger.Println(logger.ERROR, true, err.Error())
+		return
+	}
 
 	cli := airflow.NewAPIClient(conf)
 	conn := Client{
