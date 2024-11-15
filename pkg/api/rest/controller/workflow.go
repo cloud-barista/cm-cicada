@@ -179,12 +179,18 @@ func CreateWorkflow(c echo.Context) error {
 	workflow.Name = createWorkflowReq.Name
 	workflow.Data = workflowData
 
+	var success bool
 	_, err = dao.WorkflowCreate(&workflow)
 	if err != nil {
 		{
 			return common.ReturnErrorMsg(c, err.Error())
 		}
 	}
+	defer func() {
+		if !success {
+			_ = dao.WorkflowDelete(&workflow)
+		}
+	}()
 
 	client, err := airflow.GetClient()
 	if err != nil {
@@ -218,6 +224,7 @@ func CreateWorkflow(c echo.Context) error {
 			}
 		}
 	}
+	success = true
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
