@@ -1,0 +1,7 @@
+{
+  "name": "grasshopper_task_software_migration",
+  "description": "Do software migration by grasshopper.",
+  "api_connection_id": "grasshopper_api",
+  "swagger_yaml_endpoint": "/grasshopper/api/doc.yaml",
+  "endpoint": "/software/migrate"
+}
