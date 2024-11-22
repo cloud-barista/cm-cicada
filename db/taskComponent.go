@@ -28,6 +28,7 @@ type ConfigFile struct {
 	APIConnectionID     string                 `json:"api_connection_id"`
 	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint"`
 	Endpoint            string                 `json:"endpoint"`
+	Method              string                 `json:"method"`
 	Extra               map[string]interface{} `json:"extra"`
 }
 
@@ -167,7 +168,6 @@ func TaskComponentInit() error {
 		if configFile.Extra != nil {
 			taskComponent = &model.TaskComponent{}
 			taskComponent.Data.Options.Extra = configFile.Extra
-
 		} else {
 			var connectionFound bool
 			var connection model.Connection
@@ -189,7 +189,7 @@ func TaskComponentInit() error {
 			}
 
 			endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
-			taskComponent, err = processEndpoint(connection.ID, spec, endpoint)
+			taskComponent, err = processEndpoint(connection.ID, spec, endpoint, configFile.Method)
 			if err != nil {
 				logger.Println(logger.WARN, true, fmt.Sprintf("failed to process endpoint: %v", err))
 				continue
@@ -412,72 +412,87 @@ func generateRequestBodyExample(schema SchemaModel) string {
 	return string(jsonBytes)
 }
 
-func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint string) (*model.TaskComponent, error) {
+func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, targetMethod string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 	for path, pathItem := range spec.Paths {
 		if normalizePath(path) == targetEndpoint {
-			for method, operation := range pathItem {
-				taskComponent := &model.TaskComponent{
-					Data: model.TaskComponentData{
-						Options: model.TaskComponentOptions{
-							APIConnectionID: connectionID,
-							Endpoint:        joinPaths(spec.BasePath, path),
-							Method:          strings.ToUpper(method),
-						},
+			methodFoundCount := 0
+
+			var method string
+			var operation Operation
+
+			for method, operation = range pathItem {
+				methodFoundCount++
+
+				if targetMethod != "" && strings.EqualFold(targetMethod, method) {
+					break
+				}
+			}
+
+			if methodFoundCount > 1 {
+				return nil, fmt.Errorf("multiple methods found with the same endpoint: %s", targetEndpoint)
+			}
+
+			taskComponent := &model.TaskComponent{
+				Data: model.TaskComponentData{
+					Options: model.TaskComponentOptions{
+						APIConnectionID: connectionID,
+						Endpoint:        joinPaths(spec.BasePath, path),
+						Method:          strings.ToUpper(method),
 					},
-				}
+				},
+			}
 
-				pathParams := model.ParameterStructure{
-					Properties: make(map[string]model.PropertyDef),
-				}
-				queryParams := model.ParameterStructure{
-					Properties: make(map[string]model.PropertyDef),
-				}
+			pathParams := model.ParameterStructure{
+				Properties: make(map[string]model.PropertyDef),
+			}
+			queryParams := model.ParameterStructure{
+				Properties: make(map[string]model.PropertyDef),
+			}
 
-				for _, param := range operation.Parameters {
-					switch param.In {
-					case "path":
-						if param.Required {
-							pathParams.Required = append(pathParams.Required, param.Name)
-						}
-						pathParams.Properties[param.Name] = model.PropertyDef{
-							Type:        param.Type,
-							Description: param.Description,
-							Default:     param.Default,
-							Enum:        param.Enum,
-						}
-					case "query":
-						if param.Required {
-							queryParams.Required = append(queryParams.Required, param.Name)
-						}
-						queryParams.Properties[param.Name] = model.PropertyDef{
-							Type:        param.Type,
-							Description: param.Description,
-							Default:     param.Default,
-							Enum:        param.Enum,
-						}
-					case "body":
-						if param.Schema != nil && param.Schema.Ref != "" {
-							schema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
-							taskComponent.Data.BodyParams = convertSchemaToParams(schema)
+			for _, param := range operation.Parameters {
+				switch param.In {
+				case "path":
+					if param.Required {
+						pathParams.Required = append(pathParams.Required, param.Name)
+					}
+					pathParams.Properties[param.Name] = model.PropertyDef{
+						Type:        param.Type,
+						Description: param.Description,
+						Default:     param.Default,
+						Enum:        param.Enum,
+					}
+				case "query":
+					if param.Required {
+						queryParams.Required = append(queryParams.Required, param.Name)
+					}
+					queryParams.Properties[param.Name] = model.PropertyDef{
+						Type:        param.Type,
+						Description: param.Description,
+						Default:     param.Default,
+						Enum:        param.Enum,
+					}
+				case "body":
+					if param.Schema != nil && param.Schema.Ref != "" {
+						schema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
+						taskComponent.Data.BodyParams = convertSchemaToParams(schema)
 
-							requestBodyExample := generateRequestBodyExample(schema)
-							if requestBodyExample != "" {
-								taskComponent.Data.Options.RequestBody = requestBodyExample
-							}
+						requestBodyExample := generateRequestBodyExample(schema)
+						if requestBodyExample != "" {
+							taskComponent.Data.Options.RequestBody = requestBodyExample
 						}
 					}
 				}
-
-				if len(pathParams.Properties) > 0 {
-					taskComponent.Data.PathParams = pathParams
-				}
-				if len(queryParams.Properties) > 0 {
-					taskComponent.Data.QueryParams = queryParams
-				}
-
-				return taskComponent, nil
 			}
+
+			if len(pathParams.Properties) > 0 {
+				taskComponent.Data.PathParams = pathParams
+			}
+			if len(queryParams.Properties) > 0 {
+				taskComponent.Data.QueryParams = queryParams
+			}
+
+			return taskComponent, nil
 		}
 	}
 

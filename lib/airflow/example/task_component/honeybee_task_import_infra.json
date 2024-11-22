@@ -3,5 +3,6 @@
   "description": "Import infra information by honeybee.",
   "api_connection_id": "honeybee_api",
   "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
-  "endpoint": "/source_group/{sgId}/import/infra"
+  "endpoint": "/source_group/{sgId}/import/infra",
+  "method": "POST"
 }

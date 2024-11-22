@@ -3,5 +3,6 @@
   "description": "Create MCI Dynamically from common spec and image.",
   "api_connection_id": "tumblebug_api",
   "swagger_yaml_endpoint": "/tumblebug/api/doc.yaml",
-  "endpoint": "/ns/{nsId}/mciDynamic"
+  "endpoint": "/ns/{nsId}/mciDynamic",
+  "method": "POST"
 }

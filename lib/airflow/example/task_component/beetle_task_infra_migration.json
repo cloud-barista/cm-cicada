@@ -3,5 +3,6 @@
   "description": "Do infra migration with beetle.",
   "api_connection_id": "beetle_api",
   "swagger_yaml_endpoint": "/beetle/api/doc.yaml",
-  "endpoint": "/migration/ns/{nsId}/mci"
+  "endpoint": "/migration/ns/{nsId}/mci",
+  "method": "POST"
 }

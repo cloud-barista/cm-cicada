@@ -3,5 +3,6 @@
   "description": "Get refined infra information from honeybee.",
   "api_connection_id": "honeybee_api",
   "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
-  "endpoint": "/source_group/{sgId}/infra/refined"
+  "endpoint": "/source_group/{sgId}/infra/refined",
+  "method": "GET"
 }

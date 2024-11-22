@@ -3,5 +3,6 @@
   "description": "Do infra recommendation with beetle.",
   "api_connection_id": "beetle_api",
   "swagger_yaml_endpoint": "/beetle/api/doc.yaml",
-  "endpoint": "/recommendation/mci"
+  "endpoint": "/recommendation/mci",
+  "method": "POST"
 }
