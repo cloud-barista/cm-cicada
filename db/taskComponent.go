@@ -429,8 +429,9 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, tar
 				}
 			}
 
-			if methodFoundCount > 1 {
-				return nil, fmt.Errorf("multiple methods found with the same endpoint: %s", targetEndpoint)
+			if targetMethod == "" && methodFoundCount > 1 {
+				return nil, fmt.Errorf("multiple methods found with the same endpoint: %s"+
+					" (Please specify the method from the task component example JSON file.)", targetEndpoint)
 			}
 
 			taskComponent := &model.TaskComponent{
