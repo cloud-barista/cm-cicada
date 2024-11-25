@@ -430,6 +430,21 @@ Add trigger_email task component at the bottom of the workflow to receive email 
 
 ...
 ```
+
+## GET task log 
+### 1. GET workflow RunId
+[GET] /workflow/{wfId}/runs
+![image](https://github.com/user-attachments/assets/27fbaf5f-c52d-4d04-b599-ef2eac9e76de)
+
+### 2. GET taskId and task_Try_Num
+[GET] /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances
+![image](https://github.com/user-attachments/assets/d893cc1a-2cbd-417c-a19d-a650aaca7f6e)
+
+### 3. GET execution task log
+[GET] /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs
+![image](https://github.com/user-attachments/assets/347babf5-df32-4fe0-82e0-f0e111c333d1)
+
+
 ## Health-check
 
 Check if CM-Cicada is running
