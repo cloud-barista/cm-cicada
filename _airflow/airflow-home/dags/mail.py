@@ -63,7 +63,7 @@ with DAG(
     email_task = EmailOperator(
         task_id='send_email',
         to='ish.mcmp@gmail.com',
-        subject='DAG 상태 보고서',
+        subject='Workflow 상태 보고서',
         html_content="""<h3>Workflow Execution Complete</h3>
             <p><strong>Workflow ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_id') }}</p>
             <p><strong>Workflow Run ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_run_id') }}</p>

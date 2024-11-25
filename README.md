@@ -376,6 +376,75 @@ The Task Component automatically generated from the above JSON is as follows:
 
 </details>
 
+## SMTP 
+
+### 1. Add SMTP info
+file path : /_airflow/docker-compose.yml 
+
+modify docker-compose.yml file and enter your smtp info.
+
+gmail example : https://support.google.com/a/answer/176600?hl=en
+
+
+```
+...
+    airflow-server:
+        environment:
+            AIRFLOW__SMTP__SMTP_HOST: 'smtp.gmail.com'
+            AIRFLOW__SMTP__SMTP_USER: 'yourEmail@gmail.com'
+            AIRFLOW__SMTP__SMTP_PASSWORD: 'wtknvaprkkwyaurd'
+            AIRFLOW__SMTP__SMTP_PORT: 587
+            AIRFLOW__SMTP__SMTP_MAIL_FROM: 'yourEmail@gmail.com'
+...
+```
+### 2. Modify mail.py 
+file path : /_airflow/airflow-home/dags/mail.py
+
+Modify the recipient's email address in the email_task.
+
+```
+...
+    email_task = EmailOperator(
+        task_id='send_email',
+        to='Your Email@example.com',
+        subject='DAG 상태 보고서',
+        ...
+    )
+...
+```
+
+### 3. Add taskComponent 
+Add trigger_email task component at the bottom of the workflow to receive email alarms.
+
+```
+...
+         {
+           "name": "trigger_email",
+           "task_component": "trigger_email",
+           "request_body": "",
+           "path_params": {},
+           "dependencies": [
+             "{$Pre_taskName}"
+           ]
+         }
+
+...
+```
+
+## GET task log 
+### 1. GET workflow RunId
+[GET] /workflow/{wfId}/runs
+![image](https://github.com/user-attachments/assets/27fbaf5f-c52d-4d04-b599-ef2eac9e76de)
+
+### 2. GET taskId and task_Try_Num
+[GET] /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances
+![image](https://github.com/user-attachments/assets/d893cc1a-2cbd-417c-a19d-a650aaca7f6e)
+
+### 3. GET execution task log
+[GET] /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs
+![image](https://github.com/user-attachments/assets/347babf5-df32-4fe0-82e0-f0e111c333d1)
+
+
 ## Health-check
 
 Check if CM-Cicada is running
