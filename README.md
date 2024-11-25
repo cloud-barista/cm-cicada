@@ -380,8 +380,11 @@ The Task Component automatically generated from the above JSON is as follows:
 
 ### 1. Add SMTP info
 file path : /_airflow/docker-compose.yml 
+
 modify docker-compose.yml file and enter your smtp info.
+
 gmail example : https://support.google.com/a/answer/176600?hl=en
+
 
 ```
 ...
@@ -396,7 +399,9 @@ gmail example : https://support.google.com/a/answer/176600?hl=en
 ```
 ### 2. Modify mail.py 
 file path : /_airflow/airflow-home/dags/mail.py
+
 Modify the recipient's email address in the email_task.
+
 ```
 ...
     email_task = EmailOperator(
@@ -409,6 +414,22 @@ Modify the recipient's email address in the email_task.
 ```
 
 ### 3. Add taskComponent 
+Add trigger_email task component at the bottom of the workflow to receive email alarms.
+
+```
+...
+         {
+           "name": "trigger_email",
+           "task_component": "trigger_email",
+           "request_body": "",
+           "path_params": {},
+           "dependencies": [
+             "{$Pre_taskName}"
+           ]
+         }
+
+...
+```
 ## Health-check
 
 Check if CM-Cicada is running
