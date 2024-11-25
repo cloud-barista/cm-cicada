@@ -376,6 +376,39 @@ The Task Component automatically generated from the above JSON is as follows:
 
 </details>
 
+## SMTP 
+
+### 1. Add SMTP info
+file path : /_airflow/docker-compose.yml 
+modify docker-compose.yml file and enter your smtp info.
+gmail example : https://support.google.com/a/answer/176600?hl=en
+
+```
+...
+    airflow-server:
+        environment:
+            AIRFLOW__SMTP__SMTP_HOST: 'smtp.gmail.com'
+            AIRFLOW__SMTP__SMTP_USER: 'yourEmail@gmail.com'
+            AIRFLOW__SMTP__SMTP_PASSWORD: 'wtknvaprkkwyaurd'
+            AIRFLOW__SMTP__SMTP_PORT: 587
+            AIRFLOW__SMTP__SMTP_MAIL_FROM: 'yourEmail@gmail.com'
+...
+```
+### 2. Modify mail.py 
+file path : /_airflow/airflow-home/dags/mail.py
+Modify the recipient's email address in the email_task.
+```
+...
+    email_task = EmailOperator(
+        task_id='send_email',
+        to='Your Email@example.com',
+        subject='DAG 상태 보고서',
+        ...
+    )
+...
+```
+
+### 3. Add taskComponent 
 ## Health-check
 
 Check if CM-Cicada is running
