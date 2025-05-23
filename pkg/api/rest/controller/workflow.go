@@ -1147,12 +1147,46 @@ func GetTaskInstances(c echo.Context) error {
 //	@Produce	json
 //	@Param	wfId path string true "ID of the workflow."
 //	@Param	wfRunId path string true "ID of the wfRunId."
-//	@Param	taskId path string true "ID of the taskId."
-//	@Success	200	{object}	model.TaskInstanceReference		"Successfully clear the taskInstances."
-//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
-//	@Failure	500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
-//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear [post]
+//
+// @Param		request body 	model.TaskClearOption true "Workflow content"
+// @Success	200	{object}	model.TaskInstanceReference		"Successfully clear the taskInstances."
+// @Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+// @Failure	500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
+// @Router	 /workflow/{wfId}/workflowRun/{wfRunId}/clear [post]
 func ClearTaskInstances(c echo.Context) error {
+	var taskClearOption model.TaskClearOption
+
+	data, err := common.GetJSONRawBody(c)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			toTimeHookFunc()),
+		Result: &taskClearOption,
+	})
+	if err != nil {
+		return err
+	}
+	err = decoder.Decode(data)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	var taskNameList []string
+	for _, taskId := range taskClearOption.TaskIds {
+		taskInfo, err := dao.TaskGet(taskId)
+		if err != nil {
+			return fmt.Errorf("failed to get task info for ID %s: %w", taskId, err)
+		}
+		taskNameList = append(taskNameList, taskInfo.Name)
+	}
+	taskClearOption.TaskIds = taskNameList
+	if err := common.ValidateTaskClearOptions(taskClearOption); err != nil {
+		fmt.Printf("옵션 검증 실패: %v\n", err)
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 	wfId := c.Param("wfId")
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
@@ -1161,22 +1195,13 @@ func ClearTaskInstances(c echo.Context) error {
 	if wfRunId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
-	taskId := c.Param("taskId")
-	if taskId == "" {
-		return common.ReturnErrorMsg(c, "Please provide the taskId.")
-	} else {
-		taskDBInfo, err := dao.TaskGet(taskId)
-		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
-		}
-		taskId = taskDBInfo.Name
-	}
+
 	var TaskInstanceReferences []model.TaskInstanceReference
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	clearList, err := client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskId)
+	clearList, err := client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskClearOption)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
