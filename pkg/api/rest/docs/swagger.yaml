@@ -218,6 +218,33 @@ definitions:
     - request_body
     - task_component
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskClearOption:
+    properties:
+      dryRun:
+        type: boolean
+      includeDownstream:
+        type: boolean
+      includeFuture:
+        type: boolean
+      includeParentdag:
+        type: boolean
+      includePast:
+        type: boolean
+      includeSubdags:
+        type: boolean
+      includeUpstream:
+        type: boolean
+      onlyFailed:
+        type: boolean
+      onlyRunning:
+        type: boolean
+      resetDagRuns:
+        type: boolean
+      taskIds:
+        items:
+          type: string
+        type: array
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent:
     properties:
       created_at:
@@ -1293,7 +1320,7 @@ paths:
       summary: Get WorkflowVersion
       tags:
       - '[Workflow]'
-  /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear:
+  /workflow/{wfId}/workflowRun/{wfRunId}/clear:
     post:
       consumes:
       - application/json
@@ -1310,11 +1337,12 @@ paths:
         name: wfRunId
         required: true
         type: string
-      - description: ID of the taskId.
-        in: path
-        name: taskId
+      - description: Workflow content
+        in: body
+        name: request
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskClearOption'
       produces:
       - application/json
       responses:
