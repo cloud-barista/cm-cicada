@@ -1,7 +1,7 @@
 apache-airflow==2.10.3
 mysqlclient==2.2.5
 apache-airflow-providers-celery==3.8.3
-apache-airflow-providers-mysql==5.7.3
+apache-airflow-providers-mysql==6.2.1rc1
 apache-airflow-providers-sqlite==3.9.0
 apache-airflow-providers-ssh==3.14.0
 apache-airflow-providers-docker==3.14.0
