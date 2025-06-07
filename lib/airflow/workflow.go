@@ -194,8 +194,7 @@ func (client *Client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber 
 
 	return logs, nil
 }
-
-func (client *Client) ClearTaskInstance(dagID string, dagRunID string, taskID string) (airflow.TaskInstanceReferenceCollection, error) {
+func (client *Client) ClearTaskInstance(dagID string, dagRunID string, option model.TaskClearOption) (airflow.TaskInstanceReferenceCollection, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()
@@ -203,49 +202,43 @@ func (client *Client) ClearTaskInstance(dagID string, dagRunID string, taskID st
 	ctx, cancel := Context()
 	defer cancel()
 
-	dryRun := false
-	taskIds := []string{taskID}
-	includeDownstream := true
-	includeFuture := false
-	includeParentdag := false
-	includePast := false
-	includeSubdags := true
-	includeUpstream := false
-	onlyFailed := false
-	onlyRunning := false
-	resetDagRuns := true
-
 	clearTask := airflow.ClearTaskInstances{
-		DryRun:            &dryRun,
-		TaskIds:           &taskIds,
-		IncludeSubdags:    &includeSubdags,
-		IncludeParentdag:  &includeParentdag,
-		IncludeUpstream:   &includeUpstream,
-		IncludeDownstream: &includeDownstream,
-		IncludeFuture:     &includeFuture,
-		IncludePast:       &includePast,
-		OnlyFailed:        &onlyFailed,
-		OnlyRunning:       &onlyRunning,
-		ResetDagRuns:      &resetDagRuns,
+		DryRun:            &option.DryRun,
+		TaskIds:           &option.TaskIds,
+		IncludeSubdags:    &option.IncludeSubdags,
+		IncludeParentdag:  &option.IncludeParentdag,
+		IncludeUpstream:   &option.IncludeUpstream,
+		IncludeDownstream: &option.IncludeDownstream,
+		IncludeFuture:     &option.IncludeFuture,
+		IncludePast:       &option.IncludePast,
+		OnlyFailed:        &option.OnlyFailed,
+		OnlyRunning:       &option.OnlyRunning,
+		ResetDagRuns:      &option.ResetDagRuns,
 		DagRunId:          *airflow.NewNullableString(&dagRunID),
 	}
 
-	// 요청 생성
-	request := client.DAGApi.PostClearTaskInstances(ctx, dagID)
+	logger.Println(logger.DEBUG, false,
+		"ClearTaskInstances 요청 내용 ", clearTask.TaskIds)
 
-	// ClearTaskInstances 데이터 설정
-	request = request.ClearTaskInstances(clearTask)
+	// 요청 생성
+	request := client.DAGApi.PostClearTaskInstances(ctx, dagID).ClearTaskInstances(clearTask)
 
 	// 요청 실행
-	logs, _, err := client.DAGApi.PostClearTaskInstancesExecute(request)
+	response, _, err := client.DAGApi.PostClearTaskInstancesExecute(request)
 	if err != nil {
-		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while clearing TaskInstance. (Error: "+err.Error()+").")
+		logger.Println(logger.ERROR, false, "AIRFLOW: Error occurred while clearing TaskInstance.")
+
 		return airflow.TaskInstanceReferenceCollection{}, err
 	}
+	logger.Println(logger.WARN, false, "response : ", response.GetTaskInstances())
 
-	return logs, nil
+	if response.TaskInstances == nil || len(*response.TaskInstances) == 0 {
+		logger.Println(logger.WARN, false, "AIRFLOW: 요청은 성공했지만 반환된 TaskInstances가 없습니다.")
+	}
+
+	return response, nil
 }
+
 func (client *Client) GetEventLogs(dagID string, dagRunId string, taskId string) ([]byte, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {

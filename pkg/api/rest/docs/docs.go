@@ -1326,7 +1326,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/clear": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/clear": {
             "post": {
                 "description": "Clear the task Instance.",
                 "consumes": [
@@ -1356,11 +1356,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "ID of the taskId.",
-                        "name": "taskId",
-                        "in": "path",
-                        "required": true
+                        "description": "Workflow content",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskClearOption"
+                        }
                     }
                 ],
                 "responses": {
@@ -1977,6 +1979,47 @@ const docTemplate = `{
                 },
                 "task_component": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskClearOption": {
+            "type": "object",
+            "properties": {
+                "dryRun": {
+                    "type": "boolean"
+                },
+                "includeDownstream": {
+                    "type": "boolean"
+                },
+                "includeFuture": {
+                    "type": "boolean"
+                },
+                "includeParentdag": {
+                    "type": "boolean"
+                },
+                "includePast": {
+                    "type": "boolean"
+                },
+                "includeSubdags": {
+                    "type": "boolean"
+                },
+                "includeUpstream": {
+                    "type": "boolean"
+                },
+                "onlyFailed": {
+                    "type": "boolean"
+                },
+                "onlyRunning": {
+                    "type": "boolean"
+                },
+                "resetDagRuns": {
+                    "type": "boolean"
+                },
+                "taskIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
