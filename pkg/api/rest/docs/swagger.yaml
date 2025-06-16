@@ -224,15 +224,12 @@ definitions:
         type: boolean
       includeDownstream:
         type: boolean
-      includeFuture:
-        type: boolean
-      includeParentdag:
-        type: boolean
-      includePast:
-        type: boolean
-      includeSubdags:
-        type: boolean
       includeUpstream:
+        description: |-
+          IncludeFuture     bool     `json:"includeFuture"`
+          IncludeParentdag  bool     `json:"includeParentdag"`
+          IncludePast       bool     `json:"includePast"`
+          IncludeSubdags    bool     `json:"includeSubdags"`
         type: boolean
       onlyFailed:
         type: boolean

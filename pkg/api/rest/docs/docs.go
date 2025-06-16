@@ -1991,19 +1991,8 @@ const docTemplate = `{
                 "includeDownstream": {
                     "type": "boolean"
                 },
-                "includeFuture": {
-                    "type": "boolean"
-                },
-                "includeParentdag": {
-                    "type": "boolean"
-                },
-                "includePast": {
-                    "type": "boolean"
-                },
-                "includeSubdags": {
-                    "type": "boolean"
-                },
                 "includeUpstream": {
+                    "description": "IncludeFuture     bool     ` + "`" + `json:\"includeFuture\"` + "`" + `\nIncludeParentdag  bool     ` + "`" + `json:\"includeParentdag\"` + "`" + `\nIncludePast       bool     ` + "`" + `json:\"includePast\"` + "`" + `\nIncludeSubdags    bool     ` + "`" + `json:\"includeSubdags\"` + "`" + `",
                     "type": "boolean"
                 },
                 "onlyFailed": {

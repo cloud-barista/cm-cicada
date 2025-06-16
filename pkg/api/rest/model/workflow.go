@@ -180,14 +180,14 @@ type TaskClearOption struct {
 	DryRun            bool     `json:"dryRun"`
 	TaskIds           []string `json:"taskIds"`
 	IncludeDownstream bool     `json:"includeDownstream"`
-	IncludeFuture     bool     `json:"includeFuture"`
-	IncludeParentdag  bool     `json:"includeParentdag"`
-	IncludePast       bool     `json:"includePast"`
-	IncludeSubdags    bool     `json:"includeSubdags"`
-	IncludeUpstream   bool     `json:"includeUpstream"`
-	OnlyFailed        bool     `json:"onlyFailed"`
-	OnlyRunning       bool     `json:"onlyRunning"`
-	ResetDagRuns      bool     `json:"resetDagRuns"`
+	//IncludeFuture     bool     `json:"includeFuture"`
+	//IncludeParentdag  bool     `json:"includeParentdag"`
+	//IncludePast       bool     `json:"includePast"`
+	//IncludeSubdags    bool     `json:"includeSubdags"`
+	IncludeUpstream bool `json:"includeUpstream"`
+	OnlyFailed      bool `json:"onlyFailed"`
+	OnlyRunning     bool `json:"onlyRunning"`
+	ResetDagRuns    bool `json:"resetDagRuns"`
 }
 
 func (d Data) Value() (driver.Value, error) {

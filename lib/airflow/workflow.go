@@ -201,16 +201,16 @@ func (client *Client) ClearTaskInstance(dagID string, dagRunID string, option mo
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-
+	defaultOption := false
 	clearTask := airflow.ClearTaskInstances{
 		DryRun:            &option.DryRun,
 		TaskIds:           &option.TaskIds,
-		IncludeSubdags:    &option.IncludeSubdags,
-		IncludeParentdag:  &option.IncludeParentdag,
+		IncludeSubdags:    &defaultOption,
+		IncludeParentdag:  &defaultOption,
 		IncludeUpstream:   &option.IncludeUpstream,
 		IncludeDownstream: &option.IncludeDownstream,
-		IncludeFuture:     &option.IncludeFuture,
-		IncludePast:       &option.IncludePast,
+		IncludeFuture:     &defaultOption,
+		IncludePast:       &defaultOption,
 		OnlyFailed:        &option.OnlyFailed,
 		OnlyRunning:       &option.OnlyRunning,
 		ResetDagRuns:      &option.ResetDagRuns,
@@ -218,7 +218,7 @@ func (client *Client) ClearTaskInstance(dagID string, dagRunID string, option mo
 	}
 
 	logger.Println(logger.DEBUG, false,
-		"ClearTaskInstances 요청 내용 ", clearTask.TaskIds)
+		"ClearTaskInstances 요청 내용 : {} ", clearTask.TaskIds)
 
 	// 요청 생성
 	request := client.DAGApi.PostClearTaskInstances(ctx, dagID).ClearTaskInstances(clearTask)

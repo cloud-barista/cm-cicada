@@ -38,12 +38,15 @@ func ValidateTaskClearOptions(opt model.TaskClearOption) error {
 	}
 
 	// include_future 가 true인데 only_failed 도 true면, 미래 태스크는 실패할 수 없음
-	if opt.IncludeFuture && opt.OnlyFailed {
-		return errors.New("include_future가 true이면 only_failed는 의미가 없습니다 (미래 태스크는 실패하지 않음)")
-	}
+	// if opt.IncludeFuture && opt.OnlyFailed {
+	// 	return errors.New("include_future가 true이면 only_failed는 의미가 없습니다 (미래 태스크는 실패하지 않음)")
+	// }
 
 	// 관련 태스크 포함 옵션이 모두 false이면, 처리할 수 있는 태스크가 거의 없음
-	if !opt.IncludeUpstream && !opt.IncludeDownstream && !opt.IncludeSubdags && !opt.IncludeParentdag {
+	// if !opt.IncludeUpstream && !opt.IncludeDownstream && !opt.IncludeSubdags && !opt.IncludeParentdag {
+	// 	fmt.Println("경고: include 관련 옵션이 모두 false이므로 단일 태스크만 처리됩니다. 이게 의도한 바인지 확인하세요.")
+	// }
+	if !opt.IncludeUpstream && !opt.IncludeDownstream {
 		fmt.Println("경고: include 관련 옵션이 모두 false이므로 단일 태스크만 처리됩니다. 이게 의도한 바인지 확인하세요.")
 	}
 

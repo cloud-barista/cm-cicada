@@ -1196,7 +1196,7 @@ func ClearTaskInstances(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
 
-	var TaskInstanceReferences []model.TaskInstanceReference
+	TaskInstanceReferences := make([]model.TaskInstanceReference, 0)
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
@@ -1205,7 +1205,11 @@ func ClearTaskInstances(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
+	logger.Println(logger.DEBUG, false, "clearList 요청 내용 : {} ", &clearList)
+	if clearList.TaskInstances == nil || len(*clearList.TaskInstances) == 0 {
+		logger.Println(logger.DEBUG, false, "TaskInstances is nil or empty")
 
+	}
 	for _, taskInstance := range *clearList.TaskInstances {
 		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
 		if err != nil {
@@ -1219,8 +1223,10 @@ func ClearTaskInstances(c echo.Context) error {
 			TaskName:      taskInstance.GetTaskId(),
 			ExecutionDate: taskInstance.ExecutionDate,
 		}
+		logger.Println(logger.DEBUG, false, "TaskInstanceReferences  ", TaskInstanceReferences)
 		TaskInstanceReferences = append(TaskInstanceReferences, taskInfo)
 	}
+	logger.Println(logger.DEBUG, false, "TaskInstanceReferences ", TaskInstanceReferences)
 
 	return c.JSONPretty(http.StatusOK, TaskInstanceReferences, " ")
 }
