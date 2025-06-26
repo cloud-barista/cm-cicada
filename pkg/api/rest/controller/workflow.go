@@ -1152,7 +1152,7 @@ func GetTaskInstances(c echo.Context) error {
 // @Success	200	{object}	model.TaskInstanceReference		"Successfully clear the taskInstances."
 // @Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 // @Failure	500	{object}	common.ErrorResponse	"Failed to clear the taskInstances."
-// @Router	 /workflow/{wfId}/workflowRun/{wfRunId}/clear [post]
+// @Router	 /workflow/{wfId}/workflowRun/{wfRunId}/range [post]
 func ClearTaskInstances(c echo.Context) error {
 	var taskClearOption model.TaskClearOption
 

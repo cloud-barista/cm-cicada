@@ -1326,7 +1326,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{wfId}/workflowRun/{wfRunId}/clear": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/range": {
             "post": {
                 "description": "Clear the task Instance.",
                 "consumes": [

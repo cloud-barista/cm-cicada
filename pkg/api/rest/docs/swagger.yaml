@@ -1317,7 +1317,7 @@ paths:
       summary: Get WorkflowVersion
       tags:
       - '[Workflow]'
-  /workflow/{wfId}/workflowRun/{wfRunId}/clear:
+  /workflow/{wfId}/workflowRun/{wfRunId}/range:
     post:
       consumes:
       - application/json
