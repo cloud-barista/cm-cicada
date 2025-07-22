@@ -3,15 +3,16 @@
   "description": "trigger email alert",
   "extra": {
     "operator": "airflow.operators.trigger_dagrun.TriggerDagRunOperator",
-    "trigger_dag_id":"monitor_dag",
-    "task_id":"trigger",
-    "execution_date":"{{ execution_date }}",
-    "wait_for_completion":false,
+    "trigger_dag_id": "monitor_dag",
+    "task_id": "trigger",
+    "execution_date": "{{ execution_date }}",
+    "wait_for_completion": false,
     "conf": {
-      "source_dag_id": "{{ dag.dag_id }}",      
-      "source_dag_run_id": "{{ dag_run.run_id }}" 
+      "source_workflow_id": "{{ dag.dag_id }}",
+      "source_workflow_run_id": "{{ dag_run.run_id }}",
+      "to_email": "YourEmail@example.com"
     },
-    "poke_interval":30,
+    "poke_interval": 30,
     "reset_dag_run": true,
     "trigger_rule": "all_done"
   }

@@ -3,6 +3,17 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.state import State
+import os
+
+
+
+def load_email_template():
+    current_dir = os.path.dirname(__file__)  # mail.py 파일이 있는 경로
+    file_path = os.path.join(current_dir, 'templates', 'email_template.html')
+    with open(file_path, 'r') as f:
+        return f.read()
+
+email_template_content = load_email_template()
 
 # 실패한 태스크 수집 함수
 def collect_failed_tasks(**context):
@@ -62,19 +73,9 @@ with DAG(
     # EmailOperator 설정
     email_task = EmailOperator(
         task_id='send_email',
-        to='ish.mcmp@gmail.com',
+        to="{{ dag_run.conf['to_email'] }}",
         subject='Workflow 상태 보고서',
-        html_content="""<h3>Workflow Execution Complete</h3>
-            <p><strong>Workflow ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_id') }}</p>
-            <p><strong>Workflow Run ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_run_id') }}</p>
-            <p><strong>Workflow 상태:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_state') }}</p>
-            {% if ti.xcom_pull(task_ids='collect_failed_tasks').get('failed_tasks') | length == 0 %}
-            <p>모든 Tasks가 성공적으로 완료되었습니다.</p>
-            {% else %}
-            <p><strong>실패한 Tasks:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('failed_tasks') }}</p>
-            {% endif %}
-        """
-        #params={},  # Initial empty params
+        html_content=email_template_content
     )
 
     # collect_task의 반환 값을 email_task에 전달하기 위한 PythonOperator 후크
