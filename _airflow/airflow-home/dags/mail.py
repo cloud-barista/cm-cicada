@@ -22,24 +22,24 @@ def collect_failed_tasks(**context):
     @provide_session
     def _inner(session=None):
         # conf에서 전달받은 dag_id와 dag_run_id
-        source_dag_id = context['dag_run'].conf.get('source_dag_id')
-        source_dag_run_id = context['dag_run'].conf.get('source_dag_run_id')
+        source_workflow_id = context['dag_run'].conf.get('source_workflow_id')
+        source_workflow_run_id = context['dag_run'].conf.get('source_workflow_run_id')
 
-        if not source_dag_id or not source_dag_run_id:
-            raise ValueError("source_dag_id와 source_dag_run_id가 전달되지 않았습니다.")
+        if not source_workflow_id or not source_workflow_run_id:
+            raise ValueError("source_workflow_id source_workflow_run_id 전달되지 않았습니다.")
 
-        # source_dag_id와 source_dag_run_id를 이용해 DagRun 정보 가져오기
-        source_dag_run = session.query(DagRun).filter_by(
-            dag_id=source_dag_id,
-            run_id=source_dag_run_id
+        # source_workflow_id source_workflow_run_id 이용해 DagRun 정보 가져오기
+        source_workflow_run = session.query(DagRun).filter_by(
+            dag_id=source_workflow_id,
+            run_id=source_workflow_run_id
         ).first()
 
-        if not source_dag_run:
+        if not source_workflow_run:
             raise ValueError("해당하는 DAG Run을 찾을 수 없습니다.")
 
         # 실패한 태스크 ID 목록 수집
         failed_tasks = []
-        for task_instance in source_dag_run.get_task_instances():
+        for task_instance in source_workflow_run.get_task_instances():
             if task_instance.state != State.SUCCESS:
                 failed_tasks.append(task_instance.task_id)
 
@@ -48,8 +48,8 @@ def collect_failed_tasks(**context):
 
         # 결과 반환
         return {
-            "dag_id": source_dag_id,
-            "dag_run_id": source_dag_run_id,
+            "dag_id": source_workflow_id,
+            "dag_run_id": source_workflow_run_id,
             "dag_state": dag_state,
             "failed_tasks": failed_tasks
         }
