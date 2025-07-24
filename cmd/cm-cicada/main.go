@@ -29,6 +29,7 @@ func init() {
 		log.Fatalln(err)
 	}
 
+	logger.Println(logger.DEBUG, false, "Base path:", common.RootPath)
 	err = logger.InitLogFile(common.RootPath+"/log", strings.ToLower(common.ModuleName))
 	if err != nil {
 		log.Panicln(err)
