@@ -5,7 +5,6 @@ import (
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

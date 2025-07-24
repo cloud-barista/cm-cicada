@@ -27,7 +27,7 @@ func GetClient() (*Client, error) {
 		go func() {
 			Init()
 		}()
-		return nil, fmt.Errorf("Airflow client not initialized. Try again later or check the Airflow server.")
+		return nil, fmt.Errorf("ERROR: Airflow client not initialized")
 	}
 
 	return airflowClient, nil
@@ -64,7 +64,7 @@ func checkPing(url string) error {
 	}
 
 	if i == retry {
-		return errors.New("Airflow Server is not responding!")
+		return errors.New("ERROR: Airflow Server is not responding")
 	}
 
 	return nil
