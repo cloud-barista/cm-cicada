@@ -1,0 +1,42 @@
+{% set result = ti.xcom_pull(task_ids='collect_failed_tasks') %}
+{% set dag_id = result.get('dag_id') %}
+{% set exec_date = dag_run.execution_date | urlencode %}
+{% set failed_tasks = result.get('failed_tasks') %}
+
+<h3>📋 워크플로우 실행 상태 보고서</h3>
+
+<table style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <th style="text-align: left; border-bottom: 1px solid #ddd;">항목</th>
+    <th style="text-align: left; border-bottom: 1px solid #ddd;">값</th>
+  </tr>
+  <tr>
+    <td><strong>워크플로우 ID</strong></td>
+    <td>{{ dag_id }}</td>
+  </tr>
+  <tr>
+    <td><strong>워크플로우 Run ID</strong></td>
+    <td>{{ result.get('dag_run_id') }}</td>
+  </tr>
+  <tr>
+    <td><strong>실행 상태</strong></td>
+    <td>{{ result.get('dag_state') }}</td>
+  </tr>
+</table>
+
+{% if failed_tasks %}
+<br>
+<h4 style="color:red;">❌ 실패한 Task 목록</h4>
+<ul>
+  {% for task_id in failed_tasks %}
+  <li>
+    {{ task_id }}<br>
+    <a href="http://192.168.160.250:8080/dags/{{ dag_id }}/grid?task_id={{ task_id }}&execution_date={{ exec_date }}"
+      target="_blank">🔍 로그 보기</a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<br>
+<p>✅ 모든 Task가 성공적으로 완료되었습니다.</p>
+{% endif %}

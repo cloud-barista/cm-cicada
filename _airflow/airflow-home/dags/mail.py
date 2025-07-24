@@ -3,6 +3,17 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.state import State
+import os
+
+
+
+def load_email_template():
+    current_dir = os.path.dirname(__file__)  # mail.py 파일이 있는 경로
+    file_path = os.path.join(current_dir, 'templates', 'email_template.html')
+    with open(file_path, 'r') as f:
+        return f.read()
+
+email_template_content = load_email_template()
 
 # 실패한 태스크 수집 함수
 def collect_failed_tasks(**context):
@@ -11,24 +22,24 @@ def collect_failed_tasks(**context):
     @provide_session
     def _inner(session=None):
         # conf에서 전달받은 dag_id와 dag_run_id
-        source_dag_id = context['dag_run'].conf.get('source_dag_id')
-        source_dag_run_id = context['dag_run'].conf.get('source_dag_run_id')
+        source_workflow_id = context['dag_run'].conf.get('source_workflow_id')
+        source_workflow_run_id = context['dag_run'].conf.get('source_workflow_run_id')
 
-        if not source_dag_id or not source_dag_run_id:
-            raise ValueError("source_dag_id와 source_dag_run_id가 전달되지 않았습니다.")
+        if not source_workflow_id or not source_workflow_run_id:
+            raise ValueError("source_workflow_id source_workflow_run_id 전달되지 않았습니다.")
 
-        # source_dag_id와 source_dag_run_id를 이용해 DagRun 정보 가져오기
-        source_dag_run = session.query(DagRun).filter_by(
-            dag_id=source_dag_id,
-            run_id=source_dag_run_id
+        # source_workflow_id source_workflow_run_id 이용해 DagRun 정보 가져오기
+        source_workflow_run = session.query(DagRun).filter_by(
+            dag_id=source_workflow_id,
+            run_id=source_workflow_run_id
         ).first()
 
-        if not source_dag_run:
+        if not source_workflow_run:
             raise ValueError("해당하는 DAG Run을 찾을 수 없습니다.")
 
         # 실패한 태스크 ID 목록 수집
         failed_tasks = []
-        for task_instance in source_dag_run.get_task_instances():
+        for task_instance in source_workflow_run.get_task_instances():
             if task_instance.state != State.SUCCESS:
                 failed_tasks.append(task_instance.task_id)
 
@@ -37,8 +48,8 @@ def collect_failed_tasks(**context):
 
         # 결과 반환
         return {
-            "dag_id": source_dag_id,
-            "dag_run_id": source_dag_run_id,
+            "dag_id": source_workflow_id,
+            "dag_run_id": source_workflow_run_id,
             "dag_state": dag_state,
             "failed_tasks": failed_tasks
         }
@@ -62,19 +73,9 @@ with DAG(
     # EmailOperator 설정
     email_task = EmailOperator(
         task_id='send_email',
-        to='ish.mcmp@gmail.com',
+        to="{{ dag_run.conf['to_email'] }}",
         subject='Workflow 상태 보고서',
-        html_content="""<h3>Workflow Execution Complete</h3>
-            <p><strong>Workflow ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_id') }}</p>
-            <p><strong>Workflow Run ID:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_run_id') }}</p>
-            <p><strong>Workflow 상태:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('dag_state') }}</p>
-            {% if ti.xcom_pull(task_ids='collect_failed_tasks').get('failed_tasks') | length == 0 %}
-            <p>모든 Tasks가 성공적으로 완료되었습니다.</p>
-            {% else %}
-            <p><strong>실패한 Tasks:</strong> {{ ti.xcom_pull(task_ids='collect_failed_tasks').get('failed_tasks') }}</p>
-            {% endif %}
-        """
-        #params={},  # Initial empty params
+        html_content=email_template_content
     )
 
     # collect_task의 반환 값을 email_task에 전달하기 위한 PythonOperator 후크
