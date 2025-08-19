@@ -296,7 +296,6 @@ func (client *Client) GetImportErrors() (airflow.ImportErrorCollection, error) {
 	ctx, cancel := Context()
 	defer cancel()
 
-	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
 	logs, _, err := client.ImportErrorApi.GetImportErrors(ctx).Execute()
 	logger.Println(logger.INFO, false, logs)
 	if err != nil {
@@ -316,7 +315,7 @@ func (client *Client) PatchDag(dagID string, dagBody airflow.DAG) (airflow.DAG, 
 	logger.Println(logger.INFO, false, logs)
 	if err != nil {
 		logger.Println(logger.ERROR, false,
-			"AIRFLOW: Error occurred while getting import dag errors. (Error: "+err.Error()+").")
+			"AIRFLOW: Error occurred while patch dag errors. (Error: "+err.Error()+").")
 	}
 
 	return logs, nil

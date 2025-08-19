@@ -1403,6 +1403,51 @@ paths:
       summary: Get Task Logs
       tags:
       - '[Workflow]'
+  /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs/download:
+    get:
+      consumes:
+      - application/json
+      description: Download the task logs as a file.
+      operationId: get-task-logs-download
+      parameters:
+      - description: ID of the workflow.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: ID of the workflowRunId.
+        in: path
+        name: wfRunId
+        required: true
+        type: string
+      - description: ID of the task.
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: ID of the taskTryNum.
+        in: path
+        name: taskTyNum
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Log file downloaded successfully.
+          schema:
+            type: file
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get the task Logs.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Download Task Logs
+      tags:
+      - '[Workflow]'
   /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances:
     get:
       consumes:
