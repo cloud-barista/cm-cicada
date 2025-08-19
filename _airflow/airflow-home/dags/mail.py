@@ -21,14 +21,12 @@ def collect_failed_tasks(**context):
 
     @provide_session
     def _inner(session=None):
-        # conf에서 전달받은 dag_id와 dag_run_id
         source_workflow_id = context['dag_run'].conf.get('source_workflow_id')
         source_workflow_run_id = context['dag_run'].conf.get('source_workflow_run_id')
 
         if not source_workflow_id or not source_workflow_run_id:
             raise ValueError("source_workflow_id source_workflow_run_id 전달되지 않았습니다.")
 
-        # source_workflow_id source_workflow_run_id 이용해 DagRun 정보 가져오기
         source_workflow_run = session.query(DagRun).filter_by(
             dag_id=source_workflow_id,
             run_id=source_workflow_run_id
@@ -37,20 +35,24 @@ def collect_failed_tasks(**context):
         if not source_workflow_run:
             raise ValueError("해당하는 DAG Run을 찾을 수 없습니다.")
 
-        # 실패한 태스크 ID 목록 수집
         failed_tasks = []
         for task_instance in source_workflow_run.get_task_instances():
             if task_instance.state != State.SUCCESS:
                 failed_tasks.append(task_instance.task_id)
 
-        # DAG 상태를 실패한 태스크가 1개 이상인 경우 "failed"로 설정
-        dag_state = "failed" if failed_tasks else "success"
+        # 실패 여부에 따라 DagRun.state 변경
+        if failed_tasks:
+            source_workflow_run.state = State.FAILED
+        else:
+            source_workflow_run.state = State.SUCCESS
 
-        # 결과 반환
+        session.merge(source_workflow_run)  # 세션에 변경사항 반영
+        session.commit()  # DB에 커밋
+
         return {
             "dag_id": source_workflow_id,
             "dag_run_id": source_workflow_run_id,
-            "dag_state": dag_state,
+            "dag_state": source_workflow_run.state,
             "failed_tasks": failed_tasks
         }
 
