@@ -1396,3 +1396,60 @@ func GetWorkflowVersion(c echo.Context) error {
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
+
+// GetTaskLogDownload godoc
+//
+//	@ID			get-task-logs-download
+//	@Summary	Download Task Logs
+//	@Description	Download the task logs as a file.
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	text/plain
+//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfRunId path string true "ID of the workflowRunId."
+//	@Param		taskId path string true "ID of the task."
+//	@Param		taskTyNum path string true "ID of the taskTryNum."
+//	@Success	200 {file} file "Log file downloaded successfully."
+//	@Failure	400 {object} common.ErrorResponse "Sent bad request."
+//	@Failure	500 {object} common.ErrorResponse "Failed to get the task Logs."
+//	@Router		/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs/download [get]
+func GetTaskLogDownload(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	wfRunId := c.Param("wfRunId")
+	if wfRunId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
+	}
+
+	taskId := c.Param("taskId")
+	if taskId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskId.")
+	}
+	taskInfo, err := dao.TaskGet(taskId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
+	}
+
+	taskTyNum := c.Param("taskTyNum")
+	if taskTyNum == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskTyNum.")
+	}
+	taskTyNumToInt, err := strconv.Atoi(taskTyNum)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
+	}
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
+	if err != nil {
+		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
+	}
+	filename := fmt.Sprintf("%s_%s_%s.log", wfId, wfRunId, taskInfo.Name)
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Response().Header().Set("Content-Type", "text/plain")
+	return c.Blob(http.StatusOK, "text/plain", []byte(*logs.Content))
+}
