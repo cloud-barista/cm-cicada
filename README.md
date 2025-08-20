@@ -10,7 +10,7 @@ This is a subsystem of the Cloud-Barista platform that provides workflow managem
 * Tested operating systems (OSs):
     * Ubuntu 24.04, Ubuntu 22.04, Ubuntu 18.04
 * Language:
-    * Go: 1.23.0
+    * Go: 1.24.6
 
 ## How to run
 
