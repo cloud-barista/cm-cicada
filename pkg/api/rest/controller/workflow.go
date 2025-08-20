@@ -1463,7 +1463,7 @@ func GetTaskLogDownload(c echo.Context) error {
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "wfId of the workflow"
-//	@Success	200	{object}	model.Workflow		"Successfully get the WorkflowVersion."
+//	@Success	200	{object}	[]model.WorkflowStatus		"Successfully get the WorkflowVersion."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the WorkflowVersion."
 //	@Router		/workflow/{wfId}/status [get]

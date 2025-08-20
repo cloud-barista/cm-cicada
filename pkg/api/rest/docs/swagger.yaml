@@ -428,6 +428,13 @@ definitions:
       workflow_run_id:
         type: string
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus:
+    properties:
+      count:
+        type: integer
+      state:
+        type: string
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowTemplate:
     properties:
       data:
@@ -1049,7 +1056,9 @@ paths:
         "200":
           description: Successfully get the WorkflowVersion.
           schema:
-            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus'
+            type: array
         "400":
           description: Sent bad request.
           schema:

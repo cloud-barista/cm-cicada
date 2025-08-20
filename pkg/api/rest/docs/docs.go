@@ -927,7 +927,10 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the WorkflowVersion.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus"
+                            }
                         }
                     },
                     "400": {
@@ -2394,6 +2397,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workflow_run_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "state": {
                     "type": "string"
                 }
             }
