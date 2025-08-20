@@ -1453,3 +1453,43 @@ func GetTaskLogDownload(c echo.Context) error {
 	c.Response().Header().Set("Content-Type", "text/plain")
 	return c.Blob(http.StatusOK, "text/plain", []byte(*logs.Content))
 }
+
+// GetWorkflowStatus godoc
+//
+//	@ID		get-WorkflowStatus
+//	@Summary	Get WorkflowStatus
+//	@Description	Get the WorkflowStatus.
+//	@Tags		[Workflow]
+//	@Accept		json
+//	@Produce	json
+//	@Param		wfId path string true "wfId of the workflow"
+//	@Success	200	{object}	model.Workflow		"Successfully get the WorkflowVersion."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to get the WorkflowVersion."
+//	@Router		/workflow/{wfId}/status [get]
+func GetWorkflowStatus(c echo.Context) error {
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+	client, err := airflow.GetClient()
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	enumStatus := client.GetAllowedDagStateEnumValues()
+	var statusList []model.WorkflowStatus
+	for _, v := range enumStatus {
+
+		resp, err := client.GetDagStatus(wfId, string(*v.Ptr()))
+		if err != nil {
+			logger.Println(logger.ERROR, false,
+				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+		}
+		statusList = append(statusList, model.WorkflowStatus{
+			State: string(*v.Ptr()),
+			Count: len(*resp.DagRuns),
+		})
+	}
+
+	return c.JSONPretty(http.StatusOK, statusList, " ")
+}

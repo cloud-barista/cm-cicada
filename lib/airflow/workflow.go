@@ -305,6 +305,39 @@ func (client *Client) GetImportErrors() (airflow.ImportErrorCollection, error) {
 
 	return logs, nil
 }
+func (client *Client) GetDagStatus(dagID string, status string) (airflow.DAGRunCollection, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+	resp, _, err := client.DAGRunApi.GetDagRuns(ctx, dagID).State([]string{status}).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+	}
+	// enumStatus := airflow.AllowedDagStateEnumValues
+	// var statusList []model.WorkflowStatus
+	// for _, v := range enumStatus {
+
+	// 	resp, _, err := client.DAGRunApi.GetDagRuns(ctx, dagID).State([]string{v}).Execute()
+	// 	if err != nil {
+	// 		logger.Println(logger.ERROR, false,
+	// 			"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+	// 	}
+	// 	statusList = append(statusList, model.WorkflowStatus{
+	// 		State: string(*v.Ptr()),
+	// 		Count: len(*resp.DagRuns),
+	// 	})
+	// }
+
+	return resp, nil
+}
+
+func (client *Client) GetAllowedDagStateEnumValues() []airflow.DagState {
+	return airflow.AllowedDagStateEnumValues
+}
 
 func (client *Client) PatchDag(dagID string, dagBody airflow.DAG) (airflow.DAG, error) {
 	ctx, cancel := Context()

@@ -276,3 +276,8 @@ func (w *Workflow) BeforeDelete(tx *gorm.DB) (err error) {
 	}
 	return nil
 }
+
+type WorkflowStatus struct {
+	State string `json:"state"`
+	Count int    `json:"count"`
+}

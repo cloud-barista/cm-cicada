@@ -893,6 +893,51 @@
                 }
             }
         },
+        "/workflow/{wfId}/status": {
+            "get": {
+                "description": "Get the WorkflowStatus.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get WorkflowStatus",
+                "operationId": "get-WorkflowStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wfId of the workflow",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the WorkflowVersion.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get the WorkflowVersion.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/task": {
             "get": {
                 "description": "Get a task list of the workflow.",
