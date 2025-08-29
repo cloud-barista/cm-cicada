@@ -6,8 +6,8 @@ import (
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/glebarez/sqlite"
 	"github.com/jollaman999/utils/logger"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -15,8 +15,7 @@ var DB *gorm.DB
 
 func Open() error {
 	var err error
-
-	DB, err = gorm.Open(sqlite.Open(common.RootPath+"/"+common.ModuleName+".db"), &gorm.Config{})
+	DB, err = gorm.Open(sqlite.Open(common.RootPath+"/"+common.ModuleName+".db?_journal_mode=WAL&_busy_timeout=10000"), &gorm.Config{})
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)
 	}
@@ -74,4 +73,12 @@ func Close() {
 		sqlDB, _ := DB.DB()
 		_ = sqlDB.Close()
 	}
+}
+
+func BeginTransaction() (*gorm.DB, error) {
+	tx := DB.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return tx, nil
 }
