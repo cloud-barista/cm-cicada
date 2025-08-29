@@ -14,13 +14,9 @@ RUN git config --global user.name "ish-hcc"
 RUN git init
 RUN git commit --allow-empty -m "a commit for the build"
 
-RUN make
+RUN make build-only
 
-FROM alpine:3.20.1 as prod
-
-RUN apk --no-cache add tzdata
-RUN echo "Asia/Seoul" >  /etc/timezone
-RUN cp -f /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+FROM golang:1.24.6-bookworm AS prod
 
 COPY --from=builder /go/src/github.com/cloud-barista/cm-cicada/conf /conf
 COPY --from=builder /go/src/github.com/cloud-barista/cm-cicada/cmd/cm-cicada/cm-cicada /cm-cicada
