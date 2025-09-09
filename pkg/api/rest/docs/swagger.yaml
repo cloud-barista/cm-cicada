@@ -84,6 +84,10 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      query_params:
+        additionalProperties:
+          type: string
+        type: object
       request_body:
         type: string
       task_component:

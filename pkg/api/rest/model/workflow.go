@@ -53,6 +53,7 @@ type CreateTaskReq struct {
 	TaskComponent string            `json:"task_component" mapstructure:"task_component" validate:"required"`
 	RequestBody   string            `json:"request_body" mapstructure:"request_body" validate:"required"`
 	PathParams    map[string]string `json:"path_params" mapstructure:"path_params"`
+	QueryParams   map[string]string `json:"query_params" mapstructure:"query_params"`
 	Dependencies  []string          `json:"dependencies" mapstructure:"dependencies"`
 }
 

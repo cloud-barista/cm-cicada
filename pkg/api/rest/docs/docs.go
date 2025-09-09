@@ -1901,6 +1901,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "query_params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "request_body": {
                     "type": "string"
                 },
