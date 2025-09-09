@@ -25,6 +25,14 @@ cm-cicada:
             host: localhost
             port: 8084
             schema: http
+          - id: damselfly_api
+            type: http
+            description: Damselfly API
+            host: localhost
+            port: 8088
+            schema: http
+            login: default
+            password: default
           - id: beetle_api
             type: http
             description: Beetle API
