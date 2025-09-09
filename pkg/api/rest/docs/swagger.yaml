@@ -294,11 +294,18 @@ definitions:
         items:
           type: string
         type: array
+      extra:
+        additionalProperties: true
+        type: object
       id:
         type: string
       name:
         type: string
       path_params:
+        additionalProperties:
+          type: string
+        type: object
+      query_params:
         additionalProperties:
           type: string
         type: object

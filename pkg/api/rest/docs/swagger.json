@@ -2205,6 +2205,10 @@
                         "type": "string"
                     }
                 },
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2212,6 +2216,12 @@
                     "type": "string"
                 },
                 "path_params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "query_params": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"

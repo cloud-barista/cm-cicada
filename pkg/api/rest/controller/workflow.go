@@ -945,6 +945,9 @@ func GetTaskDirectly(c echo.Context) error {
 						Name:          task.Name,
 						TaskComponent: task.TaskComponent,
 						RequestBody:   task.RequestBody,
+						PathParams:    task.PathParams,
+						QueryParams:   task.QueryParams,
+						Extra:         task.Extra,
 						Dependencies:  task.Dependencies,
 					}, " ")
 				}

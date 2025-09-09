@@ -2212,6 +2212,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2219,6 +2223,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path_params": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "query_params": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
