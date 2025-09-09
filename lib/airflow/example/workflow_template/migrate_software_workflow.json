@@ -9,44 +9,29 @@
         "description": "Migrate Software",
         "tasks": [
           {
-            "name": "import_software",
-            "task_component": "honeybee_task_import_software",
+            "name": "get_target_software_model",
+            "task_component": "damselfly_task_get_target_software_model",
             "path_params": {
-              "sgId": "ddcfa917-17e0-4718-a878-f1e99f97ed6d"
+              "id": "9BR80VgLwYXDhOV"
             }
           },
           {
-            "name": "get_software",
-            "task_component": "honeybee_task_get_software",
-            "path_params": {
-              "sgId": "ddcfa917-17e0-4718-a878-f1e99f97ed6d"
+            "name": "run_software_migration",
+            "task_component": "grasshopper_task_software_migration",
+            "request_body": "get_target_software_model",
+            "query_params": {
+              "nsId": "mig01",
+              "mciId": "mmci01"
             },
             "dependencies": [
-              "import_software"
-            ]
-          },
-          {
-            "name": "software_migration_nfs_server",
-            "task_component": "grasshopper_task_software_migration",
-            "request_body": "{\n  \"software_ids\": [\n    \"78d3664e-3eb7-4d37-bf8b-b57b7a238693\",\n    \"aaf49384-1a7c-4b91-9fdc-c7c46aed0882\"\n  ],\n  \"source_connection_info_id\": \"829e9c15-a24c-4c39-9e1b-162fcae8f21b\",\n  \"target\": {\n    \"mci_id\": \"mmci01\",\n    \"namespace_id\": \"mig01\",\n    \"vm_id\": \"rehosted-test-cm-nfs-1\"\n  }\n}",
-            "dependencies": [
-              "get_software"
-            ]
-          },
-          {
-            "name": "software_migration_web_server",
-            "task_component": "grasshopper_task_software_migration",
-            "request_body": "{\n  \"software_ids\": [\n    \"78d3664e-3eb7-4d37-bf8b-b57b7a238693\",\n    \"aa34795f-3401-4c28-bbe9-157a5788fd75\"\n  ],\n  \"source_connection_info_id\": \"d0b6a2a6-4cd8-4b36-ba41-a5f9a7aeef26\",\n  \"target\": {\n    \"mci_id\": \"mmci01\",\n    \"namespace_id\": \"mig01\",\n    \"vm_id\": \"rehosted-test-cm-web-1\"\n  }\n}",
-            "dependencies": [
-              "get_software"
+              "get_target_software_model"
             ]
           },
           {
             "name": "send_result_via_email",
             "task_component": "trigger_email",
             "dependencies": [
-              "software_migration_nfs_server",
-              "software_migration_web_server"
+              "run_software_migration"
             ]
           }
         ]
