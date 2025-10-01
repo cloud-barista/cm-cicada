@@ -11,7 +11,7 @@ apache-airflow-providers-celery==3.8.3
 apache-airflow-providers-cncf-kubernetes==9.0.1
 apache-airflow-providers-common-compat==1.2.2
 apache-airflow-providers-common-io==1.4.2
-apache-airflow-providers-common-sql==1.20.0
+apache-airflow-providers-common-sql==1.24.1
 apache-airflow-providers-docker==3.14.0
 apache-airflow-providers-fab==1.5.1
 apache-airflow-providers-ftp==3.11.1
