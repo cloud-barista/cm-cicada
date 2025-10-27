@@ -19,6 +19,12 @@ cm-cicada:
             host: localhost
             port: 8081
             schema: http
+          - id: cicada_api
+            type: http
+            description: Cicada API
+            host: localhost
+            port: 8083
+            schema: http
           - id: grasshopper_api
             type: http
             description: Grasshopper API

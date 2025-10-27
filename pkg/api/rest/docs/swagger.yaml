@@ -186,6 +186,27 @@ definitions:
       type:
         type: string
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq:
+    properties:
+      content:
+        description: Base64 encoded script content.
+        type: string
+      mci_id:
+        type: string
+      ns_id:
+        type: string
+      vm_id:
+        type: string
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult:
+    properties:
+      error:
+        type: string
+      is_success:
+        type: boolean
+      output:
+        type: string
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg:
     properties:
       message:
@@ -535,6 +556,37 @@ paths:
       summary: Check Ready
       tags:
       - "[Admin]\tSystem management"
+  /run_script:
+    post:
+      consumes:
+      - application/json
+      description: Run script on target with NS ID, MCI ID and VM ID.
+      operationId: run-script
+      parameters:
+      - description: Workflow content
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Result of the script running
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to run script
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Run script on target
+      tags:
+      - '[Cicada Task Component]'
   /task/{taskId}:
     get:
       consumes:
