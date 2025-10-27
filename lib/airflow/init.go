@@ -5,13 +5,14 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/apache/airflow-client-go/airflow"
-	"github.com/cloud-barista/cm-cicada/lib/config"
-	"github.com/jollaman999/utils/logger"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/apache/airflow-client-go/airflow"
+	"github.com/cloud-barista/cm-cicada/lib/config"
+	"github.com/jollaman999/utils/logger"
 )
 
 type Client struct {

@@ -1,10 +1,11 @@
 package controller
 
 import (
+	"net/http"
+
 	_ "github.com/cloud-barista/cm-cicada/pkg/api/rest/common" // Need for swag
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 var OkMessage = model.SimpleMsg{}

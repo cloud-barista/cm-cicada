@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"gorm.io/gorm"
