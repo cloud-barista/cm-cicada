@@ -35,12 +35,6 @@ func init() {
 		log.Panicln(err)
 	}
 
-	controller.OkMessage.Message = "Database is not ready"
-	err = db.Open()
-	if err != nil {
-		logger.Panicln(logger.ERROR, true, err.Error())
-	}
-
 	controller.OkMessage.Message = "API server is not ready"
 
 	var wg sync.WaitGroup
@@ -51,6 +45,12 @@ func init() {
 		}()
 		server.Init()
 	}()
+
+	controller.OkMessage.Message = "Database is not ready"
+	err = db.Open()
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err.Error())
+	}
 
 	controller.OkMessage.Message = "Airflow connection is not ready"
 	airflow.Init()
