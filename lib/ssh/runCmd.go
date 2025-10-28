@@ -64,7 +64,7 @@ func ExecuteScript(nsID string, mciID string, vmID string, base64EncodedContent 
 				keepAliveSession, err := targetClient.NewSessionWithRetry()
 				if err != nil {
 					logger.Printf(logger.ERROR, true, "Keep-alive session creation failed for target: "+
-						"ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
+						"NS_ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
 					continue
 				}
 
@@ -77,7 +77,7 @@ func ExecuteScript(nsID string, mciID string, vmID string, base64EncodedContent 
 	cmd := fmt.Sprintf("cat << 'SCRIPT_EOF' | bash\n%s\nSCRIPT_EOF", script)
 
 	logger.Printf(logger.DEBUG, true, "Executing script with keep-alive enabled for target: "+
-		"ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
+		"NS_ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
 	output, err := session.CombinedOutput(cmd)
 
 	cancel()
