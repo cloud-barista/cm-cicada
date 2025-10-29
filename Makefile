@@ -120,21 +120,5 @@ clean: ## Remove previous build
 	@rm -rf cmd/${MODULE_NAME}/conf
 	@cd cmd/${MODULE_NAME} && ${GO_COMMAND} clean
 
-	# Run only the Go binary (without Airflow)
-run_go: ## Run the built binary only
-	@sudo killall ${MODULE_NAME} | true
-	@git diff > .diff_current
-	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
-	  GIT_HASH_MINE=`git rev-parse HEAD` && \
-	  GIT_HASH_LAST_BUILD=`cat .git_hash_last_build 2>&1 > /dev/null | true` && \
-	  if [ "$$STATUS" != "0" ] || [ "$$GIT_HASH_MINE" != "$$GIT_HASH_LAST_BUILD" ]; then \
-	    $(MAKE) build; \
-	  fi
-	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
-
-# Stop only the Go binary
-stop_go: ## Stop the running Go binary only
-	@sudo pkill -f ${MODULE_NAME} || true
-
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -183,10 +183,7 @@ func (client *Client) GetTaskLogs(dagID, dagRunID, taskID string, taskTryNumber 
 	}()
 	ctx, cancel := Context()
 	defer cancel()
-	err := client.ValidateWorkflowIdentifiers(dagID, dagRunID, taskID)
-	if err != nil {
-		return airflow.InlineResponse200{}, errors.New("invalid workflow identifiers: " + err.Error())
-	}
+
 	// TaskInstanceApi 인스턴스를 사용하여 로그 요청
 	logs, _, err := client.TaskInstanceApi.GetLog(ctx, dagID, dagRunID, taskID, int32(taskTryNumber)).FullContent(true).Execute()
 	logger.Println(logger.INFO, false, logs)
@@ -361,82 +358,4 @@ func addBasicAuth(req *http.Request, username, password string) {
 	auth := username + ":" + password
 	encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
 	req.Header.Add("Authorization", "Basic "+encodedAuth)
-}
-
-func (client *Client) WorkflowIdValid(workflowId string) (bool, error) {
-	ctx, cancel := Context()
-	defer cancel()
-
-	_, _, err := client.DAGApi.GetDag(ctx, workflowId).Execute()
-	if err != nil {
-		// DAG이 없거나 다른 오류
-		return false, fmt.Errorf("AIRFLOW: Workflow %s not found or error occurred: %w", workflowId, err)
-	}
-
-	return true, nil
-}
-
-func (client *Client) WorkflowRunIdValid(dagId, workflowRunId string) (bool, error) {
-	ctx, cancel := Context()
-	defer cancel()
-
-	_, _, err := client.DAGRunApi.GetDagRun(ctx, dagId, workflowRunId).Execute()
-	if err != nil {
-		return false, fmt.Errorf("AIRFLOW: Workflow Run %s for Workflow %s not found or error: %w", workflowRunId, dagId, err)
-	}
-	return true, nil
-}
-
-func (client *Client) TaskIdValid(dagId, taskId string) (bool, error) {
-	ctx, cancel := Context()
-	defer cancel()
-
-	_, _, err := client.DAGApi.GetTask(ctx, dagId, taskId).Execute()
-	if err != nil {
-		return false, fmt.Errorf("AIRFLOW: Task %s for Workflow %s not found or error: %w", taskId, dagId, err)
-	}
-	return true, nil
-}
-
-func (client *Client) ValidateWorkflowIdentifiers(dagId, dagRunId, taskId string) error {
-	// DAG ID 검사
-	if dagId != "" {
-		exists, err := client.WorkflowIdValid(dagId)
-		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("AIRFLOW: WorkflowId %s is not valid", dagId)
-		}
-	}
-
-	// DAG Run ID 검사
-	if dagRunId != "" {
-		if dagId == "" {
-			return fmt.Errorf("AIRFLOW: WorkflowRunId provided but WorkflowId is empty")
-		}
-		exists, err := client.WorkflowRunIdValid(dagId, dagRunId)
-		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("AIRFLOW: WorkflowRunId %s is not valid for WorkflowId %s", dagRunId, dagId)
-		}
-	}
-
-	// Task ID 검사
-	if taskId != "" {
-		if dagId == "" {
-			return fmt.Errorf("AIRFLOW: taskId provided but WorkflowId is empty")
-		}
-		exists, err := client.TaskIdValid(dagId, taskId)
-		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("AIRFLOW: taskId %s is not valid for WorkflowId %s", taskId, dagId)
-		}
-	}
-
-	return nil
 }
