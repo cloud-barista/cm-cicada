@@ -1939,6 +1939,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "extra": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "name": {
                     "type": "string"
                 },

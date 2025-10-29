@@ -78,6 +78,9 @@ definitions:
         items:
           type: string
         type: array
+      extra:
+        additionalProperties: true
+        type: object
       name:
         type: string
       path_params:

@@ -12,6 +12,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
+	"github.com/jollaman999/utils/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -177,9 +178,17 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
-			if taskComponent.Data.Options.Extra != nil {
-				taskOptions = taskComponent.Data.Options.Extra
+			logger.Println(logger.INFO, true, fmt.Sprintf("task component extra: %v", taskComponent.Data.Options.Extra))
+			logger.Println(logger.INFO, true, fmt.Sprintf("task  extra: %v", t))
 
+			if taskComponent.Data.Options.Extra != nil {
+				// taskComponent의 Extra를 복사
+				taskOptions = copyMap(taskComponent.Data.Options.Extra)
+
+				// task의 extra가 있으면 병합
+				if t.Extra != nil {
+					mergeMaps(taskOptions, t.Extra)
+				}
 			} else {
 				if isTaskExist(workflow, t.RequestBody) {
 					taskOptions["operator"] = "local.JsonHttpRequestOperator"
@@ -222,4 +231,45 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 	}
 
 	return nil
+}
+
+func copyMap(src map[string]any) map[string]any {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]any, len(src))
+	for k, v := range src {
+		if nestedMap, ok := v.(map[string]any); ok {
+			dst[k] = copyMap(nestedMap)
+		} else {
+			dst[k] = v
+		}
+	}
+	return dst
+}
+
+func mergeMaps(dst map[string]any, src map[string]any) {
+	if dst == nil || src == nil {
+		return
+	}
+
+	for k, srcValue := range src {
+		// dst에 같은 키가 없으면 그대로 추가
+		if _, exists := dst[k]; !exists {
+			dst[k] = srcValue
+			continue
+		}
+
+		// dst에 같은 키가 있는 경우
+		dstValue := dst[k]
+
+		if dstMap, dstOk := dstValue.(map[string]any); dstOk {
+			if srcMap, srcOk := srcValue.(map[string]any); srcOk {
+				mergeMaps(dstMap, srcMap)
+				continue
+			}
+		}
+
+		dst[k] = srcValue
+	}
 }

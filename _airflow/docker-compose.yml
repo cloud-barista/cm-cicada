@@ -25,7 +25,8 @@ services:
             - ./db_data:/var/lib/mysql
     airflow-server:
         container_name: airflow-server
-        image: cloudbaristaorg/airflow-server:edge
+          #        image: cloudbaristaorg/airflow-server:edge
+        build: .
         restart: always
         environment:
             - AIRFLOW__SMTP__SMTP_HOST=${SMTP_HOST}
