@@ -40,7 +40,7 @@ ConfigUpdater==3.2
 connexion==2.14.2
 cron-descriptor==1.4.5
 croniter==5.0.1
-cryptography==42.0.8
+cryptography==44.0.1
 debugpy==1.8.9
 decorator==5.1.1
 defusedxml==0.7.1
