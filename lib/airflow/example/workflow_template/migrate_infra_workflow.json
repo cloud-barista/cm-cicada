@@ -17,10 +17,18 @@
             }
           },
           {
+            "name": "install_docker",
+            "task_component": "cicada_task_run_script",
+            "request_body": "{\n  \"content\": \"IyBBZGQgRG9ja2VyJ3Mgb2ZmaWNpYWwgR1BHIGtleToNCnN1ZG8gYXB0LWdldCB1cGRhdGUNCnN1ZG8gYXB0LWdldCBpbnN0YWxsIGNhLWNlcnRpZmljYXRlcyBjdXJsDQpzdWRvIGluc3RhbGwgLW0gMDc1NSAtZCAvZXRjL2FwdC9rZXlyaW5ncw0Kc3VkbyBjdXJsIC1mc1NMIGh0dHBzOi8vZG93bmxvYWQuZG9ja2VyLmNvbS9saW51eC91YnVudHUvZ3BnIC1vIC9ldGMvYXB0L2tleXJpbmdzL2RvY2tlci5hc2MNCnN1ZG8gY2htb2QgYStyIC9ldGMvYXB0L2tleXJpbmdzL2RvY2tlci5hc2MNCg0KIyBBZGQgdGhlIHJlcG9zaXRvcnkgdG8gQXB0IHNvdXJjZXM6DQplY2hvIFwNCiAgImRlYiBbYXJjaD0kKGRwa2cgLS1wcmludC1hcmNoaXRlY3R1cmUpIHNpZ25lZC1ieT0vZXRjL2FwdC9rZXlyaW5ncy9kb2NrZXIuYXNjXSBodHRwczovL2Rvd25sb2FkLmRvY2tlci5jb20vbGludXgvdWJ1bnR1IFwNCiAgJCguIC9ldGMvb3MtcmVsZWFzZSAmJiBlY2hvICIke1VCVU5UVV9DT0RFTkFNRTotJFZFUlNJT05fQ09ERU5BTUV9Iikgc3RhYmxlIiB8IFwNCiAgc3VkbyB0ZWUgL2V0Yy9hcHQvc291cmNlcy5saXN0LmQvZG9ja2VyLmxpc3QgPiAvZGV2L251bGwNCnN1ZG8gYXB0LWdldCB1cGRhdGUNCg0KIyBBZGQgdGhlIHJlcG9zaXRvcnkgdG8gQXB0IHNvdXJjZXM6DQplY2hvIFwNCiAgImRlYiBbYXJjaD0kKGRwa2cgLS1wcmludC1hcmNoaXRlY3R1cmUpIHNpZ25lZC1ieT0vZXRjL2FwdC9rZXlyaW5ncy9kb2NrZXIuYXNjXSBodHRwczovL2Rvd25sb2FkLmRvY2tlci5jb20vbGludXgvdWJ1bnR1IFwNCiAgJCguIC9ldGMvb3MtcmVsZWFzZSAmJiBlY2hvICIke1VCVU5UVV9DT0RFTkFNRTotJFZFUlNJT05fQ09ERU5BTUV9Iikgc3RhYmxlIiB8IFwNCiAgc3VkbyB0ZWUgL2V0Yy9hcHQvc291cmNlcy5saXN0LmQvZG9ja2VyLmxpc3QgPiAvZGV2L251bGwNCnN1ZG8gYXB0LWdldCB1cGRhdGUNCg0Kc3VkbyBhcHQtZ2V0IGluc3RhbGwgLXkgZG9ja2VyLWNlIGRvY2tlci1jZS1jbGkgY29udGFpbmVyZC5pbyBkb2NrZXItYnVpbGR4LXBsdWdpbiBkb2NrZXItY29tcG9zZS1wbHVnaW4=\",\n  \"ns_id\": \"mig01\",\n  \"mci_id\": \"mmci01\",\n  \"vm_id\": \"migrated-cb95f7e4-570c-468c-af77-2263271bc138-1\"\n}",
+            "dependencies": [
+              "infra_migration"
+            ]
+          },
+          {
             "name": "send_result_via_email",
             "task_component": "trigger_email",
             "dependencies": [
-              "infra_migration"
+              "install_docker"
             ]
           }
         ]

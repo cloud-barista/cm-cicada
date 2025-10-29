@@ -78,6 +78,53 @@
                 }
             }
         },
+        "/run_script": {
+            "post": {
+                "description": "Run script on target with NS ID, MCI ID and VM ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Cicada Task Component]"
+                ],
+                "summary": "Run script on target",
+                "operationId": "run-script",
+                "parameters": [
+                    {
+                        "description": "Workflow content",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result of the script running",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to run script",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/task/{taskId}": {
             "get": {
                 "description": "Get the task directly.",
@@ -2042,6 +2089,38 @@
                     }
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Base64 encoded script content.",
+                    "type": "string"
+                },
+                "mci_id": {
+                    "type": "string"
+                },
+                "ns_id": {
+                    "type": "string"
+                },
+                "vm_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "is_success": {
+                    "type": "boolean"
+                },
+                "output": {
                     "type": "string"
                 }
             }

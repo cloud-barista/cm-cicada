@@ -38,4 +38,6 @@ func Workflow(e *echo.Echo) {
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version", controller.ListWorkflowVersion)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version/:verId", controller.GetWorkflowVersion)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/status", controller.GetWorkflowStatus)
+
+	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/run_script", controller.RunScript)
 }
