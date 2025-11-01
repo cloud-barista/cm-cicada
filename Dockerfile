@@ -1,4 +1,4 @@
-FROM golang:1.24.6-bookworm AS builder
+FROM golang:1.25.0-bookworm AS builder
 
 RUN apt-get update && apt-get install -y make bash git
 
@@ -16,7 +16,7 @@ RUN git commit --allow-empty -m "a commit for the build"
 
 RUN make build-only
 
-FROM golang:1.24.6-bookworm AS prod
+FROM golang:1.25.0-bookworm AS prod
 
 COPY --from=builder /go/src/github.com/cloud-barista/cm-cicada/conf /conf
 COPY --from=builder /go/src/github.com/cloud-barista/cm-cicada/cmd/cm-cicada/cm-cicada /cm-cicada
