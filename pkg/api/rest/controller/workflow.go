@@ -75,6 +75,7 @@ func createDataReqToData(specVersion string, createDataReq model.CreateDataReq) 
 						RequestBody:   tReq.RequestBody,
 						PathParams:    tReq.PathParams,
 						QueryParams:   tReq.QueryParams,
+						Extra:         tReq.Extra,
 						Dependencies:  tReq.Dependencies,
 					})
 				}
