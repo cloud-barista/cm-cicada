@@ -2374,6 +2374,9 @@ const docTemplate = `{
                 "execution_date": {
                     "type": "string"
                 },
+                "is_software_migration_task": {
+                    "type": "boolean"
+                },
                 "start_date": {
                     "type": "string"
                 },

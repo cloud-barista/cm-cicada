@@ -138,16 +138,17 @@ type WorkflowRun struct {
 }
 
 type TaskInstance struct {
-	WorkflowRunID string    `json:"workflow_run_id,omitempty"`
-	WorkflowID    *string   `json:"workflow_id,omitempty"`
-	TaskID        string    `json:"task_id,omitempty"`
-	TaskName      string    `json:"task_name,omitempty"`
-	State         string    `json:"state,omitempty"`
-	StartDate     time.Time `json:"start_date,omitempty"`
-	EndDate       time.Time `json:"end_date,omitempty"`
-	DurationDate  float64   `json:"duration_date"`
-	ExecutionDate time.Time `json:"execution_date,omitempty"`
-	TryNumber     int       `json:"try_number"`
+	WorkflowRunID           string    `json:"workflow_run_id,omitempty"`
+	WorkflowID              *string   `json:"workflow_id,omitempty"`
+	TaskID                  string    `json:"task_id,omitempty"`
+	TaskName                string    `json:"task_name,omitempty"`
+	State                   string    `json:"state,omitempty"`
+	StartDate               time.Time `json:"start_date,omitempty"`
+	EndDate                 time.Time `json:"end_date,omitempty"`
+	DurationDate            float64   `json:"duration_date"`
+	ExecutionDate           time.Time `json:"execution_date,omitempty"`
+	TryNumber               int       `json:"try_number"`
+	IsSoftwareMigrationTask bool      `json:"is_software_migration_task"`
 }
 
 type TaskInstanceReference struct {

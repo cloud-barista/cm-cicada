@@ -231,6 +231,33 @@ func CreateWorkflow(c echo.Context) error {
 	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
 
+func getWorkflowFromDB(workflowID string) (*model.Workflow, error) {
+	workflow, err := dao.WorkflowGet(workflowID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get the workflow from DB. Error: %s", err.Error())
+	}
+
+	for i, tg := range workflow.Data.TaskGroups {
+		_, err = dao.TaskGroupGetByWorkflowIDAndName(workflowID, tg.Name)
+		if err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
+
+		workflow.Data.TaskGroups[i].ID = tg.ID
+
+		for j, t := range tg.Tasks {
+			_, err = dao.TaskGetByWorkflowIDAndName(workflowID, t.Name)
+			if err != nil {
+				logger.Println(logger.ERROR, true, err)
+			}
+
+			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
+		}
+	}
+
+	return workflow, nil
+}
+
 // GetWorkflow godoc
 //
 //	@ID		get-workflow
@@ -250,27 +277,9 @@ func GetWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
 
-	workflow, err := dao.WorkflowGet(wfId)
+	workflow, err := getWorkflowFromDB(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	for i, tg := range workflow.Data.TaskGroups {
-		_, err = dao.TaskGroupGetByWorkflowIDAndName(wfId, tg.Name)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-
-		workflow.Data.TaskGroups[i].ID = tg.ID
-
-		for j, t := range tg.Tasks {
-			_, err = dao.TaskGetByWorkflowIDAndName(wfId, tg.Name)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-
-			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
-		}
 	}
 
 	client, err := airflow.GetClient()
@@ -1104,6 +1113,11 @@ func GetTaskInstances(c echo.Context) error {
 	var taskInstances []model.TaskInstance
 	layout := time.RFC3339Nano
 
+	workflow, err := getWorkflowFromDB(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
 	for _, taskInstance := range *runList.TaskInstances {
 		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
 		if err != nil {
@@ -1125,17 +1139,32 @@ func GetTaskInstances(c echo.Context) error {
 			fmt.Println("Error parsing end date:", err)
 			continue
 		}
+
+		var isSoftwareMigrationTask bool
+		for _, tg := range workflow.Data.TaskGroups {
+			for _, task := range tg.Tasks {
+				if strings.Contains(task.TaskComponent, "grasshopper") &&
+					strings.Contains(task.TaskComponent, "software") &&
+					strings.Contains(task.TaskComponent, "migration") &&
+					task.ID == *taskId {
+					isSoftwareMigrationTask = true
+					break
+				}
+			}
+		}
+
 		taskInfo := model.TaskInstance{
-			WorkflowID:    taskInstance.DagId,
-			WorkflowRunID: taskInstance.GetDagRunId(),
-			TaskID:        *taskId,
-			TaskName:      taskInstance.GetTaskId(),
-			State:         string(taskInstance.GetState()),
-			ExecutionDate: executionDate,
-			StartDate:     startDate,
-			EndDate:       endDate,
-			DurationDate:  float64(taskInstance.GetDuration()),
-			TryNumber:     int(taskInstance.GetTryNumber()),
+			WorkflowID:              taskInstance.DagId,
+			WorkflowRunID:           taskInstance.GetDagRunId(),
+			TaskID:                  *taskId,
+			TaskName:                taskInstance.GetTaskId(),
+			State:                   string(taskInstance.GetState()),
+			ExecutionDate:           executionDate,
+			StartDate:               startDate,
+			EndDate:                 endDate,
+			DurationDate:            float64(taskInstance.GetDuration()),
+			TryNumber:               int(taskInstance.GetTryNumber()),
+			IsSoftwareMigrationTask: isSoftwareMigrationTask,
 		}
 		taskInstances = append(taskInstances, taskInfo)
 	}
