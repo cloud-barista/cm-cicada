@@ -2,6 +2,7 @@ package airflow
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -352,6 +353,37 @@ func (client *Client) PatchDag(dagID string, dagBody airflow.DAG) (airflow.DAG, 
 	}
 
 	return logs, nil
+}
+
+func (client *Client) GetXComValue(dagID, dagRunID, taskID, xcomKey string) (map[string]interface{}, error) {
+	deferFunc := callDagRequestLock(dagID)
+	defer func() {
+		deferFunc()
+	}()
+	ctx, cancel := Context()
+	defer cancel()
+
+	// XCom API를 사용하여 특정 task의 xcom 데이터 조회
+	xcomEntry, _, err := client.XComApi.GetXcomEntry(ctx, dagID, dagRunID, taskID, xcomKey).Execute()
+	if err != nil {
+		logger.Println(logger.ERROR, false,
+			"AIRFLOW: Error occurred while getting XCom value. (Error: "+err.Error()+").")
+		return nil, err
+	}
+
+	// xcom value를 JSON에서 map으로 파싱
+	if xcomEntry.Value != nil {
+		var valueMap map[string]interface{}
+		err := json.Unmarshal([]byte(*xcomEntry.Value), &valueMap)
+		if err != nil {
+			logger.Println(logger.ERROR, false,
+				"AIRFLOW: Error occurred while parsing XCom value. (Error: "+err.Error()+").")
+			return nil, err
+		}
+		return valueMap, nil
+	}
+
+	return nil, nil
 }
 
 func addBasicAuth(req *http.Request, username, password string) {

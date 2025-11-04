@@ -1141,6 +1141,7 @@ func GetTaskInstances(c echo.Context) error {
 		}
 
 		var isSoftwareMigrationTask bool
+		var executionID string
 		for _, tg := range workflow.Data.TaskGroups {
 			for _, task := range tg.Tasks {
 				if strings.Contains(task.TaskComponent, "grasshopper") &&
@@ -1148,23 +1149,40 @@ func GetTaskInstances(c echo.Context) error {
 					strings.Contains(task.TaskComponent, "migration") &&
 					task.ID == *taskId {
 					isSoftwareMigrationTask = true
+
+					// software migration task인 경우 xcom에서 execution_id 조회
+					xcomData, err := client.GetXComValue(
+						taskInstance.GetDagId(),
+						taskInstance.GetDagRunId(),
+						taskInstance.GetTaskId(),
+						"return_value",
+					)
+					if err != nil {
+						logger.Println(logger.WARN, false,
+							"Failed to get xcom data for task: "+taskInstance.GetTaskId()+" (Error: "+err.Error()+")")
+					} else if xcomData != nil {
+						if execID, ok := xcomData["execution_id"].(string); ok {
+							executionID = execID
+						}
+					}
 					break
 				}
 			}
 		}
 
 		taskInfo := model.TaskInstance{
-			WorkflowID:              taskInstance.DagId,
-			WorkflowRunID:           taskInstance.GetDagRunId(),
-			TaskID:                  *taskId,
-			TaskName:                taskInstance.GetTaskId(),
-			State:                   string(taskInstance.GetState()),
-			ExecutionDate:           executionDate,
-			StartDate:               startDate,
-			EndDate:                 endDate,
-			DurationDate:            float64(taskInstance.GetDuration()),
-			TryNumber:               int(taskInstance.GetTryNumber()),
-			IsSoftwareMigrationTask: isSoftwareMigrationTask,
+			WorkflowID:                   taskInstance.DagId,
+			WorkflowRunID:                taskInstance.GetDagRunId(),
+			TaskID:                       *taskId,
+			TaskName:                     taskInstance.GetTaskId(),
+			State:                        string(taskInstance.GetState()),
+			ExecutionDate:                executionDate,
+			StartDate:                    startDate,
+			EndDate:                      endDate,
+			DurationDate:                 float64(taskInstance.GetDuration()),
+			TryNumber:                    int(taskInstance.GetTryNumber()),
+			IsSoftwareMigrationTask:      isSoftwareMigrationTask,
+			SoftwareMigrationExecutionID: executionID,
 		}
 		taskInstances = append(taskInstances, taskInfo)
 	}

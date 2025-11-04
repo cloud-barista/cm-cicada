@@ -2377,6 +2377,9 @@ const docTemplate = `{
                 "is_software_migration_task": {
                     "type": "boolean"
                 },
+                "software_migration_execution_id": {
+                    "type": "string"
+                },
                 "start_date": {
                     "type": "string"
                 },
