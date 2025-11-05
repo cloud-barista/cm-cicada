@@ -20,7 +20,7 @@ on:
     paths:
       - "_airflow"
   # workflow trigger button
-  # workflow_dispatch:
+  workflow_dispatch:
 
 env:
   DOCKER_REGISTRY_NAME: cloudbaristaorg
