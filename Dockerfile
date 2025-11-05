@@ -25,6 +25,10 @@ RUN mkdir -p /lib/airflow/example/
 COPY lib/airflow/example /lib/airflow/example
 
 USER root
+
+RUN mkdir -p /root/.ssh
+RUN touch /root/.ssh/known_hosts && chmod 600 /root/.ssh/known_hosts
+
 CMD ["/cm-cicada"]
 
 EXPOSE 8083
