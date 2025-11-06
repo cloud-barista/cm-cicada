@@ -40,4 +40,5 @@ func Workflow(e *echo.Echo) {
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/status", controller.GetWorkflowStatus)
 
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/run_script", controller.RunScript)
+	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/sleep_time", controller.SleepTime)
 }

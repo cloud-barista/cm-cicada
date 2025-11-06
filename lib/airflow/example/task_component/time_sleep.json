@@ -1,8 +1,0 @@
-{
-  "name": "sleep_time",
-  "description": "pause with configurable time",
-  "extra": {
-    "operator": "airflow.providers.standard.operators.bash.BashOperator",
-    "bash_command": "sleep {{ params.time }}"
-  }
-}

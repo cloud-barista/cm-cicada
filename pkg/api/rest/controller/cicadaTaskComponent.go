@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/cloud-barista/cm-cicada/lib/cmd"
 	"github.com/cloud-barista/cm-cicada/lib/ssh"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
@@ -55,6 +56,42 @@ func RunScript(c echo.Context) error {
 		result.IsSuccess = true
 	}
 	result.Output = string(output)
+
+	return c.JSONPretty(http.StatusOK, result, " ")
+}
+
+// SleepTime godoc
+//
+//	@ID				sleep-time
+//	@Summary		Run sleep command on cicada
+//	@Description	Runs sleep command on cicada and waits for configured time.
+//	@Tags			[Cicada Task Component]
+//	@Accept			json
+//	@Produce		json
+//	@Param			request body 	model.SleepTimeReq true "SleepTime request"
+//	@Success		200	{object}	model.ScriptResult		"Result of sleep"
+//	@Failure		400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure		500	{object}	common.ErrorResponse	"Failed to run script"
+//	@Router			/sleep_time [post]
+func SleepTime(c echo.Context) error {
+	sleepTimeReq := new(model.SleepTimeReq)
+	err := c.Bind(sleepTimeReq)
+	if err != nil {
+		return err
+	}
+
+	if sleepTimeReq.Time == "" {
+		return common.ReturnErrorMsg(c, "Please provide the time.")
+	}
+
+	var result model.SimpleMsg
+
+	_, err = cmd.RunBash("sleep " + sleepTimeReq.Time)
+	if err != nil {
+		result.Message = err.Error()
+	} else {
+		result.Message = "success"
+	}
 
 	return c.JSONPretty(http.StatusOK, result, " ")
 }

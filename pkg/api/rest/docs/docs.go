@@ -132,6 +132,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/sleep_time": {
+            "post": {
+                "description": "Runs sleep command on cicada and waits for configured time.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Cicada Task Component]"
+                ],
+                "summary": "Run sleep command on cicada",
+                "operationId": "sleep-time",
+                "parameters": [
+                    {
+                        "description": "SleepTime request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SleepTimeReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result of sleep",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to run script",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/task/{taskId}": {
             "get": {
                 "description": "Get the task directly.",
@@ -2136,6 +2183,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SleepTimeReq": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "Ex: 300 = 300sec, 1m 30s = 1min 30seconds, 1h 10m 15s = 1hour 10minutes 15seconds, 1d 1s = 1day 1second, No Input Default: 10s",
                     "type": "string"
                 }
             }
