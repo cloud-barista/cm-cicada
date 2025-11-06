@@ -64,7 +64,7 @@ func RunScript(c echo.Context) error {
 //
 //	@ID				sleep-time
 //	@Summary		Run sleep command on cicada
-//	@Description	Runs sleep command on cicada and waits for configured time.
+//	@Description	Runs sleep command on cicada and waits for configured time. Wait for 10 seconds if time value is not provided.
 //	@Tags			[Cicada Task Component]
 //	@Accept			json
 //	@Produce		json
@@ -81,7 +81,7 @@ func SleepTime(c echo.Context) error {
 	}
 
 	if sleepTimeReq.Time == "" {
-		return common.ReturnErrorMsg(c, "Please provide the time.")
+		sleepTimeReq.Time = "10s"
 	}
 
 	var result model.SimpleMsg
