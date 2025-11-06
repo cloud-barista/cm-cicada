@@ -18,9 +18,8 @@
           },
           {
             "name": "sleep_for_1m_30s",
-            "task_component": "sleep_time",
-            "extra": { "params": { "time": "1m 30s" } },
-            "request_body": "",
+            "task_component": "cicada_task_time_sleep",
+            "request_body": "{\n  \"time\": \"1m 30s\"\n}",
             "dependencies": [
               "infra_migration"
             ]
