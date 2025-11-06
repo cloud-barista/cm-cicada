@@ -1529,7 +1529,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs": {
             "get": {
                 "description": "Get the task Logs.",
                 "consumes": [
@@ -1568,7 +1568,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the taskTryNum.",
-                        "name": "taskTyNum",
+                        "name": "taskTryNum",
                         "in": "path",
                         "required": true
                     }
@@ -1595,7 +1595,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs/download": {
+        "/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs/download": {
             "get": {
                 "description": "Download the task logs as a file.",
                 "consumes": [
@@ -1634,7 +1634,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "ID of the taskTryNum.",
-                        "name": "taskTyNum",
+                        "name": "taskTryNum",
                         "in": "path",
                         "required": true
                     }

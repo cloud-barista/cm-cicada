@@ -441,7 +441,7 @@ Add trigger_email task component at the bottom of the workflow to receive email 
 ![image](https://github.com/user-attachments/assets/d893cc1a-2cbd-417c-a19d-a650aaca7f6e)
 
 ### 3. GET execution task log
-[GET] /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs
+[GET] /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs
 ![image](https://github.com/user-attachments/assets/347babf5-df32-4fe0-82e0-f0e111c333d1)
 
 

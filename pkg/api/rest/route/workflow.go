@@ -28,8 +28,8 @@ func Workflow(e *echo.Echo) {
 
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task_group/:tgId", controller.GetTaskGroupDirectly)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/task/:taskId", controller.GetTaskDirectly)
-	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/taskTryNum/:taskTyNum/logs", controller.GetTaskLogs)
-	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/taskTryNum/:taskTyNum/logs/download", controller.GetTaskLogDownload)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/taskTryNum/:taskTryNum/logs", controller.GetTaskLogs)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/task/:taskId/taskTryNum/:taskTryNum/logs/download", controller.GetTaskLogDownload)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/runs", controller.GetWorkflowRuns)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/taskInstances", controller.GetTaskInstances)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/workflowRun/:wfRunId/range", controller.ClearTaskInstances)

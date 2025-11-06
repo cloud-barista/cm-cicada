@@ -980,11 +980,11 @@ func GetTaskDirectly(c echo.Context) error {
 //	@Param	wfId path string true "ID of the workflow."
 //	@Param	wfRunId path string true "ID of the workflowRunId."
 //	@Param	taskId path string true "ID of the task."
-//	@Param	taskTyNum path string true "ID of the taskTryNum."
+//	@Param	taskTryNum path string true "ID of the taskTryNum."
 //	@Success	200	{object}	airflow.InlineResponse200		"Successfully get the task Logs."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task Logs."
-//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs [get]
+//	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs [get]
 func GetTaskLogs(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -1004,11 +1004,11 @@ func GetTaskLogs(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
 	}
 
-	taskTyNum := c.Param("taskTyNum")
-	if taskTyNum == "" {
-		return common.ReturnErrorMsg(c, "Please provide the taskTyNum.")
+	taskTryNum := c.Param("taskTryNum")
+	if taskTryNum == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskTryNum.")
 	}
-	taskTyNumToInt, err := strconv.Atoi(taskTyNum)
+	taskTryNumToInt, err := strconv.Atoi(taskTryNum)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
 	}
@@ -1016,7 +1016,7 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
+	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTryNumToInt)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
@@ -1460,11 +1460,11 @@ func GetWorkflowVersion(c echo.Context) error {
 //	@Param		wfId path string true "ID of the workflow."
 //	@Param		wfRunId path string true "ID of the workflowRunId."
 //	@Param		taskId path string true "ID of the task."
-//	@Param		taskTyNum path string true "ID of the taskTryNum."
+//	@Param		taskTryNum path string true "ID of the taskTryNum."
 //	@Success	200 {file} file "Log file downloaded successfully."
 //	@Failure	400 {object} common.ErrorResponse "Sent bad request."
 //	@Failure	500 {object} common.ErrorResponse "Failed to get the task Logs."
-//	@Router		/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTyNum}/logs/download [get]
+//	@Router		/workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs/download [get]
 func GetTaskLogDownload(c echo.Context) error {
 	wfId := c.Param("wfId")
 	if wfId == "" {
@@ -1484,11 +1484,11 @@ func GetTaskLogDownload(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
 	}
 
-	taskTyNum := c.Param("taskTyNum")
-	if taskTyNum == "" {
-		return common.ReturnErrorMsg(c, "Please provide the taskTyNum.")
+	taskTryNum := c.Param("taskTryNum")
+	if taskTryNum == "" {
+		return common.ReturnErrorMsg(c, "Please provide the taskTryNum.")
 	}
-	taskTyNumToInt, err := strconv.Atoi(taskTyNum)
+	taskTryNumToInt, err := strconv.Atoi(taskTryNum)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
 	}
@@ -1496,7 +1496,7 @@ func GetTaskLogDownload(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTyNumToInt)
+	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTryNumToInt)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
