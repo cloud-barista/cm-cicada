@@ -127,7 +127,7 @@
         },
         "/sleep_time": {
             "post": {
-                "description": "Runs sleep command on cicada and waits for configured time.",
+                "description": "Runs sleep command on cicada and waits for configured time. Wait for 10 seconds if time value is not provided.",
                 "consumes": [
                     "application/json"
                 ],

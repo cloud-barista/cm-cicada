@@ -605,7 +605,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Runs sleep command on cicada and waits for configured time.
+      description: Runs sleep command on cicada and waits for configured time. Wait
+        for 10 seconds if time value is not provided.
       operationId: sleep-time
       parameters:
       - description: SleepTime request
