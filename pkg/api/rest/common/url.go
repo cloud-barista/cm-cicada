@@ -1,18 +1,21 @@
 package common
 
 import (
-	"fmt"
 	"net/url"
+	"strings"
 )
 
 func UrlDecode(text string) string {
-	decodedStr, err := url.QueryUnescape(text)
-	if err != nil {
-		fmt.Println("Error decoding URL:", err)
-		return err.Error()
-	} else {
-		return decodedStr
+	if strings.Contains(text, "%") {
+		decodedStr, err := url.QueryUnescape(text)
+		if err != nil {
+			return text
+		} else {
+			return decodedStr
+		}
 	}
+
+	return text
 }
 
 func UrlEncode(text string) string {
