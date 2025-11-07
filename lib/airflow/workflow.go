@@ -31,6 +31,11 @@ func callDagRequestLock(workflowID string) func() {
 	dagRequests[workflowID].Lock()
 
 	return func() {
+		_, exist := dagRequests[workflowID]
+		if !exist {
+			return
+		}
+
 		dagRequests[workflowID].Unlock()
 
 		dagRequestsLock.Lock()
