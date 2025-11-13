@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"sync"
 
 	"net"
 	"strconv"
 	"time"
 
+	comm "github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
@@ -18,10 +20,12 @@ import (
 
 type Client struct {
 	*goph.Client
-	SSHTarget *model.SSHTarget
-	nsID      string
-	mciID     string
-	id        string
+	SSHTarget     *model.SSHTarget
+	nsID          string
+	mciID         string
+	id            string
+	keepAliveStop chan struct{}
+	keepAliveOnce sync.Once
 }
 
 func (c *Client) NewSessionWithRetry() (*ssh.Session, error) {
@@ -59,6 +63,37 @@ func (c *Client) NewSessionWithRetry() (*ssh.Session, error) {
 	}
 
 	return nil, err
+}
+
+func (c *Client) startKeepAlive() {
+	c.keepAliveOnce.Do(func() {
+		c.keepAliveStop = make(chan struct{})
+		go func() {
+			ticker := time.NewTicker(1 * time.Second)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					if c.Client != nil {
+						_, _, _ = c.SendRequest("keepalive@"+comm.ShortModuleName, true, nil)
+					}
+				case <-c.keepAliveStop:
+					return
+				}
+			}
+		}()
+	})
+}
+
+func (c *Client) Close() error {
+	if c.keepAliveStop != nil {
+		close(c.keepAliveStop)
+	}
+	if c.Client != nil {
+		return c.Client.Close()
+	}
+	return nil
 }
 
 func AddKnownHost(host string, remote net.Addr, key ssh.PublicKey) error {
@@ -146,11 +181,16 @@ func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
 		PrivateKey: sshKeyInfo.PrivateKey,
 	}
 
-	return &Client{
+	sshClient := &Client{
 		Client:    client,
 		SSHTarget: sshTarget,
 		nsID:      nsID,
 		mciID:     mciID,
 		id:        vmID,
-	}, nil
+	}
+
+	// Start SSH KeepAlive to prevent connection timeout
+	sshClient.startKeepAlive()
+
+	return sshClient, nil
 }
