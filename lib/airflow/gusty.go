@@ -41,6 +41,10 @@ func checkWorkflow(workflow *model.Workflow) error {
 			}
 
 			for _, dep := range t.Dependencies {
+				if t.Name == dep {
+					return errors.New("cycle dependency found in " + tg.Name + "." + t.Name)
+				}
+
 				var depFound bool
 				for _, tName := range taskNames {
 					if tName == dep {
