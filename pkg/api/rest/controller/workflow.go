@@ -125,6 +125,169 @@ func createDataReqToData(specVersion string, createDataReq model.CreateDataReq) 
 	}, nil
 }
 
+func workflowDagID(workflow *model.Workflow) string {
+	if workflow.WorkflowKey != "" {
+		return workflow.WorkflowKey
+	}
+	return workflow.ID
+}
+
+func taskAirflowID(task *model.TaskDBModel) string {
+	if task.TaskKey != "" {
+		return task.TaskKey
+	}
+	if task.ID != "" {
+		return task.ID
+	}
+	return task.Name
+}
+
+type workflowGraphDiff struct {
+	workflowData         model.Data
+	taskGroupsToUpsert   []model.TaskGroupDBModel
+	tasksToUpsert        []model.TaskDBModel
+	taskGroupsToSoftDrop []model.TaskGroupDBModel
+	tasksToSoftDrop      []model.TaskDBModel
+}
+
+func buildWorkflowGraphDiff(workflow *model.Workflow, incoming model.Data) (*workflowGraphDiff, error) {
+	workflowKey := workflowDagID(workflow)
+	taskGroupsFromDB, err := dao.TaskGroupGetListByWorkflowID(workflow.ID, true)
+	if err != nil {
+		return nil, err
+	}
+	tasksFromDB, err := dao.TaskGetListByWorkflowID(workflow.ID, true)
+	if err != nil {
+		return nil, err
+	}
+
+	taskGroupByName := make(map[string]model.TaskGroupDBModel)
+	activeTaskGroups := make(map[string]model.TaskGroupDBModel)
+	for _, tg := range taskGroupsFromDB {
+		current, exists := taskGroupByName[tg.Name]
+		if !exists || (current.IsDeleted && !tg.IsDeleted) {
+			taskGroupByName[tg.Name] = tg
+		}
+		if !tg.IsDeleted {
+			activeTaskGroups[tg.ID] = tg
+		}
+	}
+
+	taskByName := make(map[string]model.TaskDBModel)
+	activeTasks := make(map[string]model.TaskDBModel)
+	for _, t := range tasksFromDB {
+		current, exists := taskByName[t.Name]
+		if !exists || (current.IsDeleted && !t.IsDeleted) {
+			taskByName[t.Name] = t
+		}
+		if !t.IsDeleted {
+			activeTasks[t.ID] = t
+		}
+	}
+
+	diff := &workflowGraphDiff{
+		workflowData: model.Data{
+			Description: incoming.Description,
+			TaskGroups:  make([]model.TaskGroup, 0, len(incoming.TaskGroups)),
+		},
+	}
+	seenTaskGroupIDs := make(map[string]bool)
+	seenTaskIDs := make(map[string]bool)
+
+	for _, incomingTG := range incoming.TaskGroups {
+		resolvedTG := incomingTG
+		taskGroupModel, exists := taskGroupByName[incomingTG.Name]
+		if !exists {
+			taskGroupModel = model.TaskGroupDBModel{
+				ID:           uuid.New().String(),
+				TaskGroupKey: uuid.New().String(),
+			}
+		}
+		if taskGroupModel.TaskGroupKey == "" {
+			taskGroupModel.TaskGroupKey = taskGroupModel.ID
+		}
+		resolvedTG.ID = taskGroupModel.ID
+		resolvedTG.Tasks = make([]model.Task, 0, len(incomingTG.Tasks))
+
+		taskGroupModel.Name = incomingTG.Name
+		taskGroupModel.WorkflowID = workflow.ID
+		taskGroupModel.WorkflowKey = workflowKey
+		taskGroupModel.IsDeleted = false
+		diff.taskGroupsToUpsert = append(diff.taskGroupsToUpsert, taskGroupModel)
+		seenTaskGroupIDs[taskGroupModel.ID] = true
+
+		for _, incomingTask := range incomingTG.Tasks {
+			resolvedTask := incomingTask
+			taskModel, exists := taskByName[incomingTask.Name]
+			if !exists {
+				taskModel = model.TaskDBModel{
+					ID:      uuid.New().String(),
+					TaskKey: uuid.New().String(),
+				}
+			}
+			if taskModel.TaskKey == "" {
+				taskModel.TaskKey = taskModel.ID
+			}
+
+			resolvedTask.ID = taskModel.ID
+			resolvedTG.Tasks = append(resolvedTG.Tasks, resolvedTask)
+
+			taskModel.Name = incomingTask.Name
+			taskModel.WorkflowID = workflow.ID
+			taskModel.WorkflowKey = workflowKey
+			taskModel.TaskGroupID = taskGroupModel.ID
+			taskModel.TaskGroupKey = taskGroupModel.TaskGroupKey
+			taskModel.IsDeleted = false
+			diff.tasksToUpsert = append(diff.tasksToUpsert, taskModel)
+			seenTaskIDs[taskModel.ID] = true
+		}
+
+		diff.workflowData.TaskGroups = append(diff.workflowData.TaskGroups, resolvedTG)
+	}
+
+	for _, tg := range activeTaskGroups {
+		if !seenTaskGroupIDs[tg.ID] {
+			diff.taskGroupsToSoftDrop = append(diff.taskGroupsToSoftDrop, tg)
+		}
+	}
+	for _, t := range activeTasks {
+		if !seenTaskIDs[t.ID] {
+			diff.tasksToSoftDrop = append(diff.tasksToSoftDrop, t)
+		}
+	}
+
+	return diff, nil
+}
+
+func resolveCreateSourceType(specVersion string, createDataReq model.CreateDataReq) (string, string, error) {
+	templates, err := dao.WorkflowTemplateGetList(&model.WorkflowTemplate{}, 0, 0)
+	if err != nil {
+		return "", "", err
+	}
+
+	reqJSON, err := json.Marshal(createDataReq)
+	if err != nil {
+		return "", "", err
+	}
+
+	for _, tmpl := range *templates {
+		if tmpl.SpecVersion != specVersion {
+			continue
+		}
+
+		tmplJSON, err := json.Marshal(tmpl.Data)
+		if err != nil {
+			return "", "", err
+		}
+
+		if string(reqJSON) == string(tmplJSON) {
+			return "example", tmpl.ID, nil
+		}
+	}
+
+	return "custom", "", nil
+}
+
 // CreateWorkflow godoc
 //
 //	@ID		create-workflow
@@ -177,6 +340,7 @@ func CreateWorkflow(c echo.Context) error {
 
 	var workflow model.Workflow
 	workflow.ID = uuid.New().String()
+	workflow.WorkflowKey = uuid.New().String()
 	workflow.SpecVersion = specVersion
 	workflow.Name = createWorkflowReq.Name
 	workflow.Data = workflowData
@@ -190,9 +354,49 @@ func CreateWorkflow(c echo.Context) error {
 	}
 	defer func() {
 		if !success {
+			_ = dao.TaskSoftDeleteByWorkflowID(workflow.ID)
+			_ = dao.TaskGroupSoftDeleteByWorkflowID(workflow.ID)
 			_ = dao.WorkflowDelete(&workflow)
 		}
 	}()
+
+	for _, tg := range workflow.Data.TaskGroups {
+		_, err = dao.TaskGroupCreate(&model.TaskGroupDBModel{
+			ID:           tg.ID,
+			Name:         tg.Name,
+			WorkflowID:   workflow.ID,
+			WorkflowKey:  workflow.WorkflowKey,
+			TaskGroupKey: tg.ID,
+		})
+		if err != nil {
+			return common.ReturnErrorMsg(c, err.Error())
+		}
+
+		for _, t := range tg.Tasks {
+			_, err = dao.TaskCreate(&model.TaskDBModel{
+				ID:           t.ID,
+				Name:         t.Name,
+				WorkflowID:   workflow.ID,
+				WorkflowKey:  workflow.WorkflowKey,
+				TaskGroupID:  tg.ID,
+				TaskGroupKey: tg.ID,
+				TaskKey:      t.ID,
+			})
+			if err != nil {
+				return common.ReturnErrorMsg(c, err.Error())
+			}
+		}
+	}
+
+	sourceType, sourceTemplateID, err := resolveCreateSourceType(specVersion, createWorkflowReq.Data)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	_, err = dao.WorkflowCreateSnapshot(&workflow, "create", sourceType, sourceTemplateID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 
 	client, err := airflow.GetClient()
 	if err != nil {
@@ -202,29 +406,6 @@ func CreateWorkflow(c echo.Context) error {
 	err = client.CreateDAG(&workflow)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
-	}
-
-	for _, tg := range workflow.Data.TaskGroups {
-		_, err = dao.TaskGroupCreate(&model.TaskGroupDBModel{
-			ID:         tg.ID,
-			Name:       tg.Name,
-			WorkflowID: workflow.ID,
-		})
-		if err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-
-		for _, t := range tg.Tasks {
-			_, err = dao.TaskCreate(&model.TaskDBModel{
-				ID:          t.ID,
-				Name:        t.Name,
-				WorkflowID:  workflow.ID,
-				TaskGroupID: tg.ID,
-			})
-			if err != nil {
-				return common.ReturnErrorMsg(c, err.Error())
-			}
-		}
 	}
 	success = true
 
@@ -238,20 +419,20 @@ func getWorkflowFromDB(workflowID string) (*model.Workflow, error) {
 	}
 
 	for i, tg := range workflow.Data.TaskGroups {
-		_, err = dao.TaskGroupGetByWorkflowIDAndName(workflowID, tg.Name)
+		tgDB, err := dao.TaskGroupGetByWorkflowIDAndName(workflowID, tg.Name)
 		if err != nil {
 			logger.Println(logger.ERROR, true, err)
+		} else {
+			workflow.Data.TaskGroups[i].ID = tgDB.ID
 		}
 
-		workflow.Data.TaskGroups[i].ID = tg.ID
-
 		for j, t := range tg.Tasks {
-			_, err = dao.TaskGetByWorkflowIDAndName(workflowID, t.Name)
+			tDB, err := dao.TaskGetByWorkflowIDAndName(workflowID, t.Name)
 			if err != nil {
 				logger.Println(logger.ERROR, true, err)
+			} else {
+				workflow.Data.TaskGroups[i].Tasks[j].ID = tDB.ID
 			}
-
-			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
 		}
 	}
 
@@ -266,7 +447,7 @@ func getWorkflowFromDB(workflowID string) (*model.Workflow, error) {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Success	200	{object}	model.Workflow		"Successfully get the workflow."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflow."
@@ -287,7 +468,7 @@ func GetWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = client.GetDAG(wfId)
+	_, err = client.GetDAG(workflowDagID(workflow))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
@@ -314,27 +495,14 @@ func GetWorkflowByName(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfName.")
 	}
 
-	workflow, err := dao.WorkflowGetByName(wfName)
+	workflowByName, err := dao.WorkflowGetByName(wfName)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	for i, tg := range workflow.Data.TaskGroups {
-		_, err = dao.TaskGroupGetByWorkflowIDAndName(workflow.ID, tg.Name)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-
-		workflow.Data.TaskGroups[i].ID = tg.ID
-
-		for j, t := range tg.Tasks {
-			_, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, tg.Name)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-
-			workflow.Data.TaskGroups[i].Tasks[j].ID = t.ID
-		}
+	workflow, err := getWorkflowFromDB(workflowByName.ID)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	client, err := airflow.GetClient()
@@ -342,7 +510,7 @@ func GetWorkflowByName(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = client.GetDAG(workflow.ID)
+	_, err = client.GetDAG(workflowDagID(workflow))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
@@ -380,26 +548,6 @@ func ListWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	for i, w := range *workflows {
-		for j, tg := range workflow.Data.TaskGroups {
-			_, err = dao.TaskGroupGetByWorkflowIDAndName(w.ID, tg.Name)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-
-			(*workflows)[i].Data.TaskGroups[j].ID = tg.ID
-
-			for k, t := range tg.Tasks {
-				_, err = dao.TaskGetByWorkflowIDAndName(w.ID, tg.Name)
-				if err != nil {
-					logger.Println(logger.ERROR, true, err)
-				}
-
-				(*workflows)[i].Data.TaskGroups[j].Tasks[k].ID = t.ID
-			}
-		}
-	}
-
 	return c.JSONPretty(http.StatusOK, workflows, " ")
 }
 
@@ -411,7 +559,7 @@ func ListWorkflow(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Success	200	{object}	model.SimpleMsg		"Successfully run the workflow."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to run the Workflow"
@@ -432,7 +580,12 @@ func RunWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	_, err = client.RunDAG(workflow.ID)
+	conf := map[string]interface{}{
+		"workflow_id":   workflow.ID,
+		"workflow_key":  workflowDagID(workflow),
+		"workflow_name": workflow.Name,
+	}
+	_, err = client.RunDAG(workflowDagID(workflow), conf)
 	if err != nil {
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
@@ -448,7 +601,7 @@ func RunWorkflow(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Param		Workflow body 	model.CreateWorkflowReq true "Workflow to modify."
 //	@Success	200	{object}	model.Workflow	"Successfully update the workflow"
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
@@ -497,56 +650,45 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	// Remove old task groups and tasks from the database
-	for _, tg := range oldWorkflow.Data.TaskGroups {
-		taskGroup, err := dao.TaskGroupGet(tg.ID)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-		err = dao.TaskGroupDelete(taskGroup)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-
-		for _, t := range tg.Tasks {
-			task, err := dao.TaskGet(t.ID)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-			err = dao.TaskDelete(task)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-		}
+	diff, err := buildWorkflowGraphDiff(oldWorkflow, workflowData)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	// Create task groups and tasks to the database
-	for _, tg := range workflowData.TaskGroups {
-		_, err = dao.TaskGroupCreate(&model.TaskGroupDBModel{
-			ID:         tg.ID,
-			Name:       tg.Name,
-			WorkflowID: wfId,
-		})
-		if err != nil {
+	for _, tg := range diff.taskGroupsToUpsert {
+		taskGroup := tg
+		if err := dao.TaskGroupSave(&taskGroup); err != nil {
 			return common.ReturnErrorMsg(c, err.Error())
 		}
-
-		for _, t := range tg.Tasks {
-			_, err = dao.TaskCreate(&model.TaskDBModel{
-				ID:          t.ID,
-				Name:        t.Name,
-				WorkflowID:  wfId,
-				TaskGroupID: tg.ID,
-			})
-			if err != nil {
-				return common.ReturnErrorMsg(c, err.Error())
-			}
+	}
+	for _, t := range diff.tasksToUpsert {
+		task := t
+		if err := dao.TaskSave(&task); err != nil {
+			return common.ReturnErrorMsg(c, err.Error())
+		}
+	}
+	for _, t := range diff.tasksToSoftDrop {
+		task := t
+		if err := dao.TaskDelete(&task); err != nil {
+			return common.ReturnErrorMsg(c, err.Error())
+		}
+	}
+	for _, tg := range diff.taskGroupsToSoftDrop {
+		taskGroup := tg
+		if err := dao.TaskGroupDelete(&taskGroup); err != nil {
+			return common.ReturnErrorMsg(c, err.Error())
 		}
 	}
 
-	oldWorkflow.Data = workflowData
+	oldWorkflow.SpecVersion = specVersion
+	oldWorkflow.Data = diff.workflowData
 
 	err = dao.WorkflowUpdate(oldWorkflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	_, err = dao.WorkflowCreateSnapshot(oldWorkflow, "update", "modified", "")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -554,11 +696,6 @@ func UpdateWorkflow(c echo.Context) error {
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = client.DeleteDAG(oldWorkflow.ID, true)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
 	}
 
 	err = client.CreateDAG(oldWorkflow)
@@ -577,7 +714,7 @@ func UpdateWorkflow(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Success	200	{object}	model.SimpleMsg		"Successfully delete the workflow"
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to delete the workflow"
@@ -598,34 +735,27 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	err = client.DeleteDAG(workflow.ID, false)
+	err = client.DeleteDAG(workflowDagID(workflow), true)
 	if err != nil {
 		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
 
-	for _, tg := range workflow.Data.TaskGroups {
-		taskGroup, err := dao.TaskGroupGet(tg.ID)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-		err = dao.TaskGroupDelete(taskGroup)
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
-
-		for _, t := range tg.Tasks {
-			task, err := dao.TaskGet(t.ID)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-			err = dao.TaskDelete(task)
-			if err != nil {
-				logger.Println(logger.ERROR, true, err)
-			}
-		}
+	if err := dao.TaskSoftDeleteByWorkflowID(workflow.ID); err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	if err := dao.TaskGroupSoftDeleteByWorkflowID(workflow.ID); err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	err = dao.WorkflowDelete(workflow)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	workflow.IsDeleted = true
+	now := time.Now()
+	workflow.DeletedAt = &now
+	_, err = dao.WorkflowCreateSnapshot(workflow, "delete", "custom", "")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -641,7 +771,7 @@ func DeleteWorkflow(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Success	200	{object}	[]model.TaskGroup	"Successfully get a task group list."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task group list."
@@ -671,7 +801,7 @@ func ListTaskGroup(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
 //	@Param	tgId path string true "ID of the task group."
 //	@Success	200	{object}	model.Task		"Successfully get the task group."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
@@ -754,7 +884,7 @@ func GetTaskGroupDirectly(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
 //	@Param	tgId path string true "ID of the task group."
 //	@Success	200	{object}	[]model.Task		"Successfully get a task list from the task group."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
@@ -795,7 +925,7 @@ func ListTaskFromTaskGroup(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Param		tgId path string true "ID of the task group."
 //	@Param		taskId path string true "ID of the task."
 //	@Success	200	{object}	model.Task		"Successfully get the task from the task group."
@@ -846,7 +976,7 @@ func GetTaskFromTaskGroup(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Success	200	{object}	[]model.Task		"Successfully get a task list."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task list."
@@ -878,7 +1008,7 @@ func ListTask(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Param		taskId path string true "ID of the task."
 //	@Success	200	{object}	model.Task		"Successfully get the task."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
@@ -977,7 +1107,7 @@ func GetTaskDirectly(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
 //	@Param	wfRunId path string true "ID of the workflowRunId."
 //	@Param	taskId path string true "ID of the task."
 //	@Param	taskTryNum path string true "ID of the taskTryNum."
@@ -1003,6 +1133,10 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
 	}
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 
 	taskTryNum := c.Param("taskTryNum")
 	if taskTryNum == "" {
@@ -1016,7 +1150,12 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTryNumToInt)
+	logs, err := client.GetTaskLogs(
+		workflowDagID(workflow),
+		common.UrlDecode(wfRunId),
+		taskAirflowID(taskInfo),
+		taskTryNumToInt,
+	)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
@@ -1036,7 +1175,7 @@ func GetTaskLogs(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
 //	@Success	200	{object}	[]model.WorkflowRun		"Successfully get the workflowRuns."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflowRuns."
@@ -1046,13 +1185,17 @@ func GetWorkflowRuns(c echo.Context) error {
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	runList, err := client.GetDAGRuns(wfId)
+	runList, err := client.GetDAGRuns(workflowDagID(workflow))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: "+err.Error())
 	}
@@ -1087,8 +1230,8 @@ func GetWorkflowRuns(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
-//	@Param	wfRunId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
+//	@Param	wfRunId path string true "DB workflow ID."
 //	@Success	200	{object}	model.TaskInstance		"Successfully get the taskInstances."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the taskInstances."
@@ -1102,24 +1245,26 @@ func GetTaskInstances(c echo.Context) error {
 	if wfRunId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
+	workflow, err := getWorkflowFromDB(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	runList, err := client.GetTaskInstances(common.UrlDecode(wfId), common.UrlDecode(wfRunId))
+	runList, err := client.GetTaskInstances(workflowDagID(workflow), common.UrlDecode(wfRunId))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
 	var taskInstances []model.TaskInstance
 	layout := time.RFC3339Nano
 
-	workflow, err := getWorkflowFromDB(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
 	for _, taskInstance := range *runList.TaskInstances {
-		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
+		taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, taskInstance.GetTaskId())
+		}
 		if err != nil {
 			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
@@ -1174,7 +1319,7 @@ func GetTaskInstances(c echo.Context) error {
 			WorkflowID:                   taskInstance.DagId,
 			WorkflowRunID:                taskInstance.GetDagRunId(),
 			TaskID:                       *taskId,
-			TaskName:                     taskInstance.GetTaskId(),
+			TaskName:                     taskDBInfo.Name,
 			State:                        string(taskInstance.GetState()),
 			ExecutionDate:                executionDate,
 			StartDate:                    startDate,
@@ -1197,7 +1342,7 @@ func GetTaskInstances(c echo.Context) error {
 //	@Tags	[Workflow]
 //	@Accept	json
 //	@Produce	json
-//	@Param	wfId path string true "ID of the workflow."
+//	@Param	wfId path string true "DB workflow ID."
 //	@Param	wfRunId path string true "ID of the wfRunId."
 //
 // @Param		request body 	model.TaskClearOption true "Workflow content"
@@ -1226,19 +1371,6 @@ func ClearTaskInstances(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	var taskNameList []string
-	for _, taskId := range taskClearOption.TaskIds {
-		taskInfo, err := dao.TaskGet(taskId)
-		if err != nil {
-			return fmt.Errorf("failed to get task info for ID %s: %w", taskId, err)
-		}
-		taskNameList = append(taskNameList, taskInfo.Name)
-	}
-	taskClearOption.TaskIds = taskNameList
-	if err := common.ValidateTaskClearOptions(taskClearOption); err != nil {
-		fmt.Printf("옵션 검증 실패: %v\n", err)
-		return common.ReturnErrorMsg(c, err.Error())
-	}
 	wfId := c.Param("wfId")
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
@@ -1248,12 +1380,31 @@ func ClearTaskInstances(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the wfRunId.")
 	}
 
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	var taskKeyList []string
+	for _, taskId := range taskClearOption.TaskIds {
+		taskInfo, err := dao.TaskGet(taskId)
+		if err != nil {
+			return common.ReturnErrorMsg(c, fmt.Sprintf("failed to get task info for ID %s: %v", taskId, err))
+		}
+		taskKeyList = append(taskKeyList, taskAirflowID(taskInfo))
+	}
+	taskClearOption.TaskIds = taskKeyList
+	if err := common.ValidateTaskClearOptions(taskClearOption); err != nil {
+		fmt.Printf("옵션 검증 실패: %v\n", err)
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
 	TaskInstanceReferences := make([]model.TaskInstanceReference, 0)
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	clearList, err := client.ClearTaskInstance(wfId, common.UrlDecode(wfRunId), taskClearOption)
+	clearList, err := client.ClearTaskInstance(workflowDagID(workflow), common.UrlDecode(wfRunId), taskClearOption)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1263,7 +1414,10 @@ func ClearTaskInstances(c echo.Context) error {
 
 	}
 	for _, taskInstance := range *clearList.TaskInstances {
-		taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(taskInstance.GetDagId(), taskInstance.GetTaskId())
+		taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, taskInstance.GetTaskId())
+		}
 		if err != nil {
 			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
@@ -1272,7 +1426,7 @@ func ClearTaskInstances(c echo.Context) error {
 			WorkflowID:    taskInstance.DagId,
 			WorkflowRunID: taskInstance.DagRunId,
 			TaskId:        taskId,
-			TaskName:      taskInstance.GetTaskId(),
+			TaskName:      taskDBInfo.Name,
 			ExecutionDate: taskInstance.ExecutionDate,
 		}
 		logger.Println(logger.DEBUG, false, "TaskInstanceReferences  ", TaskInstanceReferences)
@@ -1291,7 +1445,7 @@ func ClearTaskInstances(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	json
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Param		wfRunId query string false "ID of the workflow run."
 //	@Param		taskId query string false "ID of the task."
 //	@Success	200	{object}	[]model.EventLog			"Successfully get the workflow."
@@ -1303,8 +1457,12 @@ func GetEventLogs(c echo.Context) error {
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 
-	var wfRunId, taskId, taskName string
+	var wfRunId, taskId, airflowTaskID string
 
 	if c.QueryParam("wfRunId") != "" {
 		wfRunId = c.QueryParam("wfRunId")
@@ -1315,14 +1473,14 @@ func GetEventLogs(c echo.Context) error {
 		if err != nil {
 			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 		}
-		taskName = taskDBInfo.Name
+		airflowTaskID = taskAirflowID(taskDBInfo)
 	}
 	var eventLogs model.EventLogs
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetEventLogs(wfId, wfRunId, taskName)
+	logs, err := client.GetEventLogs(workflowDagID(workflow), wfRunId, airflowTaskID)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 	}
@@ -1332,24 +1490,28 @@ func GetEventLogs(c echo.Context) error {
 	}
 	var logList []model.EventLog
 	for _, eventlog := range eventLogs.EventLogs {
-		var taskID, RunId string
+		var taskID, taskName, runID string
 		if eventlog.TaskID != "" {
-			taskDBInfo, err := dao.TaskGetByWorkflowIDAndName(wfId, eventlog.TaskID)
+			taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), eventlog.TaskID)
+			if err != nil {
+				taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(wfId, eventlog.TaskID)
+			}
 			if err != nil {
 				return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
 			}
 			taskID = taskDBInfo.ID
+			taskName = taskDBInfo.Name
 		}
 		eventlog.WorkflowID = wfId
 		if eventlog.RunID != "" {
-			RunId = eventlog.RunID
+			runID = eventlog.RunID
 		}
 
 		log := model.EventLog{
 			WorkflowID:    eventlog.WorkflowID,
-			WorkflowRunID: RunId,
+			WorkflowRunID: runID,
 			TaskID:        taskID,
-			TaskName:      eventlog.TaskID,
+			TaskName:      taskName,
 			Extra:         eventlog.Extra,
 			Event:         eventlog.Event,
 			When:          eventlog.When,
@@ -1405,8 +1567,13 @@ func ListWorkflowVersion(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
+	wfId := c.Param("wfId")
+	if wfId == "" {
+		return common.ReturnErrorMsg(c, "Please provide the wfId.")
+	}
+
 	workflow := &model.WorkflowVersion{
-		WorkflowID: c.QueryParam("wfId"),
+		WorkflowID: wfId,
 	}
 
 	workflows, err := dao.WorkflowVersionGetList(workflow, page, row)
@@ -1457,7 +1624,7 @@ func GetWorkflowVersion(c echo.Context) error {
 //	@Tags		[Workflow]
 //	@Accept		json
 //	@Produce	text/plain
-//	@Param		wfId path string true "ID of the workflow."
+//	@Param		wfId path string true "DB workflow ID."
 //	@Param		wfRunId path string true "ID of the workflowRunId."
 //	@Param		taskId path string true "ID of the task."
 //	@Param		taskTryNum path string true "ID of the taskTryNum."
@@ -1483,6 +1650,10 @@ func GetTaskLogDownload(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
 	}
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 
 	taskTryNum := c.Param("taskTryNum")
 	if taskTryNum == "" {
@@ -1496,7 +1667,12 @@ func GetTaskLogDownload(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetTaskLogs(wfId, common.UrlDecode(wfRunId), taskInfo.Name, taskTryNumToInt)
+	logs, err := client.GetTaskLogs(
+		workflowDagID(workflow),
+		common.UrlDecode(wfRunId),
+		taskAirflowID(taskInfo),
+		taskTryNumToInt,
+	)
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
 	}
@@ -1524,6 +1700,10 @@ func GetWorkflowStatus(c echo.Context) error {
 	if wfId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the wfId.")
 	}
+	workflow, err := dao.WorkflowGet(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
 	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
@@ -1532,7 +1712,7 @@ func GetWorkflowStatus(c echo.Context) error {
 	var statusList []model.WorkflowStatus
 	for _, v := range enumStatus {
 
-		resp, err := client.GetDagStatus(wfId, string(*v.Ptr()))
+		resp, err := client.GetDagStatus(workflowDagID(workflow), string(*v.Ptr()))
 		if err != nil {
 			logger.Println(logger.ERROR, false,
 				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")

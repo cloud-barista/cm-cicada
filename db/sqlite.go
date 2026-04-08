@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/cloud-barista/cm-cicada/common"
@@ -50,6 +51,11 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	err = ensureWorkflowActiveNameUniqueIndex()
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+
 	logger.Println(logger.INFO, false, "Loading workflow templates...")
 	err = WorkflowTemplateInit()
 	if err != nil {
@@ -66,6 +72,24 @@ func Open() error {
 	}
 
 	return err
+}
+
+func ensureWorkflowActiveNameUniqueIndex() error {
+	// Legacy global unique index blocks re-create of a soft-deleted workflow with same name.
+	if err := DB.Exec("DROP INDEX IF EXISTS idx_workflows_name").Error; err != nil {
+		return err
+	}
+	if err := DB.Exec("DROP INDEX IF EXISTS idx_workflows_name_active").Error; err != nil {
+		return err
+	}
+
+	createSQL := "CREATE UNIQUE INDEX IF NOT EXISTS idx_workflows_name_active " +
+		"ON workflows(name COLLATE NOCASE) WHERE is_deleted = 0"
+	if err := DB.Exec(createSQL).Error; err != nil {
+		return fmt.Errorf("failed to enforce active workflow name uniqueness: %w", err)
+	}
+
+	return nil
 }
 
 func Close() {

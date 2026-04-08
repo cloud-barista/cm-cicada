@@ -123,7 +123,11 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 		return err
 	}
 
-	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + workflow.ID
+	dagID := workflow.ID
+	if workflow.WorkflowKey != "" {
+		dagID = workflow.WorkflowKey
+	}
+	dagDir := config.CMCicadaConfig.CMCicada.DAGDirectoryHost + "/" + dagID
 	err = fileutil.CreateDirIfNotExist(dagDir)
 	if err != nil {
 		return errors.New("failed to create the Workflow directory (Workflow ID=" + workflow.ID +
@@ -138,8 +142,9 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 	}
 
 	var dagInfo struct {
-		defaultArgs defaultArgs `yaml:"default_args"`
-		Description string      `yaml:"description"`
+		defaultArgs    defaultArgs `yaml:"default_args"`
+		Description    string      `yaml:"description"`
+		DagDisplayName string      `yaml:"dag_display_name"`
 	}
 
 	dagInfo.defaultArgs = defaultArgs{
@@ -149,12 +154,32 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 		RetryDelaySec: 0,
 	}
 	dagInfo.Description = workflow.Data.Description
-
+	dagInfo.DagDisplayName = workflow.Name
 	filePath := dagDir + "/METADATA.yml"
 
 	err = writeModelToYAMLFile(dagInfo, filePath)
 	if err != nil {
 		return errors.New("failed to write YAML file (FilePath: " + filePath + ", Error: " + err.Error() + ")")
+	}
+
+	taskAirflowIDByName := make(map[string]string)
+	for _, tg := range workflow.Data.TaskGroups {
+		for _, t := range tg.Tasks {
+			taskAirflowID := t.Name
+			if db.DB != nil {
+				taskModel := &model.TaskDBModel{}
+				result := db.DB.Where("workflow_id = ? AND name = ? AND is_deleted = ?", workflow.ID, t.Name, false).First(taskModel)
+				if result.Error == nil {
+					switch {
+					case taskModel.TaskKey != "":
+						taskAirflowID = taskModel.TaskKey
+					case taskModel.ID != "":
+						taskAirflowID = taskModel.ID
+					}
+				}
+			}
+			taskAirflowIDByName[t.Name] = taskAirflowID
+		}
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
@@ -196,7 +221,12 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			} else {
 				if isTaskExist(workflow, t.RequestBody) {
 					taskOptions["operator"] = "local.JsonHttpRequestOperator"
-					taskOptions["xcom_task"] = t.RequestBody
+					xcomTaskID, exists := taskAirflowIDByName[t.RequestBody]
+					if exists {
+						taskOptions["xcom_task"] = xcomTaskID
+					} else {
+						taskOptions["xcom_task"] = t.RequestBody
+					}
 				} else {
 					taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
 
@@ -221,9 +251,21 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 				taskOptions["method"] = taskComponent.Data.Options.Method
 			}
 
-			taskOptions["dependencies"] = t.Dependencies
+			dependencies := make([]string, 0, len(t.Dependencies))
+			for _, dep := range t.Dependencies {
+				if depID, exists := taskAirflowIDByName[dep]; exists {
+					dependencies = append(dependencies, depID)
+				} else {
+					dependencies = append(dependencies, dep)
+				}
+			}
+			taskOptions["dependencies"] = dependencies
 
-			taskOptions["task_id"] = t.Name
+			if taskID, exists := taskAirflowIDByName[t.Name]; exists {
+				taskOptions["task_id"] = taskID
+			} else {
+				taskOptions["task_id"] = t.Name
+			}
 
 			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
 
