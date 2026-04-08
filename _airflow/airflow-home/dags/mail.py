@@ -1,4 +1,5 @@
-from airflow.models import DAG, DagRun
+from airflow.models import DAG, DagRun, DagBag
+from airflow.configuration import conf
 from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.utils.dates import days_ago
@@ -6,94 +7,194 @@ from airflow.utils.state import State
 import os
 
 
-
 def load_email_template():
-    current_dir = os.path.dirname(__file__)  # mail.py 파일이 있는 경로
+    current_dir = os.path.dirname(__file__)
     file_path = os.path.join(current_dir, 'templates', 'email_template.html')
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         return f.read()
+
 
 email_template_content = load_email_template()
 
-# 실패한 태스크 수집 함수
+
 def collect_failed_tasks(**context):
     from airflow.utils.db import provide_session
 
     @provide_session
     def _inner(session=None):
-        source_workflow_id = context['dag_run'].conf.get('source_workflow_id')
-        source_workflow_run_id = context['dag_run'].conf.get('source_workflow_run_id')
-
+        conf_data = context['dag_run'].conf or {}
+        source_workflow_id = conf_data.get('source_workflow_id')
+        source_workflow_run_id = conf_data.get('source_workflow_run_id')
         if not source_workflow_id or not source_workflow_run_id:
-            raise ValueError("source_workflow_id source_workflow_run_id 전달되지 않았습니다.")
+            raise ValueError("source_workflow_id, source_workflow_run_id 전달되지 않았습니다.")
 
         source_workflow_run = session.query(DagRun).filter_by(
             dag_id=source_workflow_id,
             run_id=source_workflow_run_id
         ).first()
-
+        
         if not source_workflow_run:
             raise ValueError("해당하는 DAG Run을 찾을 수 없습니다.")
+        workflow_info = source_workflow_run.conf
+        airflow_base_url = conf.get("webserver", "base_url")
 
         failed_tasks = []
-        for task_instance in source_workflow_run.get_task_instances():
-            if task_instance.state != State.SUCCESS:
-                failed_tasks.append(task_instance.task_id)
+        task_infos = []
 
-        # 실패 여부에 따라 DagRun.state 변경
-        if failed_tasks:
-            source_workflow_run.state = State.FAILED
-        else:
-            source_workflow_run.state = State.SUCCESS
+        for ti in source_workflow_run.get_task_instances():
+            state = ti.state
 
-        session.merge(source_workflow_run)  # 세션에 변경사항 반영
-        session.commit()  # DB에 커밋
+            task_infos.append({
+                "task_id": ti.task_id,
+                "state": state,
+                "try_number": ti.try_number,
+                "log_url": ti.log_url,
+            })
 
-        return {
-            "dag_id": source_workflow_id,
+            if state in [State.FAILED, State.UPSTREAM_FAILED]:
+                failed_tasks.append(ti.task_id)
+
+        source_workflow_run.state = State.FAILED if failed_tasks else State.SUCCESS
+        session.merge(source_workflow_run)
+        session.commit()
+
+        dag_run_url = f"{airflow_base_url}/dags/{source_workflow_id}/grid?dag_run_id={source_workflow_run_id}"
+
+        result = {
+            "dag_id": workflow_info.get("workflow_key"),
+            "dag_name": workflow_info.get("workflow_name"),
+            "workflow_id": workflow_info.get("workflow_id"),
             "dag_run_id": source_workflow_run_id,
             "dag_state": source_workflow_run.state,
-            "failed_tasks": failed_tasks
+            "failed_tasks": failed_tasks,
+            "tasks": task_infos,
+            "airflow_base_url": airflow_base_url,
+            "dag_run_url": dag_run_url,
         }
+
+        print("XCOM RESULT =", result)
+        return result
 
     return _inner()
 
-# DAG 정의
+
 with DAG(
     dag_id="monitor_dag",
-    default_args={'start_date': days_ago(1)},
+    default_args={"start_date": days_ago(1)},
     schedule_interval=None,
+    catchup=False,
 ) as dag:
 
-    # 실패한 태스크 수집 태스크
     collect_task = PythonOperator(
-        task_id='collect_failed_tasks',
+        task_id="collect_failed_tasks",
         python_callable=collect_failed_tasks,
-        provide_context=True,
     )
 
-    # EmailOperator 설정
     email_task = EmailOperator(
-        task_id='send_email',
+        task_id="send_email",
         to="{{ dag_run.conf['to_email'] }}",
-        subject='Workflow 상태 보고서',
-        html_content=email_template_content
+        subject="Workflow 상태 보고서 - {{ (ti.xcom_pull(task_ids='collect_failed_tasks') or {}).get('dag_name', '') }}",
+        html_content=email_template_content,
     )
 
-    # collect_task의 반환 값을 email_task에 전달하기 위한 PythonOperator 후크
-    def set_email_params(ti, **context):
-        # Pull the result from the previous task
-        task_result = ti.xcom_pull(task_ids='collect_failed_tasks')
-        if task_result:
-            # Update the email_task.params directly
-            email_task.params.update(task_result)
-        print( "params : " , email_task.params)
+    collect_task >> email_task
 
-    update_email_params = PythonOperator(
-        task_id="update_email_params",
-        python_callable=set_email_params,
-        provide_context=True,
-    )
 
-    # 의존성 설정
-    collect_task >> update_email_params >> email_task
+
+# from airflow.models import DAG, DagBag, DagRun
+# from airflow.operators.python import PythonOperator
+# from airflow.operators.email import EmailOperator
+# from airflow.utils.dates import days_ago
+# from airflow.utils.state import State
+# import os
+
+
+
+# def load_email_template():
+#     current_dir = os.path.dirname(__file__)  # mail.py 파일이 있는 경로
+#     file_path = os.path.join(current_dir, 'templates', 'email_template.html')
+#     with open(file_path, 'r') as f:
+#         return f.read()
+
+# email_template_content = load_email_template()
+
+# # 실패한 태스크 수집 함수
+# def collect_failed_tasks(**context):
+#     from airflow.utils.db import provide_session
+
+#     @provide_session
+#     def _inner(session=None):
+#         source_workflow_id = context['dag_run'].conf.get('source_workflow_id')
+#         source_workflow_run_id = context['dag_run'].conf.get('source_workflow_run_id')
+#         if not source_workflow_id or not source_workflow_run_id:
+#             raise ValueError("source_workflow_id source_workflow_run_id 전달되지 않았습니다.")
+#         source_workflow_run = session.query(DagRun).filter_by(
+#             dag_id=source_workflow_id,
+#             run_id=source_workflow_run_id
+#         ).first()
+
+#         if not source_workflow_run:
+#             raise ValueError("해당하는 DAG Run을 찾을 수 없습니다.")
+
+#         failed_tasks = []
+#         for task_instance in source_workflow_run.get_task_instances():
+#             if task_instance.state != State.SUCCESS:
+#                 failed_tasks.append(task_instance.task_id)
+
+#         # 실패 여부에 따라 DagRun.state 변경
+#         if failed_tasks:
+#             source_workflow_run.state = State.FAILED
+#         else:
+#             source_workflow_run.state = State.SUCCESS
+
+#         session.merge(source_workflow_run)  # 세션에 변경사항 반영
+#         session.commit()  # DB에 커밋
+
+#         return {
+#             "dag_id": source_workflow_id,
+#             "dag_run_id": source_workflow_run_id,
+#             "dag_state": source_workflow_run.state,
+#             "failed_tasks": failed_tasks
+#         }
+
+#     return _inner()
+
+# # DAG 정의
+# with DAG(
+#     dag_id="monitor_dag",
+#     default_args={'start_date': days_ago(1)},
+#     schedule_interval=None,
+# ) as dag:
+
+#     # 실패한 태스크 수집 태스크
+#     collect_task = PythonOperator(
+#         task_id='collect_failed_tasks',
+#         python_callable=collect_failed_tasks,
+#         # provide_context=True,
+#     )
+
+#     # EmailOperator 설정
+#     email_task = EmailOperator(
+#         task_id='send_email',
+#         to="{{ dag_run.conf['to_email'] }}",
+#         subject='Workflow 상태 보고서',
+#         html_content=email_template_content
+#     )
+
+#     # collect_task의 반환 값을 email_task에 전달하기 위한 PythonOperator 후크
+#     def set_email_params(ti, **context):
+#         # Pull the result from the previous task
+#         task_result = ti.xcom_pull(task_ids='collect_failed_tasks')
+#         if task_result:
+#             # Update the email_task.params directly
+#             email_task.params.update(task_result)
+#         print( "params : " , email_task.params)
+
+#     update_email_params = PythonOperator(
+#         task_id="update_email_params",
+#         python_callable=set_email_params,
+#         # provide_context=True,
+#     )
+
+#     # 의존성 설정
+#     collect_task >> update_email_params >> email_task
