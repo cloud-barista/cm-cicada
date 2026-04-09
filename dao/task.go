@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/cloud-barista/cm-cicada/db"
@@ -158,12 +159,38 @@ func TaskGetByWorkflowKeyAndTaskKey(workflowKey string, taskKey string) (*model.
 	}
 
 	task := &model.TaskDBModel{}
-	result := db.DB.Where("workflow_key = ? AND task_key = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, errors.New("task not found with the provided task key")
+	if isLikelyUUID(taskKey) {
+		result := db.DB.Where("workflow_key = ? AND task_key = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// Fallback: Airflow task_id may be task name, not task_key (UUID).
+				fallback := db.DB.Where("workflow_key = ? AND name = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
+				if fallback.Error != nil {
+					if errors.Is(fallback.Error, gorm.ErrRecordNotFound) {
+						return nil, errors.New("task not found with the provided task key or name")
+					}
+					return nil, fallback.Error
+				}
+				return task, nil
+			}
+			return nil, result.Error
 		}
-		return nil, result.Error
+	} else {
+		// Prefer name lookup to avoid log noise when taskKey is a name.
+		result := db.DB.Where("workflow_key = ? AND name = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				fallback := db.DB.Where("workflow_key = ? AND task_key = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
+				if fallback.Error != nil {
+					if errors.Is(fallback.Error, gorm.ErrRecordNotFound) {
+						return nil, errors.New("task not found with the provided task key or name")
+					}
+					return nil, fallback.Error
+				}
+				return task, nil
+			}
+			return nil, result.Error
+		}
 	}
 
 	if task.TaskKey == "" {
@@ -174,6 +201,35 @@ func TaskGetByWorkflowKeyAndTaskKey(workflowKey string, taskKey string) (*model.
 	}
 
 	return task, nil
+}
+
+func isLikelyUUID(value string) bool {
+	if len(value) != 36 {
+		return false
+	}
+	// Fast shape check for UUID: 8-4-4-4-12 hex with dashes.
+	dashPos := []int{8, 13, 18, 23}
+	for i, ch := range value {
+		if containsInt(dashPos, i) {
+			if ch != '-' {
+				return false
+			}
+			continue
+		}
+		if !strings.ContainsRune("0123456789abcdefABCDEF", ch) {
+			return false
+		}
+	}
+	return true
+}
+
+func containsInt(list []int, v int) bool {
+	for _, n := range list {
+		if n == v {
+			return true
+		}
+	}
+	return false
 }
 
 func TaskGetListByWorkflowID(workflowID string, includeDeleted bool) ([]model.TaskDBModel, error) {

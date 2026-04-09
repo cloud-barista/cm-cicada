@@ -46,6 +46,7 @@ def collect_failed_tasks(**context):
 
             task_infos.append({
                 "task_id": ti.task_id,
+                "task_name": ti.task_display_name,
                 "state": state,
                 "try_number": ti.try_number,
                 "log_url": ti.log_url,

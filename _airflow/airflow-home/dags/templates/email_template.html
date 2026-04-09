@@ -44,7 +44,7 @@
   {% for task in result.get('tasks', []) %}
   {% if task.get('state') in ['failed', 'upstream_failed'] %}
   <li>
-    {{ task.get('task_id') }}<br>
+    {{ task.get('task_name') }}<br>
     <a href="{{ task.get('log_url') }}" target="_blank">🔍 로그 보기</a>
   </li>
   {% endif %}

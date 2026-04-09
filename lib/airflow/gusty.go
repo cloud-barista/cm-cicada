@@ -183,18 +183,25 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 	}
 
 	for _, tg := range workflow.Data.TaskGroups {
-		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tg.Name)
+		tgDirName := tg.ID
+		if tgDirName == "" {
+			tgDirName = tg.Name
+		}
+
+		err = fileutil.CreateDirIfNotExist(dagDir + "/" + tgDirName)
 		if err != nil {
 			return err
 		}
 
 		var taskGroup struct {
-			Tooltip string `yaml:"tooltip"`
+			Tooltip         string `yaml:"tooltip"`
+			TaskDisplayName string `yaml:"task_display_name"`
 		}
 
 		taskGroup.Tooltip = tg.Description
+		taskGroup.TaskDisplayName = tg.Name
 
-		filePath = dagDir + "/" + tg.Name + "/METADATA.yml"
+		filePath = dagDir + "/" + tgDirName + "/METADATA.yml"
 
 		err = writeModelToYAMLFile(taskGroup, filePath)
 		if err != nil {
@@ -266,8 +273,15 @@ func writeGustyYAMLs(workflow *model.Workflow) error {
 			} else {
 				taskOptions["task_id"] = t.Name
 			}
+			if t.Name != "" {
+				taskOptions["task_display_name"] = t.Name
+			}
 
-			filePath = dagDir + "/" + tg.Name + "/" + t.Name + ".yml"
+			taskFileName := t.ID
+			if taskFileName == "" {
+				taskFileName = t.Name
+			}
+			filePath = dagDir + "/" + tgDirName + "/" + taskFileName + ".yml"
 
 			err = writeModelToYAMLFile(taskOptions, filePath)
 			if err != nil {
