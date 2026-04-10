@@ -77,6 +77,27 @@ func WorkflowGet(id string) (*model.Workflow, error) {
 	return workflow, nil
 }
 
+func WorkflowGetIncludeDeleted(id string) (*model.Workflow, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	workflow := &model.Workflow{}
+	result := db.DB.Where("id = ?", id).First(workflow)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("workflow not found with the provided id")
+		}
+		return nil, result.Error
+	}
+
+	if err := ensureWorkflowKey(workflow); err != nil {
+		return nil, err
+	}
+
+	return workflow, nil
+}
+
 func WorkflowGetByName(name string) (*model.Workflow, error) {
 	if err := ensureDB(); err != nil {
 		return nil, err
@@ -84,6 +105,27 @@ func WorkflowGetByName(name string) (*model.Workflow, error) {
 
 	workflow := &model.Workflow{}
 	result := db.DB.Where("name = ? AND is_deleted = ?", name, false).First(workflow)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("workflow not found with the provided name")
+		}
+		return nil, result.Error
+	}
+
+	if err := ensureWorkflowKey(workflow); err != nil {
+		return nil, err
+	}
+
+	return workflow, nil
+}
+
+func WorkflowGetByNameIncludeDeleted(name string) (*model.Workflow, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	workflow := &model.Workflow{}
+	result := db.DB.Where("name = ?", name).First(workflow)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("workflow not found with the provided name")
@@ -106,6 +148,47 @@ func WorkflowGetList(workflow *model.Workflow, page int, row int) (*[]model.Work
 	workflowList := &[]model.Workflow{}
 	result := db.DB.Scopes(func(d *gorm.DB) *gorm.DB {
 		filtered := d.Where("is_deleted = ?", false)
+
+		if len(workflow.Name) != 0 {
+			filtered = filtered.Where("name LIKE ?", "%"+workflow.Name+"%")
+		}
+
+		if page != 0 && row != 0 {
+			offset := (page - 1) * row
+			return filtered.Offset(offset).Limit(row)
+		}
+		if row != 0 && page == 0 {
+			filtered.Error = errors.New("row is not 0 but page is 0")
+			return filtered
+		}
+		if page != 0 && row == 0 {
+			filtered.Error = errors.New("page is not 0 but row is 0")
+			return filtered
+		}
+
+		return filtered
+	}).Find(workflowList)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	for i := range *workflowList {
+		if err := ensureWorkflowKey(&(*workflowList)[i]); err != nil {
+			return nil, err
+		}
+	}
+
+	return workflowList, nil
+}
+
+func WorkflowGetListIncludeDeleted(workflow *model.Workflow, page int, row int) (*[]model.Workflow, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	workflowList := &[]model.Workflow{}
+	result := db.DB.Scopes(func(d *gorm.DB) *gorm.DB {
+		filtered := d
 
 		if len(workflow.Name) != 0 {
 			filtered = filtered.Where("name LIKE ?", "%"+workflow.Name+"%")

@@ -83,6 +83,30 @@ func TaskGroupGet(id string) (*model.TaskGroupDBModel, error) {
 	return taskGroup, nil
 }
 
+func TaskGroupGetIncludeDeleted(id string) (*model.TaskGroupDBModel, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	taskGroup := &model.TaskGroupDBModel{}
+	result := db.DB.Where("id = ?", id).First(taskGroup)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("task_group not found with the provided id")
+		}
+		return nil, result.Error
+	}
+
+	if taskGroup.TaskGroupKey == "" {
+		taskGroup.TaskGroupKey = taskGroup.ID
+		_ = db.DB.Model(&model.TaskGroupDBModel{}).
+			Where("id = ?", taskGroup.ID).
+			Update("task_group_key", taskGroup.TaskGroupKey).Error
+	}
+
+	return taskGroup, nil
+}
+
 func TaskGroupGetByWorkflowIDAndName(workflowID string, name string) (*model.TaskGroupDBModel, error) {
 	if err := ensureDB(); err != nil {
 		return nil, err
