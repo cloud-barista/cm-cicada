@@ -55,9 +55,21 @@ func GetTaskInstances(c echo.Context) error {
 	layout := time.RFC3339Nano
 
 	for _, taskInstance := range *runList.TaskInstances {
-		taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndTaskKey(workflow.ID, taskInstance.GetTaskId())
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		}
 		if err != nil {
 			taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflow.ID, taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowDagID(workflow), taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndNameIncludeDeleted(workflow.ID, taskInstance.GetTaskId())
 		}
 		if err != nil {
 			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
@@ -208,9 +220,21 @@ func ClearTaskInstances(c echo.Context) error {
 
 	}
 	for _, taskInstance := range *clearList.TaskInstances {
-		taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		taskDBInfo, err := dao.TaskGetByWorkflowIDAndTaskKey(workflow.ID, taskInstance.GetTaskId())
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), taskInstance.GetTaskId())
+		}
 		if err != nil {
 			taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflow.ID, taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowDagID(workflow), taskInstance.GetTaskId())
+		}
+		if err != nil {
+			taskDBInfo, err = dao.TaskGetByWorkflowIDAndNameIncludeDeleted(workflow.ID, taskInstance.GetTaskId())
 		}
 		if err != nil {
 			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())

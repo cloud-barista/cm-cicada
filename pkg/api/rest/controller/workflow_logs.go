@@ -45,7 +45,7 @@ func GetTaskLogs(c echo.Context) error {
 	}
 	taskInfo, err := dao.TaskGet(taskId)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
+		return common.ReturnErrorMsg(c, "Invalid get task from taskId.")
 	}
 	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
@@ -113,7 +113,7 @@ func GetTaskLogDownload(c echo.Context) error {
 	}
 	taskInfo, err := dao.TaskGet(taskId)
 	if err != nil {
-		return common.ReturnErrorMsg(c, "Invalid get tasK from taskId.")
+		return common.ReturnErrorMsg(c, "Invalid get task from taskId.")
 	}
 	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
@@ -202,9 +202,21 @@ func GetEventLogs(c echo.Context) error {
 	for _, eventlog := range eventLogs.EventLogs {
 		var taskID, taskName, runID string
 		if eventlog.TaskID != "" {
-			taskDBInfo, err := dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), eventlog.TaskID)
+			taskDBInfo, err := dao.TaskGetByWorkflowIDAndTaskKey(workflow.ID, eventlog.TaskID)
+			if err != nil {
+				taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), eventlog.TaskID)
+			}
 			if err != nil {
 				taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(wfId, eventlog.TaskID)
+			}
+			if err != nil {
+				taskDBInfo, err = dao.TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflow.ID, eventlog.TaskID)
+			}
+			if err != nil {
+				taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowDagID(workflow), eventlog.TaskID)
+			}
+			if err != nil {
+				taskDBInfo, err = dao.TaskGetByWorkflowIDAndNameIncludeDeleted(wfId, eventlog.TaskID)
 			}
 			if err != nil {
 				return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())

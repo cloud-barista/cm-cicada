@@ -177,6 +177,30 @@ func TaskGetByWorkflowIDAndTaskKey(workflowID string, taskKey string) (*model.Ta
 	return task, nil
 }
 
+func TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflowID string, taskKey string) (*model.TaskDBModel, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	task := &model.TaskDBModel{}
+	result := db.DB.Where("workflow_id = ? AND task_key = ?", workflowID, taskKey).First(task)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("task not found with the provided task key")
+		}
+		return nil, result.Error
+	}
+
+	if task.TaskKey == "" {
+		task.TaskKey = task.ID
+		_ = db.DB.Model(&model.TaskDBModel{}).
+			Where("id = ?", task.ID).
+			Update("task_key", task.TaskKey).Error
+	}
+
+	return task, nil
+}
+
 func TaskGetByWorkflowKeyAndTaskKey(workflowKey string, taskKey string) (*model.TaskDBModel, error) {
 	if err := ensureDB(); err != nil {
 		return nil, err
@@ -205,6 +229,54 @@ func TaskGetByWorkflowKeyAndTaskKey(workflowKey string, taskKey string) (*model.
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				fallback := db.DB.Where("workflow_key = ? AND task_key = ? AND is_deleted = ?", workflowKey, taskKey, false).First(task)
+				if fallback.Error != nil {
+					if errors.Is(fallback.Error, gorm.ErrRecordNotFound) {
+						return nil, errors.New("task not found with the provided task key or name")
+					}
+					return nil, fallback.Error
+				}
+				return task, nil
+			}
+			return nil, result.Error
+		}
+	}
+
+	if task.TaskKey == "" {
+		task.TaskKey = task.ID
+		_ = db.DB.Model(&model.TaskDBModel{}).
+			Where("id = ?", task.ID).
+			Update("task_key", task.TaskKey).Error
+	}
+
+	return task, nil
+}
+
+func TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowKey string, taskKey string) (*model.TaskDBModel, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	task := &model.TaskDBModel{}
+	if isLikelyUUID(taskKey) {
+		result := db.DB.Where("workflow_key = ? AND task_key = ?", workflowKey, taskKey).First(task)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				fallback := db.DB.Where("workflow_key = ? AND name = ?", workflowKey, taskKey).First(task)
+				if fallback.Error != nil {
+					if errors.Is(fallback.Error, gorm.ErrRecordNotFound) {
+						return nil, errors.New("task not found with the provided task key or name")
+					}
+					return nil, fallback.Error
+				}
+				return task, nil
+			}
+			return nil, result.Error
+		}
+	} else {
+		result := db.DB.Where("workflow_key = ? AND name = ?", workflowKey, taskKey).First(task)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				fallback := db.DB.Where("workflow_key = ? AND task_key = ?", workflowKey, taskKey).First(task)
 				if fallback.Error != nil {
 					if errors.Is(fallback.Error, gorm.ErrRecordNotFound) {
 						return nil, errors.New("task not found with the provided task key or name")
