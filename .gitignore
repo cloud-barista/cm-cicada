@@ -12,4 +12,3 @@ _airflow/.env
 .smtp.env
 docs/refactoring
 docs/test
-_airflow/.env
