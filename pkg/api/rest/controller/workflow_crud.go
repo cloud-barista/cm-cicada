@@ -2,15 +2,10 @@ package controller
 
 import (
 	"net/http"
-	"time"
 
-	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/mapper"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
-	"github.com/jollaman999/utils/logger"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 )
@@ -51,98 +46,11 @@ func CreateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if createWorkflowReq.Name == "" {
-		return common.ReturnErrorMsg(c, "Please provide the name.")
-	}
-
-	var specVersion = model.WorkflowSpecVersion_LATEST
-	if createWorkflowReq.SpecVersion != "" {
-		specVersion = createWorkflowReq.SpecVersion
-	}
-
-	workflowData, err := mapper.CreateDataReqToData(specVersion, createWorkflowReq.Data)
+	svc := service.NewWorkflowService()
+	workflow, err := svc.CreateWorkflow(createWorkflowReq)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-
-	if err := airflow.ValidateWorkflow(&model.Workflow{
-		Name:        createWorkflowReq.Name,
-		SpecVersion: specVersion,
-		Data:        workflowData,
-	}); err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	var workflow model.Workflow
-	workflow.ID = uuid.New().String()
-	workflow.WorkflowKey = uuid.New().String()
-	workflow.SpecVersion = specVersion
-	workflow.Name = createWorkflowReq.Name
-	workflow.Data = workflowData
-
-	var success bool
-	_, err = dao.WorkflowCreate(&workflow)
-	if err != nil {
-		{
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-	}
-	defer func() {
-		if !success {
-			_ = dao.TaskSoftDeleteByWorkflowID(workflow.ID)
-			_ = dao.TaskGroupSoftDeleteByWorkflowID(workflow.ID)
-			_ = dao.WorkflowDelete(&workflow)
-		}
-	}()
-
-	for _, tg := range workflow.Data.TaskGroups {
-		_, err = dao.TaskGroupCreate(&model.TaskGroupDBModel{
-			ID:           tg.ID,
-			Name:         tg.Name,
-			WorkflowID:   workflow.ID,
-			WorkflowKey:  workflow.WorkflowKey,
-			TaskGroupKey: tg.ID,
-		})
-		if err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-
-		for _, t := range tg.Tasks {
-			_, err = dao.TaskCreate(&model.TaskDBModel{
-				ID:           t.ID,
-				Name:         t.Name,
-				WorkflowID:   workflow.ID,
-				WorkflowKey:  workflow.WorkflowKey,
-				TaskGroupID:  tg.ID,
-				TaskGroupKey: tg.ID,
-				TaskKey:      t.ID,
-			})
-			if err != nil {
-				return common.ReturnErrorMsg(c, err.Error())
-			}
-		}
-	}
-
-	sourceType, sourceTemplateID, err := mapper.ResolveCreateSourceType(specVersion, createWorkflowReq.Data)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	_, err = dao.WorkflowCreateSnapshot(&workflow, "create", sourceType, sourceTemplateID)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = client.CreateDAG(&workflow)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to create the workflow. (Error:"+err.Error()+")")
-	}
-	success = true
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
 }
@@ -171,24 +79,10 @@ func GetWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	var workflow *model.Workflow
-	if includeDeleted {
-		workflow, err = mapper.GetWorkflowFromDBIncludeDeleted(wfId)
-	} else {
-		workflow, err = mapper.GetWorkflowFromDB(wfId)
-	}
+	svc := service.NewWorkflowService()
+	workflow, err := svc.GetWorkflow(wfId, includeDeleted)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	_, err = client.GetDAG(workflowDagID(workflow))
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
@@ -218,34 +112,10 @@ func GetWorkflowByName(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	var workflowByName *model.Workflow
-	if includeDeleted {
-		workflowByName, err = dao.WorkflowGetByNameIncludeDeleted(wfName)
-	} else {
-		workflowByName, err = dao.WorkflowGetByName(wfName)
-	}
+	svc := service.NewWorkflowService()
+	workflow, err := svc.GetWorkflowByName(wfName, includeDeleted)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	var workflow *model.Workflow
-	if includeDeleted {
-		workflow, err = mapper.GetWorkflowFromDBIncludeDeleted(workflowByName.ID)
-	} else {
-		workflow, err = mapper.GetWorkflowFromDB(workflowByName.ID)
-	}
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	_, err = client.GetDAG(workflowDagID(workflow))
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow from the airflow server.")
 	}
 
 	return c.JSONPretty(http.StatusOK, workflow, " ")
@@ -277,16 +147,8 @@ func ListWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	workflow := &model.Workflow{
-		Name: c.QueryParam("name"),
-	}
-
-	var workflows *[]model.Workflow
-	if includeDeleted {
-		workflows, err = dao.WorkflowGetListIncludeDeleted(workflow, page, row)
-	} else {
-		workflows, err = dao.WorkflowGetList(workflow, page, row)
-	}
+	svc := service.NewWorkflowService()
+	workflows, err := svc.ListWorkflow(c.QueryParam("name"), includeDeleted, page, row)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -336,86 +198,13 @@ func UpdateWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	oldWorkflow, err := dao.WorkflowGet(wfId)
+	svc := service.NewWorkflowService()
+	updated, err := svc.UpdateWorkflow(wfId, updateWorkflowReq)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if updateWorkflowReq.Name != "" {
-		oldWorkflow.Name = updateWorkflowReq.Name
-	}
-
-	var specVersion = model.WorkflowSpecVersion_LATEST
-	if updateWorkflowReq.SpecVersion != "" {
-		specVersion = updateWorkflowReq.SpecVersion
-	}
-
-	workflowData, err := mapper.CreateDataReqToData(specVersion, updateWorkflowReq.Data)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	validateTarget := *oldWorkflow
-	validateTarget.SpecVersion = specVersion
-	validateTarget.Data = workflowData
-	if err := airflow.ValidateWorkflow(&validateTarget); err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	diff, err := mapper.BuildWorkflowGraphDiff(oldWorkflow, workflowData)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	for _, tg := range diff.TaskGroupsToUpsert {
-		taskGroup := tg
-		if err := dao.TaskGroupSave(&taskGroup); err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-	}
-	for _, t := range diff.TasksToUpsert {
-		task := t
-		if err := dao.TaskSave(&task); err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-	}
-	for _, t := range diff.TasksToSoftDrop {
-		task := t
-		if err := dao.TaskDelete(&task); err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-	}
-	for _, tg := range diff.TaskGroupsToSoftDrop {
-		taskGroup := tg
-		if err := dao.TaskGroupDelete(&taskGroup); err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-	}
-
-	oldWorkflow.SpecVersion = specVersion
-	oldWorkflow.Data = diff.WorkflowData
-
-	err = dao.WorkflowUpdate(oldWorkflow)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	_, err = dao.WorkflowCreateSnapshot(oldWorkflow, "update", "modified", "")
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = client.CreateDAG(oldWorkflow)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to update the workflow. (Error:"+err.Error()+")")
-	}
-
-	return c.JSONPretty(http.StatusOK, oldWorkflow, " ")
+	return c.JSONPretty(http.StatusOK, updated, " ")
 }
 
 // DeleteWorkflow godoc
@@ -437,38 +226,8 @@ func DeleteWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = client.DeleteDAG(workflowDagID(workflow), true)
-	if err != nil {
-		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
-	}
-
-	if err := dao.TaskSoftDeleteByWorkflowID(workflow.ID); err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-	if err := dao.TaskGroupSoftDeleteByWorkflowID(workflow.ID); err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = dao.WorkflowDelete(workflow)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	workflow.IsDeleted = true
-	now := time.Now()
-	workflow.DeletedAt = &now
-	_, err = dao.WorkflowCreateSnapshot(workflow, "delete", "custom", "")
-	if err != nil {
+	svc := service.NewWorkflowService()
+	if err := svc.DeleteWorkflow(wfId); err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 

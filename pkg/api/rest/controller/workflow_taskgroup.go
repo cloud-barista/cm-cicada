@@ -3,12 +3,13 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/mapper"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
+
+var _ model.TaskGroup
 
 // ListTaskGroup godoc
 //
@@ -19,7 +20,7 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
-//	@Success	200	{object}	[]model.TaskGroup	"Successfully get a task group list."
+//	@Success	200	{array}		model.TaskGroup	"Successfully get a task group list."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get a task group list."
 //	@Router		/workflow/{wfId}/task_group [get]
@@ -34,54 +35,10 @@ func ListTaskGroup(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	var workflow *model.Workflow
-	if includeDeleted {
-		workflow, err = mapper.GetWorkflowFromDBIncludeDeleted(wfId)
-	} else {
-		workflow, err = mapper.GetWorkflowFromDB(wfId)
-	}
+	svc := service.NewWorkflowTaskService()
+	taskGroups, err := svc.ListTaskGroup(wfId, includeDeleted)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	taskGroups := make([]model.TaskGroup, 0, len(workflow.Data.TaskGroups))
-	taskGroups = append(taskGroups, workflow.Data.TaskGroups...)
-
-	if includeDeleted {
-		taskGroupDBs, err := dao.TaskGroupGetListByWorkflowID(wfId, true)
-		if err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-
-		taskDBs, err := dao.TaskGetListByWorkflowID(wfId, true)
-		if err != nil {
-			return common.ReturnErrorMsg(c, err.Error())
-		}
-
-		taskByGroupID := make(map[string][]model.Task)
-		for _, taskDB := range taskDBs {
-			taskByGroupID[taskDB.TaskGroupID] = append(taskByGroupID[taskDB.TaskGroupID], model.Task{
-				ID:   taskDB.ID,
-				Name: taskDB.Name,
-			})
-		}
-
-		groupByID := make(map[string]model.TaskGroup)
-		for _, tg := range taskGroups {
-			groupByID[tg.ID] = tg
-		}
-
-		for _, tgDB := range taskGroupDBs {
-			if _, exists := groupByID[tgDB.ID]; exists {
-				continue
-			}
-			taskGroups = append(taskGroups, model.TaskGroup{
-				ID:          tgDB.ID,
-				Name:        tgDB.Name,
-				Description: "",
-				Tasks:       taskByGroupID[tgDB.ID],
-			})
-		}
 	}
 
 	return c.JSONPretty(http.StatusOK, taskGroups, " ")
@@ -117,36 +74,13 @@ func GetTaskGroup(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	var workflow *model.Workflow
-	if includeDeleted {
-		workflow, err = mapper.GetWorkflowFromDBIncludeDeleted(wfId)
-	} else {
-		workflow, err = mapper.GetWorkflowFromDB(wfId)
-	}
+	svc := service.NewWorkflowTaskService()
+	tg, err := svc.GetTaskGroup(wfId, tgId, includeDeleted)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	for _, tg := range workflow.Data.TaskGroups {
-		if tg.ID == tgId {
-			return c.JSONPretty(http.StatusOK, tg, " ")
-		}
-	}
-
-	if includeDeleted {
-		tgDB, err := dao.TaskGroupGetIncludeDeleted(tgId)
-		if err != nil {
-			return common.ReturnErrorMsg(c, "Task group not found.")
-		}
-		return c.JSONPretty(http.StatusOK, model.TaskGroup{
-			ID:          tgDB.ID,
-			Name:        tgDB.Name,
-			Description: "",
-			Tasks:       []model.Task{},
-		}, " ")
-	}
-
-	return common.ReturnErrorMsg(c, "Task group not found.")
+	return c.JSONPretty(http.StatusOK, tg, " ")
 }
 
 // GetTaskGroupDirectly godoc
@@ -173,47 +107,11 @@ func GetTaskGroupDirectly(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Invalid include_deleted value.")
 	}
 
-	var tgDB *model.TaskGroupDBModel
-	if includeDeleted {
-		tgDB, err = dao.TaskGroupGetIncludeDeleted(tgId)
-	} else {
-		tgDB, err = dao.TaskGroupGet(tgId)
-	}
+	svc := service.NewWorkflowTaskService()
+	tg, err := svc.GetTaskGroupDirectly(tgId, includeDeleted)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	var workflow *model.Workflow
-	if includeDeleted {
-		workflow, err = mapper.GetWorkflowFromDBIncludeDeleted(tgDB.WorkflowID)
-	} else {
-		workflow, err = mapper.GetWorkflowFromDB(tgDB.WorkflowID)
-	}
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	for _, tg := range workflow.Data.TaskGroups {
-		if tg.ID == tgId {
-			return c.JSONPretty(http.StatusOK, model.TaskGroupDirectly{
-				ID:          tg.ID,
-				WorkflowID:  tgDB.WorkflowID,
-				Name:        tg.Name,
-				Description: tg.Description,
-				Tasks:       tg.Tasks,
-			}, " ")
-		}
-	}
-
-	if includeDeleted {
-		return c.JSONPretty(http.StatusOK, model.TaskGroupDirectly{
-			ID:          tgDB.ID,
-			WorkflowID:  tgDB.WorkflowID,
-			Name:        tgDB.Name,
-			Description: "",
-			Tasks:       []model.Task{},
-		}, " ")
-	}
-
-	return common.ReturnErrorMsg(c, "task group not found.")
+	return c.JSONPretty(http.StatusOK, tg, " ")
 }

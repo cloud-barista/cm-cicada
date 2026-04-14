@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
+
+var _ model.EventLog
 
 // GetTaskLogs godoc
 //
@@ -38,20 +38,10 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-
 	taskId, err := requireParam(c, "taskId", "taskId")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	taskInfo, err := dao.TaskGet(taskId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Invalid get task from taskId.")
-	}
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
 	taskTryNum, err := requireParam(c, "taskTryNum", "taskTryNum")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
@@ -60,22 +50,11 @@ func GetTaskLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
 	}
-	client, err := airflow.GetClient()
+
+	svc := service.NewWorkflowRuntimeService()
+	taskLog, err := svc.GetTaskLogs(wfId, wfRunId, taskId, taskTryNumToInt)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
-	}
-	logs, err := client.GetTaskLogs(
-		workflowDagID(workflow),
-		common.UrlDecode(wfRunId),
-		taskAirflowID(taskInfo),
-		taskTryNumToInt,
-	)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
-	}
-
-	taskLog := model.TaskLog{
-		Content: *logs.Content,
 	}
 
 	return c.JSONPretty(http.StatusOK, taskLog, " ")
@@ -106,20 +85,10 @@ func GetTaskLogDownload(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-
 	taskId, err := requireParam(c, "taskId", "taskId")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	taskInfo, err := dao.TaskGet(taskId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Invalid get task from taskId.")
-	}
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
 	taskTryNum, err := requireParam(c, "taskTryNum", "taskTryNum")
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
@@ -128,23 +97,16 @@ func GetTaskLogDownload(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Invalid taskTryNum format.")
 	}
-	client, err := airflow.GetClient()
+
+	svc := service.NewWorkflowRuntimeService()
+	filename, content, err := svc.GetTaskLogDownload(wfId, wfRunId, taskId, taskTryNumToInt)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	logs, err := client.GetTaskLogs(
-		workflowDagID(workflow),
-		common.UrlDecode(wfRunId),
-		taskAirflowID(taskInfo),
-		taskTryNumToInt,
-	)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow logs: "+err.Error())
-	}
-	filename := fmt.Sprintf("%s_%s_%s.log", wfId, wfRunId, taskInfo.Name)
+
 	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	c.Response().Header().Set("Content-Type", "text/plain")
-	return c.Blob(http.StatusOK, "text/plain", []byte(*logs.Content))
+	return c.Blob(http.StatusOK, "text/plain", content)
 }
 
 // GetEventLogs godoc
@@ -158,7 +120,7 @@ func GetTaskLogDownload(c echo.Context) error {
 //	@Param		wfId path string true "DB workflow ID."
 //	@Param		wfRunId query string false "ID of the workflow run."
 //	@Param		taskId query string false "ID of the task."
-//	@Success	200	{object}	[]model.EventLog			"Successfully get the workflow."
+//	@Success	200	{array}		model.EventLog			"Successfully get the workflow."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the workflow."
 //	@Router	/workflow/{wfId}/eventlogs [get]
@@ -167,78 +129,15 @@ func GetEventLogs(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	workflow, err := dao.WorkflowGet(wfId)
+
+	wfRunId := c.QueryParam("wfRunId")
+	taskId := c.QueryParam("taskId")
+
+	svc := service.NewWorkflowRuntimeService()
+	logs, err := svc.GetEventLogs(wfId, wfRunId, taskId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	var wfRunId, taskId, airflowTaskID string
-
-	if c.QueryParam("wfRunId") != "" {
-		wfRunId = c.QueryParam("wfRunId")
-	}
-	if c.QueryParam("taskId") != "" {
-		taskId = c.QueryParam("taskId")
-		taskDBInfo, err := dao.TaskGet(taskId)
-		if err != nil {
-			return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
-		}
-		airflowTaskID = taskAirflowID(taskDBInfo)
-	}
-	var eventLogs model.EventLogs
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-	logs, err := client.GetEventLogs(workflowDagID(workflow), wfRunId, airflowTaskID)
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
-	}
-	err = json.Unmarshal(logs, &eventLogs)
-	if err != nil {
-		fmt.Println(err)
-	}
-	var logList []model.EventLog
-	for _, eventlog := range eventLogs.EventLogs {
-		var taskID, taskName, runID string
-		if eventlog.TaskID != "" {
-			taskDBInfo, err := dao.TaskGetByWorkflowIDAndTaskKey(workflow.ID, eventlog.TaskID)
-			if err != nil {
-				taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), eventlog.TaskID)
-			}
-			if err != nil {
-				taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(wfId, eventlog.TaskID)
-			}
-			if err != nil {
-				taskDBInfo, err = dao.TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflow.ID, eventlog.TaskID)
-			}
-			if err != nil {
-				taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowDagID(workflow), eventlog.TaskID)
-			}
-			if err != nil {
-				taskDBInfo, err = dao.TaskGetByWorkflowIDAndNameIncludeDeleted(wfId, eventlog.TaskID)
-			}
-			if err != nil {
-				return common.ReturnErrorMsg(c, "Failed to get the taskInstances: "+err.Error())
-			}
-			taskID = taskDBInfo.ID
-			taskName = taskDBInfo.Name
-		}
-		eventlog.WorkflowID = wfId
-		if eventlog.RunID != "" {
-			runID = eventlog.RunID
-		}
-
-		log := model.EventLog{
-			WorkflowID:    eventlog.WorkflowID,
-			WorkflowRunID: runID,
-			TaskID:        taskID,
-			TaskName:      taskName,
-			Extra:         eventlog.Extra,
-			Event:         eventlog.Event,
-			When:          eventlog.When,
-		}
-		logList = append(logList, log)
-	}
-	return c.JSONPretty(http.StatusOK, logList, " ")
+	return c.JSONPretty(http.StatusOK, logs, " ")
 }
