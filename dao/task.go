@@ -17,7 +17,6 @@ func TaskCreate(task *model.TaskDBModel) (*model.TaskDBModel, error) {
 
 	task.IsDeleted = false
 	task.DeletedAt = nil
-	task.DeletedBy = ""
 	if task.TaskKey == "" {
 		task.TaskKey = task.ID
 	}
@@ -47,7 +46,6 @@ func TaskSave(task *model.TaskDBModel) error {
 
 	task.IsDeleted = false
 	task.DeletedAt = nil
-	task.DeletedBy = ""
 	if task.TaskKey == "" {
 		task.TaskKey = existing.TaskKey
 		if task.TaskKey == "" {

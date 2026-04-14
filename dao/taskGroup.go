@@ -16,7 +16,6 @@ func TaskGroupCreate(taskGroup *model.TaskGroupDBModel) (*model.TaskGroupDBModel
 
 	taskGroup.IsDeleted = false
 	taskGroup.DeletedAt = nil
-	taskGroup.DeletedBy = ""
 	if taskGroup.TaskGroupKey == "" {
 		taskGroup.TaskGroupKey = taskGroup.ID
 	}
@@ -46,7 +45,6 @@ func TaskGroupSave(taskGroup *model.TaskGroupDBModel) error {
 
 	taskGroup.IsDeleted = false
 	taskGroup.DeletedAt = nil
-	taskGroup.DeletedBy = ""
 	if taskGroup.TaskGroupKey == "" {
 		taskGroup.TaskGroupKey = existing.TaskGroupKey
 		if taskGroup.TaskGroupKey == "" {

@@ -31,6 +31,11 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	err = DB.AutoMigrate(&model.TaskSnapshot{})
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+
 	err = DB.AutoMigrate(&model.TaskComponent{})
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)

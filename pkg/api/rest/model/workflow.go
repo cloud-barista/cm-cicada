@@ -24,6 +24,7 @@ type Task struct {
 	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
 	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
 	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
+	IsDeletedTask bool                   `json:"is_deleted_task"`
 }
 
 type TaskDirectly struct {
@@ -49,7 +50,19 @@ type TaskDBModel struct {
 	TaskKey      string     `gorm:"column:task_key;index" json:"-" mapstructure:"-"`
 	IsDeleted    bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
 	DeletedAt    *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
-	DeletedBy    string     `gorm:"column:deleted_by" json:"-" mapstructure:"-"`
+}
+
+type TaskSnapshot struct {
+	ID           string    `gorm:"primaryKey" json:"id"`
+	WorkflowID   string    `gorm:"column:workflow_id;index:idx_task_snapshots_workflow_task,priority:1;index" json:"workflow_id"`
+	WorkflowKey  string    `gorm:"column:workflow_key;index" json:"workflow_key"`
+	TaskID       string    `gorm:"column:task_id;index:idx_task_snapshots_workflow_task,priority:2;index" json:"task_id"`
+	TaskKey      string    `gorm:"column:task_key;index" json:"task_key"`
+	TaskName     string    `gorm:"column:task_name;index" json:"task_name"`
+	TaskGroupID  string    `gorm:"column:task_group_id;index" json:"task_group_id"`
+	SnapshotType string    `gorm:"column:snapshot_type;index" json:"snapshot_type"`
+	RawTask      string    `gorm:"column:raw_task;type:text" json:"raw_task"`
+	CapturedAt   time.Time `gorm:"column:captured_at;index" json:"captured_at"`
 }
 
 type CreateTaskReq struct {
@@ -85,7 +98,6 @@ type TaskGroupDBModel struct {
 	TaskGroupKey string     `gorm:"column:task_group_key;index" json:"-" mapstructure:"-"`
 	IsDeleted    bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
 	DeletedAt    *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
-	DeletedBy    string     `gorm:"column:deleted_by" json:"-" mapstructure:"-"`
 }
 
 type CreateTaskGroupReq struct {
@@ -113,7 +125,6 @@ type Workflow struct {
 	CurrentVersionID string     `gorm:"column:current_version_id;index" json:"-" mapstructure:"-"`
 	IsDeleted        bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
 	DeletedAt        *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
-	DeletedBy        string     `gorm:"column:deleted_by" json:"-" mapstructure:"-"`
 	CreatedAt        time.Time  `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
 	UpdatedAt        time.Time  `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
 }
@@ -139,6 +150,7 @@ type CreateWorkflowReq struct {
 type WorkflowRun struct {
 	WorkflowRunID          string                 `json:"workflow_run_id,omitempty"`
 	WorkflowID             *string                `json:"workflow_id,omitempty"`
+	DagID                  *string                `json:"dag_id,omitempty"`
 	LogicalDate            string                 `json:"logical_date,omitempty"`
 	ExecutionDate          time.Time              `json:"execution_date,omitempty"`
 	StartDate              time.Time              `json:"start_date,omitempty"`
@@ -157,6 +169,8 @@ type WorkflowRun struct {
 type TaskInstance struct {
 	WorkflowRunID                string    `json:"workflow_run_id,omitempty"`
 	WorkflowID                   *string   `json:"workflow_id,omitempty"`
+	DagID                        *string   `json:"dag_id,omitempty"`
+	IsDeletedTask                bool      `json:"is_deleted_task"`
 	TaskID                       string    `json:"task_id,omitempty"`
 	TaskName                     string    `json:"task_name,omitempty"`
 	State                        string    `json:"state,omitempty"`
@@ -173,8 +187,10 @@ type TaskInstanceReference struct {
 	// The task ID.
 	TaskId   *string `json:"task_id,omitempty"`
 	TaskName string  `json:"task_name,omitempty"`
-	// The DAG ID.
+	// DB workflow ID.
 	WorkflowID *string `json:"workflow_id,omitempty"`
+	// The DAG ID.
+	DagID *string `json:"dag_id,omitempty"`
 	// The DAG run ID.
 	WorkflowRunID *string `json:"workflow_run_id,omitempty"`
 	ExecutionDate *string `json:"execution_date,omitempty"`
@@ -194,6 +210,7 @@ type EventLog struct {
 	WorkflowID    string    `json:"workflow_id"`
 	TaskID        string    `json:"task_id"`
 	TaskName      string    `json:"task_name"`
+	IsDeletedTask bool      `json:"is_deleted_task"`
 	Event         string    `json:"event,omitempty"`
 	When          time.Time `json:"when,omitempty"`
 	Extra         string    `json:"extra,omitempty"`

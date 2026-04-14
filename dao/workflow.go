@@ -44,7 +44,6 @@ func WorkflowCreate(workflow *model.Workflow) (*model.Workflow, error) {
 
 	workflow.IsDeleted = false
 	workflow.DeletedAt = nil
-	workflow.DeletedBy = ""
 	workflow.CreatedAt = now
 	workflow.UpdatedAt = now
 

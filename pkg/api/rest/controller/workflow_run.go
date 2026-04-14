@@ -7,6 +7,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,23 +30,11 @@ func RunWorkflow(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	conf := map[string]interface{}{
-		"workflow_id":   workflow.ID,
-		"workflow_key":  workflowDagID(workflow),
-		"workflow_name": workflow.Name,
-	}
-	_, err = client.RunDAG(workflowDagID(workflow), conf)
-	if err != nil {
+	svc := service.NewWorkflowService()
+	if err := svc.RunWorkflow(wfId); err != nil {
+		if common.IsNotFoundError(err) {
+			return common.ReturnErrorMsg(c, err.Error())
+		}
 		return common.ReturnInternalError(c, err, "Failed to run the workflow.")
 	}
 
@@ -70,12 +59,13 @@ func GetWorkflowRuns(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	workflow, err := dao.WorkflowGet(wfId)
+
+	client, err := airflow.GetClient()
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	client, err := airflow.GetClient()
+	workflow, err := dao.WorkflowGet(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -86,10 +76,12 @@ func GetWorkflowRuns(c echo.Context) error {
 	}
 
 	var transformedRuns []model.WorkflowRun
+	dbWorkflowID := workflow.ID
 
 	for _, dagRun := range *runList.DagRuns {
 		transformedRun := model.WorkflowRun{
-			WorkflowID:             dagRun.DagId,
+			WorkflowID:             &dbWorkflowID,
+			DagID:                  dagRun.DagId,
 			WorkflowRunID:          dagRun.GetDagRunId(),
 			DataIntervalStart:      dagRun.GetDataIntervalStart(),
 			DataIntervalEnd:        dagRun.GetDataIntervalEnd(),
