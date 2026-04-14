@@ -70,7 +70,7 @@ func GetWorkflowRuns(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	runList, err := client.GetDAGRuns(workflowDagID(workflow))
+	runList, err := client.GetDAGRuns(common.WorkflowDagID(workflow))
 	if err != nil {
 		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: "+err.Error())
 	}

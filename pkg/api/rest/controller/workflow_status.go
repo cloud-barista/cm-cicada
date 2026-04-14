@@ -41,7 +41,7 @@ func GetWorkflowStatus(c echo.Context) error {
 	var statusList []model.WorkflowStatus
 	for _, v := range enumStatus {
 
-		resp, err := client.GetDagStatus(workflowDagID(workflow), string(*v.Ptr()))
+		resp, err := client.GetDagStatus(common.WorkflowDagID(workflow), string(*v.Ptr()))
 		if err != nil {
 			logger.Println(logger.ERROR, false,
 				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")

@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/mitchellh/mapstructure"
 	"github.com/labstack/echo/v4"
+	"github.com/mitchellh/mapstructure"
 )
 
 func toTimeHookFunc() mapstructure.DecodeHookFunc {
@@ -50,19 +49,3 @@ func queryBool(c echo.Context, name string) (bool, error) {
 	return strconv.ParseBool(value)
 }
 
-func workflowDagID(workflow *model.Workflow) string {
-	if workflow.WorkflowKey != "" {
-		return workflow.WorkflowKey
-	}
-	return workflow.ID
-}
-
-func taskAirflowID(task *model.TaskDBModel) string {
-	if task.TaskKey != "" {
-		return task.TaskKey
-	}
-	if task.ID != "" {
-		return task.ID
-	}
-	return task.Name
-}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/mapper"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/google/uuid"
@@ -123,7 +124,7 @@ func (s *WorkflowService) GetWorkflow(wfId string, includeDeleted bool) (*model.
 		return nil, err
 	}
 
-	_, err = client.GetDAG(workflowDagID(workflow))
+	_, err = client.GetDAG(common.WorkflowDagID(workflow))
 	if err != nil {
 		return nil, errors.New("failed to get the workflow from the airflow server")
 	}
@@ -246,7 +247,7 @@ func (s *WorkflowService) DeleteWorkflow(wfId string) error {
 		return err
 	}
 
-	err = client.DeleteDAG(workflowDagID(workflow), true)
+	err = client.DeleteDAG(common.WorkflowDagID(workflow), true)
 	if err != nil {
 		logger.Println(logger.ERROR, true, "AIRFLOW: "+err.Error())
 	}
@@ -293,22 +294,15 @@ func (s *WorkflowService) RunWorkflow(wfId string) error {
 
 	conf := map[string]interface{}{
 		"workflow_id":   workflow.ID,
-		"workflow_key":  workflowDagID(workflow),
+		"workflow_key":  common.WorkflowDagID(workflow),
 		"workflow_name": workflow.Name,
 	}
-	_, err = client.RunDAG(workflowDagID(workflow), conf)
+	_, err = client.RunDAG(common.WorkflowDagID(workflow), conf)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func workflowDagID(workflow *model.Workflow) string {
-	if workflow.WorkflowKey != "" {
-		return workflow.WorkflowKey
-	}
-	return workflow.ID
 }
 
 func captureSoftDroppedTaskSnapshots(workflow *model.Workflow, droppedTasks []model.TaskDBModel, snapshotType string) error {

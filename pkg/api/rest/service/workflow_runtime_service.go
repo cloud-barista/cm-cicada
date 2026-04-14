@@ -36,7 +36,7 @@ func (s *WorkflowRuntimeService) GetTaskLogs(wfID, wfRunID, taskID string, taskT
 		return nil, err
 	}
 	logs, err := client.GetTaskLogs(
-		workflowDagID(workflow),
+		common.WorkflowDagID(workflow),
 		common.UrlDecode(wfRunID),
 		taskRuntimeAirflowID(taskInfo),
 		taskTryNum,
@@ -82,7 +82,7 @@ func (s *WorkflowRuntimeService) GetEventLogs(wfID, wfRunID, taskID string) ([]m
 	if err != nil {
 		return nil, err
 	}
-	logs, err := client.GetEventLogs(workflowDagID(workflow), wfRunID, airflowTaskID)
+	logs, err := client.GetEventLogs(common.WorkflowDagID(workflow), wfRunID, airflowTaskID)
 	if err != nil {
 		return nil, errors.New("failed to get the taskInstances: " + err.Error())
 	}
@@ -138,7 +138,7 @@ func (s *WorkflowRuntimeService) GetTaskInstances(wfID, wfRunID string) ([]model
 		return nil, err
 	}
 
-	runList, err := client.GetTaskInstances(workflowDagID(workflow), common.UrlDecode(wfRunID))
+	runList, err := client.GetTaskInstances(common.WorkflowDagID(workflow), common.UrlDecode(wfRunID))
 	if err != nil {
 		return nil, errors.New("failed to get the taskInstances: " + err.Error())
 	}
@@ -236,7 +236,7 @@ func (s *WorkflowRuntimeService) ClearTaskInstances(wfID, wfRunID string, option
 	if err != nil {
 		return nil, err
 	}
-	clearList, err := client.ClearTaskInstance(workflowDagID(workflow), common.UrlDecode(wfRunID), option)
+	clearList, err := client.ClearTaskInstance(common.WorkflowDagID(workflow), common.UrlDecode(wfRunID), option)
 	if err != nil {
 		return nil, errors.New("failed to get the taskInstances: " + err.Error())
 	}
@@ -269,7 +269,7 @@ func (s *WorkflowRuntimeService) ClearTaskInstances(wfID, wfRunID string, option
 func (s *WorkflowRuntimeService) findTaskByAirflowTaskID(workflow *model.Workflow, airflowTaskID string) (*model.TaskDBModel, bool, error) {
 	taskDBInfo, err := dao.TaskGetByWorkflowIDAndTaskKey(workflow.ID, airflowTaskID)
 	if err != nil {
-		taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(workflowDagID(workflow), airflowTaskID)
+		taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKey(common.WorkflowDagID(workflow), airflowTaskID)
 	}
 	if err != nil {
 		taskDBInfo, err = dao.TaskGetByWorkflowIDAndName(workflow.ID, airflowTaskID)
@@ -282,7 +282,7 @@ func (s *WorkflowRuntimeService) findTaskByAirflowTaskID(workflow *model.Workflo
 		taskDBInfo, err = dao.TaskGetByWorkflowIDAndTaskKeyIncludeDeleted(workflow.ID, airflowTaskID)
 	}
 	if err != nil {
-		taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(workflowDagID(workflow), airflowTaskID)
+		taskDBInfo, err = dao.TaskGetByWorkflowKeyAndTaskKeyIncludeDeleted(common.WorkflowDagID(workflow), airflowTaskID)
 	}
 	if err != nil {
 		taskDBInfo, err = dao.TaskGetByWorkflowIDAndNameIncludeDeleted(workflow.ID, airflowTaskID)
