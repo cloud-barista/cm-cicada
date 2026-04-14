@@ -39,7 +39,6 @@
               "conf": {
                 "source_workflow_id": "{{ dag_run.conf['workflow_id'] if dag_run.conf else dag.dag_id }}",
                 "source_workflow_key": "{{ dag_run.conf['workflow_key'] if dag_run.conf else dag.dag_id }}",
-                "source_workflow_name": "{{ dag_run.conf['workflow_name'] if dag_run.conf else dag.display_name }}",
                 "to_email": "test@test.com"
               }
             },

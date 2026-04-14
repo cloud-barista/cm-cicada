@@ -152,12 +152,20 @@ func checkCMCicadaConfigFile() error {
 func readCMCicadaConfigFile() error {
 	common.RootPath = os.Getenv(common.ModuleROOT)
 	if len(common.RootPath) == 0 {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return err
+		if wd, err := os.Getwd(); err == nil {
+			if fileutil.IsExist(filepath.Join(wd, "conf", cmCicadaConfigFile)) {
+				common.RootPath = wd
+			}
 		}
 
-		common.RootPath = homeDir + "/." + strings.ToLower(common.ModuleName)
+		if len(common.RootPath) == 0 {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+
+			common.RootPath = homeDir + "/." + strings.ToLower(common.ModuleName)
+		}
 	}
 
 	err := fileutil.CreateDirIfNotExist(common.RootPath)
@@ -173,7 +181,16 @@ func readCMCicadaConfigFile() error {
 	exPath := filepath.Dir(ex)
 	configDir := exPath + "/conf"
 	if !fileutil.IsExist(configDir) {
-		configDir = common.RootPath + "/conf"
+		if wd, err := os.Getwd(); err == nil {
+			cwdConfigDir := filepath.Join(wd, "conf")
+			if fileutil.IsExist(cwdConfigDir) {
+				configDir = cwdConfigDir
+			} else {
+				configDir = common.RootPath + "/conf"
+			}
+		} else {
+			configDir = common.RootPath + "/conf"
+		}
 	}
 
 	data, err := os.ReadFile(configDir + "/" + cmCicadaConfigFile)
