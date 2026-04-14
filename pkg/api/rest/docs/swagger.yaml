@@ -37,6 +37,31 @@ definitions:
       error:
         type: string
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection:
+    properties:
+      description:
+        type: string
+      extra:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      schema:
+        type: string
+      type:
+        type: string
+    required:
+    - host
+    - id
+    - type
+    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq:
     properties:
       description:
@@ -129,6 +154,8 @@ definitions:
         type: string
       extra:
         type: string
+      is_deleted_task:
+        type: boolean
       run_id:
         type: string
       task_id:
@@ -233,6 +260,8 @@ definitions:
         type: object
       id:
         type: string
+      is_deleted_task:
+        type: boolean
       name:
         type: string
       path_params:
@@ -379,12 +408,16 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance:
     properties:
+      dag_id:
+        type: string
       duration_date:
         type: number
       end_date:
         type: string
       execution_date:
         type: string
+      is_deleted_task:
+        type: boolean
       is_software_migration_task:
         type: boolean
       software_migration_execution_id:
@@ -406,6 +439,9 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference:
     properties:
+      dag_id:
+        description: The DAG ID.
+        type: string
       execution_date:
         type: string
       task_id:
@@ -414,7 +450,7 @@ definitions:
       task_name:
         type: string
       workflow_id:
-        description: The DAG ID.
+        description: DB workflow ID.
         type: string
       workflow_run_id:
         description: The DAG run ID.
@@ -445,6 +481,8 @@ definitions:
       conf:
         additionalProperties: true
         type: object
+      dag_id:
+        type: string
       data_interval_end:
         type: string
       data_interval_start:
@@ -507,8 +545,14 @@ definitions:
         $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
       id:
         type: string
+      source_template_id:
+        type: string
+      source_type:
+        type: string
       spec_version:
         type: string
+      version_no:
+        type: integer
       workflowId:
         type: string
     required:
@@ -526,6 +570,169 @@ info:
   title: CM-Cicada REST API
   version: latest
 paths:
+  /connection:
+    get:
+      consumes:
+      - application/json
+      description: List Airflow connections.
+      operationId: list-connection
+      parameters:
+      - description: Page of the connection list.
+        in: query
+        name: page
+        type: string
+      - description: Row of the connection list.
+        in: query
+        name: row
+        type: string
+      - description: Order by field, prefix with - to desc.
+        in: query
+        name: orderBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the connection list.
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+            type: array
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get connection list.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: List Connection
+      tags:
+      - '[Connection]'
+    post:
+      consumes:
+      - application/json
+      description: Create an Airflow connection.
+      operationId: create-connection
+      parameters:
+      - description: Connection content
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created the connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to create connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Create Connection
+      tags:
+      - '[Connection]'
+  /connection/{connId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an Airflow connection.
+      operationId: delete-connection
+      parameters:
+      - description: Connection ID.
+        in: path
+        name: connId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted the connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to delete connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Delete Connection
+      tags:
+      - '[Connection]'
+    get:
+      consumes:
+      - application/json
+      description: Get an Airflow connection.
+      operationId: get-connection
+      parameters:
+      - description: Connection ID.
+        in: path
+        name: connId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to get connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Connection
+      tags:
+      - '[Connection]'
+    put:
+      consumes:
+      - application/json
+      description: Update an Airflow connection.
+      operationId: update-connection
+      parameters:
+      - description: Connection ID.
+        in: path
+        name: connId
+        required: true
+        type: string
+      - description: Connection content
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated the connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to update connection.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Update Connection
+      tags:
+      - '[Connection]'
   /importErrors:
     get:
       consumes:
@@ -958,7 +1165,7 @@ paths:
       description: Delete the workflow.
       operationId: delete-workflow
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -987,7 +1194,7 @@ paths:
       description: Get the workflow.
       operationId: get-workflow
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1016,7 +1223,7 @@ paths:
       description: Update the workflow content.
       operationId: update-workflow
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1052,7 +1259,7 @@ paths:
       description: Get Eventlog.
       operationId: get-event-logs
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1092,7 +1299,7 @@ paths:
       description: Run the workflow.
       operationId: run-workflow
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1122,7 +1329,7 @@ paths:
       description: Get the task Logs.
       operationId: get-workflow-runs
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1186,7 +1393,7 @@ paths:
       description: Get a task list of the workflow.
       operationId: list-task
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1218,7 +1425,7 @@ paths:
       description: Get the task.
       operationId: get-task
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1253,7 +1460,7 @@ paths:
       description: Get a task group list of the workflow.
       operationId: list-task-group
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1285,7 +1492,7 @@ paths:
       description: Get the task group.
       operationId: get-task-group
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1320,7 +1527,7 @@ paths:
       description: Get a task list from the task group.
       operationId: list-task-from-task-group
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1357,7 +1564,7 @@ paths:
       description: Get the task from the task group.
       operationId: get-task-from-task-group
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1472,7 +1679,7 @@ paths:
       description: Clear the task Instance.
       operationId: clear-task-instances
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1513,7 +1720,7 @@ paths:
       description: Get the task Logs.
       operationId: get-task-logs
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1558,7 +1765,7 @@ paths:
       description: Download the task logs as a file.
       operationId: get-task-logs-download
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
@@ -1603,12 +1810,12 @@ paths:
       description: Get the task Logs.
       operationId: get-task-instances
       parameters:
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfId
         required: true
         type: string
-      - description: ID of the workflow.
+      - description: DB workflow ID.
         in: path
         name: wfRunId
         required: true

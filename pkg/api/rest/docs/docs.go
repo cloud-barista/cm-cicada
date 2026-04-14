@@ -19,6 +19,250 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/connection": {
+            "get": {
+                "description": "List Airflow connections.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Connection]"
+                ],
+                "summary": "List Connection",
+                "operationId": "list-connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Page of the connection list.",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Row of the connection list.",
+                        "name": "row",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order by field, prefix with - to desc.",
+                        "name": "orderBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the connection list.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get connection list.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an Airflow connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Connection]"
+                ],
+                "summary": "Create Connection",
+                "operationId": "create-connection",
+                "parameters": [
+                    {
+                        "description": "Connection content",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully created the connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/connection/{connId}": {
+            "get": {
+                "description": "Get an Airflow connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Connection]"
+                ],
+                "summary": "Get Connection",
+                "operationId": "get-connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection ID.",
+                        "name": "connId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an Airflow connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Connection]"
+                ],
+                "summary": "Update Connection",
+                "operationId": "update-connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection ID.",
+                        "name": "connId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Connection content",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated the connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an Airflow connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Connection]"
+                ],
+                "summary": "Delete Connection",
+                "operationId": "delete-connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection ID.",
+                        "name": "connId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted the connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.SimpleMsg"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to delete connection.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/importErrors": {
             "get": {
                 "description": "Get the importErrors.",
@@ -718,7 +962,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -761,7 +1005,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -813,7 +1057,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -858,7 +1102,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -918,7 +1162,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -963,7 +1207,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1059,7 +1303,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1107,7 +1351,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1159,7 +1403,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1207,7 +1451,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1259,7 +1503,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1314,7 +1558,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1485,7 +1729,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1546,7 +1790,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1612,7 +1856,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
@@ -1678,14 +1922,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfId",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "ID of the workflow.",
+                        "description": "DB workflow ID.",
                         "name": "wfRunId",
                         "in": "path",
                         "required": true
@@ -1919,6 +2163,43 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection": {
+            "type": "object",
+            "required": [
+                "host",
+                "id",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "extra": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "schema": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateDataReq": {
             "type": "object",
             "required": [
@@ -2056,6 +2337,9 @@ const docTemplate = `{
                 },
                 "extra": {
                     "type": "string"
+                },
+                "is_deleted_task": {
+                    "type": "boolean"
                 },
                 "run_id": {
                     "type": "string"
@@ -2217,6 +2501,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_deleted_task": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -2421,6 +2708,9 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstance": {
             "type": "object",
             "properties": {
+                "dag_id": {
+                    "type": "string"
+                },
                 "duration_date": {
                     "type": "number"
                 },
@@ -2429,6 +2719,9 @@ const docTemplate = `{
                 },
                 "execution_date": {
                     "type": "string"
+                },
+                "is_deleted_task": {
+                    "type": "boolean"
                 },
                 "is_software_migration_task": {
                     "type": "boolean"
@@ -2462,6 +2755,10 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskInstanceReference": {
             "type": "object",
             "properties": {
+                "dag_id": {
+                    "description": "The DAG ID.",
+                    "type": "string"
+                },
                 "execution_date": {
                     "type": "string"
                 },
@@ -2473,7 +2770,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workflow_id": {
-                    "description": "The DAG ID.",
+                    "description": "DB workflow ID.",
                     "type": "string"
                 },
                 "workflow_run_id": {
@@ -2517,6 +2814,9 @@ const docTemplate = `{
                 "conf": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "dag_id": {
+                    "type": "string"
                 },
                 "data_interval_end": {
                     "type": "string"
@@ -2617,8 +2917,17 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "source_template_id": {
+                    "type": "string"
+                },
+                "source_type": {
+                    "type": "string"
+                },
                 "spec_version": {
                     "type": "string"
+                },
+                "version_no": {
+                    "type": "integer"
                 },
                 "workflowId": {
                     "type": "string"
