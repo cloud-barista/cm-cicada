@@ -35,6 +35,13 @@
           {
             "name": "send_result_via_email",
             "task_component": "trigger_email",
+            "extra": {
+              "conf": {
+                "source_workflow_id": "{{ dag_run.conf['workflow_id'] if dag_run.conf else dag.dag_id }}",
+                "source_workflow_key": "{{ dag_run.conf['workflow_key'] if dag_run.conf else dag.dag_id }}",
+                "to_email": "test@test.com"
+              }
+            },
             "dependencies": [
               "install_docker"
             ]

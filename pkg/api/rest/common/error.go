@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
@@ -24,6 +25,16 @@ func ReturnInternalError(c echo.Context, err error, reason string) error {
 	msg := "Internal error occurred. (Reason: " + reason + ", Error: " + err.Error() + ")"
 
 	return c.JSONPretty(http.StatusInternalServerError, ErrorResponse{Error: msg}, " ")
+}
+
+func IsNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "not found with the provided id") ||
+		strings.Contains(message, "not found with the provided name")
 }
 
 func ValidateTaskClearOptions(opt model.TaskClearOption) error {

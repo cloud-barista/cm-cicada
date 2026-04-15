@@ -1,5 +1,8 @@
 {% set result = ti.xcom_pull(task_ids='collect_failed_tasks') %}
 {% set dag_id = result.get('dag_id') %}
+{% set workflow_id = result.get('workflow_id', dag_id) %}
+{% set workflow_key = result.get('dag_id', dag_id) %}
+{% set workflow_name = result.get('dag_name', '') %}
 {% set exec_date = dag_run.execution_date | urlencode %}
 {% set failed_tasks = result.get('failed_tasks') %}
 
@@ -12,8 +15,18 @@
   </tr>
   <tr>
     <td><strong>워크플로우 ID</strong></td>
-    <td>{{ dag_id }}</td>
+    <td>{{ workflow_id }}</td>
   </tr>
+  <tr>
+    <td><strong>워크플로우 Key (DAG ID)</strong></td>
+    <td>{{ workflow_key }}</td>
+  </tr>
+  {% if workflow_name %}
+  <tr>
+    <td><strong>워크플로우 이름</strong></td>
+    <td>{{ workflow_name }}</td>
+  </tr>
+  {% endif %}
   <tr>
     <td><strong>워크플로우 Run ID</strong></td>
     <td>{{ result.get('dag_run_id') }}</td>
@@ -28,12 +41,13 @@
 <br>
 <h4 style="color:red;">❌ 실패한 Task 목록</h4>
 <ul>
-  {% for task_id in failed_tasks %}
+  {% for task in result.get('tasks', []) %}
+  {% if task.get('state') in ['failed', 'upstream_failed'] %}
   <li>
-    {{ task_id }}<br>
-    <a href="http://192.168.160.250:8080/dags/{{ dag_id }}/grid?task_id={{ task_id }}&execution_date={{ exec_date }}"
-      target="_blank">🔍 로그 보기</a>
+    {{ task.get('task_name') }}<br>
+    <a href="{{ task.get('log_url') }}" target="_blank">🔍 로그 보기</a>
   </li>
+  {% endif %}
   {% endfor %}
 </ul>
 {% else %}

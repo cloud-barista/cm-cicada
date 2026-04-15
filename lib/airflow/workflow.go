@@ -45,7 +45,11 @@ func callDagRequestLock(workflowID string) func() {
 }
 
 func (client *Client) CreateDAG(workflow *model.Workflow) error {
-	deferFunc := callDagRequestLock(workflow.ID)
+	dagID := workflow.ID
+	if workflow.WorkflowKey != "" {
+		dagID = workflow.WorkflowKey
+	}
+	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()
 	}()
@@ -86,7 +90,7 @@ func (client *Client) GetDAGs() (airflow.DAGCollection, error) {
 	return resp, err
 }
 
-func (client *Client) RunDAG(dagID string) (airflow.DAGRun, error) {
+func (client *Client) RunDAG(dagID string, conf map[string]interface{}) (airflow.DAGRun, error) {
 	deferFunc := callDagRequestLock(dagID)
 	defer func() {
 		deferFunc()
@@ -114,7 +118,11 @@ func (client *Client) RunDAG(dagID string) (airflow.DAGRun, error) {
 
 	ctx, cancel := Context()
 	defer cancel()
-	resp, _, err := client.DAGRunApi.PostDagRun(ctx, dagID).DAGRun(*airflow.NewDAGRun()).Execute()
+	dagRun := airflow.NewDAGRun()
+	if conf != nil {
+		dagRun.SetConf(conf)
+	}
+	resp, _, err := client.DAGRunApi.PostDagRun(ctx, dagID).DAGRun(*dagRun).Execute()
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while running the DAG. (DAG ID: " + dagID + ", Error: " + err.Error() + ")"
 		logger.Println(logger.ERROR, false, errMsg)

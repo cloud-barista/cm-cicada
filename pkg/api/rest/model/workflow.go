@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 const (
@@ -26,6 +24,7 @@ type Task struct {
 	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
 	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
 	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
+	IsDeletedTask bool                   `json:"is_deleted_task"`
 }
 
 type TaskDirectly struct {
@@ -42,10 +41,28 @@ type TaskDirectly struct {
 }
 
 type TaskDBModel struct {
-	ID          string `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name        string `json:"name" mapstructure:"name" validate:"required"`
-	WorkflowID  string `gorm:"column:workflow_id" json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
-	TaskGroupID string `gorm:"column:task_group_id" json:"task_group_id" mapstructure:"task_group_id" validate:"required"`
+	ID           string     `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name         string     `json:"name" mapstructure:"name" validate:"required"`
+	WorkflowID   string     `gorm:"column:workflow_id;index" json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
+	WorkflowKey  string     `gorm:"column:workflow_key;index" json:"-" mapstructure:"-"`
+	TaskGroupID  string     `gorm:"column:task_group_id;index" json:"task_group_id" mapstructure:"task_group_id" validate:"required"`
+	TaskGroupKey string     `gorm:"column:task_group_key;index" json:"-" mapstructure:"-"`
+	TaskKey      string     `gorm:"column:task_key;index" json:"-" mapstructure:"-"`
+	IsDeleted    bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
+}
+
+type TaskSnapshot struct {
+	ID           string    `gorm:"primaryKey" json:"id"`
+	WorkflowID   string    `gorm:"column:workflow_id;index:idx_task_snapshots_workflow_task,priority:1;index" json:"workflow_id"`
+	WorkflowKey  string    `gorm:"column:workflow_key;index" json:"workflow_key"`
+	TaskID       string    `gorm:"column:task_id;index:idx_task_snapshots_workflow_task,priority:2;index" json:"task_id"`
+	TaskKey      string    `gorm:"column:task_key;index" json:"task_key"`
+	TaskName     string    `gorm:"column:task_name;index" json:"task_name"`
+	TaskGroupID  string    `gorm:"column:task_group_id;index" json:"task_group_id"`
+	SnapshotType string    `gorm:"column:snapshot_type;index" json:"snapshot_type"`
+	RawTask      string    `gorm:"column:raw_task;type:text" json:"raw_task"`
+	CapturedAt   time.Time `gorm:"column:captured_at;index" json:"captured_at"`
 }
 
 type CreateTaskReq struct {
@@ -74,9 +91,13 @@ type TaskGroupDirectly struct {
 }
 
 type TaskGroupDBModel struct {
-	ID         string `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name       string `json:"name" mapstructure:"name" validate:"required"`
-	WorkflowID string `gorm:"column:workflow_id" json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
+	ID           string     `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name         string     `json:"name" mapstructure:"name" validate:"required"`
+	WorkflowID   string     `gorm:"column:workflow_id;index" json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
+	WorkflowKey  string     `gorm:"column:workflow_key;index" json:"-" mapstructure:"-"`
+	TaskGroupKey string     `gorm:"column:task_group_key;index" json:"-" mapstructure:"-"`
+	IsDeleted    bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
 }
 
 type CreateTaskGroupReq struct {
@@ -96,21 +117,28 @@ type CreateDataReq struct {
 }
 
 type Workflow struct {
-	ID          string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	SpecVersion string    `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
-	Name        string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
-	Data        Data      `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
-	UpdatedAt   time.Time `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
+	ID               string     `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	WorkflowKey      string     `gorm:"column:workflow_key;index;unique" json:"-" mapstructure:"-"`
+	SpecVersion      string     `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
+	Name             string     `gorm:"column:name;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
+	Data             Data       `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
+	CurrentVersionID string     `gorm:"column:current_version_id;index" json:"-" mapstructure:"-"`
+	IsDeleted        bool       `gorm:"column:is_deleted;index;default:false" json:"-" mapstructure:"-"`
+	DeletedAt        *time.Time `gorm:"column:deleted_at" json:"-" mapstructure:"-"`
+	CreatedAt        time.Time  `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt        time.Time  `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
 }
 
 type WorkflowVersion struct {
-	ID          string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	SpecVersion string    `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
-	WorkflowID  string    `gorm:"column:workflowId" json:"workflowId" mapstructure:"workflowId" validate:"required"`
-	Data        Workflow  `gorm:"column:data" json:"data" mapstructure:"data"`
-	Action      string    `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
-	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
+	ID               string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	SpecVersion      string    `gorm:"column:spec_version" json:"spec_version" mapstructure:"spec_version" validate:"required"`
+	WorkflowID       string    `gorm:"column:workflowId;index" json:"workflowId" mapstructure:"workflowId" validate:"required"`
+	VersionNo        int       `gorm:"column:version_no;index" json:"version_no" mapstructure:"version_no"`
+	RawData          Workflow  `gorm:"column:raw_data" json:"data" mapstructure:"data"`
+	Action           string    `gorm:"column:action" json:"action" mapstructure:"action" validate:"required"`
+	SourceType       string    `gorm:"column:source_type" json:"source_type,omitempty" mapstructure:"source_type"`
+	SourceTemplateID string    `gorm:"column:source_template_id" json:"source_template_id,omitempty" mapstructure:"source_template_id"`
+	CreatedAt        time.Time `gorm:"column:created_at" json:"created_at" mapstructure:"created_at"`
 }
 
 type CreateWorkflowReq struct {
@@ -122,6 +150,7 @@ type CreateWorkflowReq struct {
 type WorkflowRun struct {
 	WorkflowRunID          string                 `json:"workflow_run_id,omitempty"`
 	WorkflowID             *string                `json:"workflow_id,omitempty"`
+	DagID                  *string                `json:"dag_id,omitempty"`
 	LogicalDate            string                 `json:"logical_date,omitempty"`
 	ExecutionDate          time.Time              `json:"execution_date,omitempty"`
 	StartDate              time.Time              `json:"start_date,omitempty"`
@@ -140,6 +169,8 @@ type WorkflowRun struct {
 type TaskInstance struct {
 	WorkflowRunID                string    `json:"workflow_run_id,omitempty"`
 	WorkflowID                   *string   `json:"workflow_id,omitempty"`
+	DagID                        *string   `json:"dag_id,omitempty"`
+	IsDeletedTask                bool      `json:"is_deleted_task"`
 	TaskID                       string    `json:"task_id,omitempty"`
 	TaskName                     string    `json:"task_name,omitempty"`
 	State                        string    `json:"state,omitempty"`
@@ -156,8 +187,10 @@ type TaskInstanceReference struct {
 	// The task ID.
 	TaskId   *string `json:"task_id,omitempty"`
 	TaskName string  `json:"task_name,omitempty"`
-	// The DAG ID.
+	// DB workflow ID.
 	WorkflowID *string `json:"workflow_id,omitempty"`
+	// The DAG ID.
+	DagID *string `json:"dag_id,omitempty"`
 	// The DAG run ID.
 	WorkflowRunID *string `json:"workflow_run_id,omitempty"`
 	ExecutionDate *string `json:"execution_date,omitempty"`
@@ -177,6 +210,7 @@ type EventLog struct {
 	WorkflowID    string    `json:"workflow_id"`
 	TaskID        string    `json:"task_id"`
 	TaskName      string    `json:"task_name"`
+	IsDeletedTask bool      `json:"is_deleted_task"`
 	Event         string    `json:"event,omitempty"`
 	When          time.Time `json:"when,omitempty"`
 	Extra         string    `json:"extra,omitempty"`
@@ -238,49 +272,6 @@ func (d *Workflow) Scan(value interface{}) error {
 		return errors.New("invalid type for Workflow")
 	}
 	return json.Unmarshal(bytes, d)
-}
-
-// AfterCreate Hook for Workflow to add WorkflowVersion on create
-func (w *Workflow) AfterCreate(tx *gorm.DB) (err error) {
-	workflowVersion := WorkflowVersion{
-		ID:         "create_" + time.Now().String(),
-		WorkflowID: w.ID,
-		// Version:    "",  // 기본 버전
-		Data:      *w,
-		Action:    "create",
-		CreatedAt: time.Now(),
-	}
-
-	if err := tx.Create(&workflowVersion).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-// AfterUpdate Hook for Workflow to add WorkflowVersion on update
-func (w *Workflow) AfterUpdate(tx *gorm.DB) (err error) {
-	workflowVersion := WorkflowVersion{
-		ID: "update_" + time.Now().String(),
-		// ID:         uuid.New().String(),
-		WorkflowID: w.ID,
-		// Version:    "new_version", // 새로운 버전 설정 로직 추가 가능
-		Data:      *w,
-		Action:    "update",
-		CreatedAt: time.Now(),
-	}
-
-	if err := tx.Create(&workflowVersion).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-// BeforeDelete Hook for Workflow to delete WorkflowVersion on delete
-func (w *Workflow) BeforeDelete(tx *gorm.DB) (err error) {
-	if err := tx.Where("workflowId = ?", w.ID).Delete(&WorkflowVersion{}).Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 type WorkflowStatus struct {

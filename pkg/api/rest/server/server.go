@@ -62,6 +62,7 @@ func Init() {
 	route.TaskComponent(e)
 	route.WorkflowTemplate(e)
 	route.Workflow(e)
+	route.Connection(e)
 	route.RegisterSwagger(e)
 	route.RegisterUtility(e)
 

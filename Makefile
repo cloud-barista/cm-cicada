@@ -8,7 +8,7 @@ GOPROXY_OPTION := GOPROXY=direct
 GO_COMMAND := ${GOPROXY_OPTION} go
 GOPATH := $(shell go env GOPATH)
 
-.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build run_airflow stop_airflow run run_docker stop stop_docker clean help
+.PHONY: all dependency lint test race coverage coverhtml gofmt update swag swagger build run_airflow stop_airflow run_go stop_go run run_docker stop stop_docker clean help
 
 all: build
 
@@ -94,7 +94,7 @@ run_airflow: ## Run Airflow server
 stop_airflow: ## Stop Airflow server
 	@cd _airflow/ && docker compose down && cd ..
 
-run: run_airflow ## Run Airflow server and the built binary
+run_go: ## Run only the built Go binary (without controlling Airflow)
 	@sudo killall ${MODULE_NAME} | true
 	@git diff > .diff_current
 	@STATUS=`diff .diff_last_build .diff_current 2>&1 > /dev/null; echo $$?` && \
@@ -105,11 +105,15 @@ run: run_airflow ## Run Airflow server and the built binary
 	  fi
 	@cp -RpPf conf cmd/${MODULE_NAME}/ && ./cmd/${MODULE_NAME}/${MODULE_NAME}* || echo "Trying with sudo..." && sudo ./cmd/${MODULE_NAME}/${MODULE_NAME}* &
 
+run: run_airflow run_go ## Run Airflow server and the built binary
+
+stop_go: ## Stop only the Go binary
+	@sudo killall ${MODULE_NAME} | true
+
 run_docker: run_airflow ## Run Airflow server and the built binary within Docker
 	@docker compose up -d
 
-stop: stop_airflow ## Stop Airflow server and the built binary
-	@sudo killall ${MODULE_NAME} | true
+stop: stop_go stop_airflow ## Stop Airflow server and the built binary
 
 stop_docker: stop_airflow ## Stop the Docker containers
 	@docker compose down

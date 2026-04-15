@@ -9,3 +9,6 @@ vendor
 _airflow/.env
 
 *.log
+.smtp.env
+docs/refactoring
+docs/test
