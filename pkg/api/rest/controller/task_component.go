@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"github.com/cloud-barista/cm-cicada/dao"
+	"net/http"
+
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 // CreateTaskComponent godoc
@@ -23,22 +23,13 @@ import (
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to register the task component"
 //	@Router		/task_component [post]
 func CreateTaskComponent(c echo.Context) error {
-	createTaskComponentReq := new(model.CreateTaskComponentReq)
-	err := c.Bind(createTaskComponentReq)
-	if err != nil {
+	req := new(model.CreateTaskComponentReq)
+	if err := c.Bind(req); err != nil {
 		return err
 	}
 
-	if createTaskComponentReq.Name == "" {
-		return common.ReturnErrorMsg(c, "Please provide the name.")
-	}
-
-	var taskComponent model.TaskComponent
-	taskComponent.ID = uuid.New().String()
-	taskComponent.Name = createTaskComponentReq.Name
-	taskComponent.Data = createTaskComponentReq.Data
-
-	_, err = dao.TaskComponentCreate(&taskComponent)
+	svc := service.NewTaskComponentService()
+	taskComponent, err := svc.Create(*req)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -64,10 +55,13 @@ func GetTaskComponent(c echo.Context) error {
 	if tcId == "" {
 		return common.ReturnErrorMsg(c, "tcId is empty")
 	}
-	taskComponent, err := dao.TaskComponentGet(tcId)
+
+	svc := service.NewTaskComponentService()
+	taskComponent, err := svc.Get(tcId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
+
 	return c.JSONPretty(http.StatusOK, taskComponent, "")
 }
 
@@ -89,10 +83,13 @@ func GetTaskComponentByName(c echo.Context) error {
 	if tcName == "" {
 		return common.ReturnErrorMsg(c, "tcName is empty")
 	}
-	taskComponent := dao.TaskComponentGetByName(tcName)
-	if taskComponent == nil {
-		return common.ReturnErrorMsg(c, "task component not found with the provided name")
+
+	svc := service.NewTaskComponentService()
+	taskComponent, err := svc.GetByName(tcName)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
+
 	return c.JSONPretty(http.StatusOK, taskComponent, "")
 }
 
@@ -116,10 +113,12 @@ func ListTaskComponent(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	taskComponentList, err := dao.TaskComponentGetList(page, row)
+	svc := service.NewTaskComponentService()
+	taskComponentList, err := svc.List(page, row)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
+
 	return c.JSONPretty(http.StatusOK, taskComponentList, "")
 }
 
@@ -138,9 +137,8 @@ func ListTaskComponent(c echo.Context) error {
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to update the task component"
 //	@Router		/task_component/{tcId} [put]
 func UpdateTaskComponent(c echo.Context) error {
-	taskComponent := new(model.CreateTaskComponentReq)
-	err := c.Bind(taskComponent)
-	if err != nil {
+	req := new(model.CreateTaskComponentReq)
+	if err := c.Bind(req); err != nil {
 		return err
 	}
 
@@ -148,23 +146,14 @@ func UpdateTaskComponent(c echo.Context) error {
 	if tcId == "" {
 		return common.ReturnErrorMsg(c, "Please provide the tcId.")
 	}
-	oldTaskComponent, err := dao.TaskComponentGet(tcId)
+
+	svc := service.NewTaskComponentService()
+	updated, err := svc.Update(tcId, *req)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if taskComponent.Name != "" {
-		oldTaskComponent.Name = taskComponent.Name
-	}
-
-	oldTaskComponent.Data = taskComponent.Data
-
-	err = dao.TaskComponentUpdate(oldTaskComponent)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	return c.JSONPretty(http.StatusOK, oldTaskComponent, " ")
+	return c.JSONPretty(http.StatusOK, updated, " ")
 }
 
 // DeleteTaskComponent godoc
@@ -186,13 +175,8 @@ func DeleteTaskComponent(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the tcId.")
 	}
 
-	taskComponent, err := dao.TaskComponentGet(tcId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	err = dao.TaskComponentDelete(taskComponent)
-	if err != nil {
+	svc := service.NewTaskComponentService()
+	if err := svc.Delete(tcId); err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
