@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
 )
@@ -39,24 +39,12 @@ func CreateConnection(c echo.Context) error {
 		return err
 	}
 
-	err = decoder.Decode(data)
-	if err != nil {
+	if err := decoder.Decode(data); err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if req.ID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the id.")
-	}
-	if req.Type == "" {
-		return common.ReturnErrorMsg(c, "Please provide the type.")
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	created, err := client.CreateConnection(&req)
+	svc := service.NewConnectionService()
+	created, err := svc.Create(&req)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -83,12 +71,8 @@ func GetConnection(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	connection, err := client.GetConnection(connId)
+	svc := service.NewConnectionService()
+	connection, err := svc.Get(connId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -119,19 +103,8 @@ func ListConnection(c echo.Context) error {
 
 	orderBy := c.QueryParam("orderBy")
 
-	var limit int32
-	var offset int32
-	if row > 0 {
-		limit = int32(row)
-		offset = int32(page * row)
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	connections, err := client.ListConnections(limit, offset, orderBy)
+	svc := service.NewConnectionService()
+	connections, err := svc.List(page, row, orderBy)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -174,26 +147,12 @@ func UpdateConnection(c echo.Context) error {
 		return err
 	}
 
-	err = decoder.Decode(data)
-	if err != nil {
+	if err := decoder.Decode(data); err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	if req.ID != "" && req.ID != connId {
-		return common.ReturnErrorMsg(c, "Path connId and body id do not match.")
-	}
-
-	req.ID = connId
-	if req.Type == "" {
-		return common.ReturnErrorMsg(c, "Please provide the type.")
-	}
-
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	updated, err := client.UpdateConnection(connId, &req)
+	svc := service.NewConnectionService()
+	updated, err := svc.Update(connId, &req)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
@@ -220,12 +179,8 @@ func DeleteConnection(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	if err := client.DeleteConnection(connId); err != nil {
+	svc := service.NewConnectionService()
+	if err := svc.Delete(connId); err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
