@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
+
+var _ model.WorkflowTemplate // swag type reference
 
 // GetWorkflowTemplate godoc
 //
