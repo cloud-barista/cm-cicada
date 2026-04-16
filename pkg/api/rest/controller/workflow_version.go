@@ -3,9 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,16 +34,13 @@ func ListWorkflowVersion(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflow := &model.WorkflowVersion{
-		WorkflowID: wfId,
-	}
-
-	workflows, err := dao.WorkflowVersionGetList(workflow, page, row)
+	svc := service.NewWorkflowService()
+	versions, err := svc.ListWorkflowVersions(wfId, page, row)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, workflows, " ")
+	return c.JSONPretty(http.StatusOK, versions, " ")
 }
 
 // GetWorkflowVersion godoc
@@ -71,10 +67,11 @@ func GetWorkflowVersion(c echo.Context) error {
 		return common.ReturnErrorMsg(c, "Please provide the verId.")
 	}
 
-	workflow, err := dao.WorkflowVersionGet(verId, wfId)
+	svc := service.NewWorkflowService()
+	version, err := svc.GetWorkflowVersion(wfId, verId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, workflow, " ")
+	return c.JSONPretty(http.StatusOK, version, " ")
 }
