@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/labstack/echo/v4"
@@ -52,7 +51,7 @@ func GetWorkflowTemplateByName(c echo.Context) error {
 	if wfName == "" {
 		return common.ReturnErrorMsg(c, "wfName is empty")
 	}
-	workflowTemplate := db.WorkflowTemplateGetByName(wfName)
+	workflowTemplate := dao.WorkflowTemplateGetByName(wfName)
 	if workflowTemplate == nil {
 		return common.ReturnErrorMsg(c, "workflow template not found with the provided name")
 	}

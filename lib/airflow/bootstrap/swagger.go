@@ -1,4 +1,4 @@
-package db
+package bootstrap
 
 import (
 	"context"
@@ -6,22 +6,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/jollaman999/utils/logger"
-	"gorm.io/gorm"
-
-	"github.com/cloud-barista/cm-cicada/lib/config"
-	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
+
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
 
+// ConfigFile describes one task component example JSON entry under
+// lib/airflow/example/task_component/. Each entry points to a remote module's
+// Swagger endpoint and the specific API operation to introspect.
 type ConfigFile struct {
 	Name                string                 `json:"name"`
 	Description         string                 `json:"description"`
@@ -32,6 +28,8 @@ type ConfigFile struct {
 	Extra               map[string]interface{} `json:"extra"`
 }
 
+// SwaggerSpec is a minimal Swagger 2.0 document model tailored for
+// TaskComponent introspection — only fields we actually consume are declared.
 type SwaggerSpec struct {
 	Swagger     string                 `yaml:"swagger"`
 	BasePath    string                 `yaml:"basePath"`
@@ -77,15 +75,6 @@ type Parameter struct {
 	Example     interface{}      `yaml:"example,omitempty"`
 }
 
-func TaskComponentGetByName(name string) *model.TaskComponent {
-	taskComponent := &model.TaskComponent{}
-	result := DB.Where("name = ?", name).First(taskComponent)
-	if result.Error != nil {
-		return nil
-	}
-	return taskComponent
-}
-
 func normalizeURL(url string) string {
 	re := regexp.MustCompile(`/{2,}`)
 	return re.ReplaceAllString(url, "/")
@@ -106,6 +95,8 @@ func normalizeURLWithProtocol(url string) string {
 	return normalizeURL(url)
 }
 
+// fetchAndParseYAML retrieves a Swagger YAML document from a remote module and
+// decodes it into a SwaggerSpec.
 func fetchAndParseYAML(connection model.Connection, swaggerYAMLEndpoint string) (*SwaggerSpec, error) {
 	url := connection.Schema + "://" + connection.Host + ":" + strconv.Itoa(int(connection.Port)) +
 		"/" + swaggerYAMLEndpoint
@@ -146,81 +137,6 @@ func fetchAndParseYAML(connection model.Connection, swaggerYAMLEndpoint string) 
 	return &spec, nil
 }
 
-func TaskComponentInit() error {
-	jsonDir := config.CMCicadaConfig.CMCicada.TaskComponent.ExamplesDirectory
-
-	files, err := filepath.Glob(jsonDir + "*.json")
-	if err != nil {
-		return fmt.Errorf("failed to read directory: %v", err)
-	}
-
-	for _, file := range files {
-		configData, err := os.ReadFile(file)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s: %v", file, err)
-		}
-
-		var configFile ConfigFile
-		if err := json.Unmarshal(configData, &configFile); err != nil {
-			return fmt.Errorf("failed to parse config file %s: %v", file, err)
-		}
-		var taskComponent *model.TaskComponent
-		if configFile.Extra != nil {
-			taskComponent = &model.TaskComponent{}
-			taskComponent.Data.Options.Extra = configFile.Extra
-		} else {
-			var connectionFound bool
-			var connection model.Connection
-			for _, connection = range config.CMCicadaConfig.CMCicada.AirflowServer.Connections {
-				if connection.ID == configFile.APIConnectionID {
-					connectionFound = true
-					break
-				}
-			}
-			if !connectionFound {
-				logger.Println(logger.WARN, true, fmt.Sprintf("failed to find connection with ID %s", configFile.APIConnectionID))
-				continue
-			}
-
-			spec, err := fetchAndParseYAML(connection, configFile.SwaggerYAMLEndpoint)
-			if err != nil {
-				logger.Println(logger.WARN, true, fmt.Sprintf("failed to fetch and parse swagger spec: %v", err))
-				continue
-			}
-
-			endpoint := strings.TrimPrefix(configFile.Endpoint, spec.BasePath)
-			taskComponent, err = processEndpoint(connection.ID, spec, endpoint, configFile.Method)
-			if err != nil {
-				logger.Println(logger.WARN, true, fmt.Sprintf("failed to process endpoint: %v", err))
-				continue
-			}
-		}
-		taskComponent.Name = configFile.Name
-		taskComponent.Description = configFile.Description
-
-		now := time.Now()
-
-		previous := TaskComponentGetByName(taskComponent.Name)
-		if previous != nil {
-			taskComponent.ID = previous.ID
-			taskComponent.CreatedAt = previous.CreatedAt
-			taskComponent.UpdatedAt = now
-		} else {
-			taskComponent.ID = uuid.New().String()
-			taskComponent.CreatedAt = now
-			taskComponent.UpdatedAt = now
-		}
-
-		taskComponent.IsExample = true
-
-		if err := DB.Session(&gorm.Session{SkipHooks: true}).Save(taskComponent).Error; err != nil {
-			return fmt.Errorf("failed to save task component: %v", err)
-		}
-	}
-
-	return nil
-}
-
 func normalizePath(path string) string {
 	path = strings.TrimRight(path, "/")
 	if !strings.HasPrefix(path, "/") {
@@ -238,6 +154,10 @@ func joinPaths(basePath, endpoint string) string {
 	return basePath + "/" + endpoint
 }
 
+// resolveSchemaRef recursively inlines $ref references in a schema so callers
+// work with a self-contained tree. Per-property overrides (description/default/
+// enum/example) from the referencing site take precedence over the referenced
+// definition.
 func resolveSchemaRef(ref string, definitions map[string]SchemaModel) SchemaModel {
 	parts := strings.Split(ref, "/")
 	defName := parts[len(parts)-1]
@@ -412,6 +332,9 @@ func generateRequestBodyExample(schema SchemaModel) string {
 	return string(jsonBytes)
 }
 
+// processEndpoint walks a SwaggerSpec, locates the target endpoint+method, and
+// builds a TaskComponent reflecting its path/query/body parameters and an
+// example request body.
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, targetMethod string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 	for path, pathItem := range spec.Paths {

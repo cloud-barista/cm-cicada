@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/google/uuid"
@@ -90,7 +89,7 @@ func GetTaskComponentByName(c echo.Context) error {
 	if tcName == "" {
 		return common.ReturnErrorMsg(c, "tcName is empty")
 	}
-	taskComponent := db.TaskComponentGetByName(tcName)
+	taskComponent := dao.TaskComponentGetByName(tcName)
 	if taskComponent == nil {
 		return common.ReturnErrorMsg(c, "task component not found with the provided name")
 	}
