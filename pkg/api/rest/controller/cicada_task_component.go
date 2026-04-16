@@ -15,7 +15,7 @@ import (
 //	@ID				run-script
 //	@Summary		Run script on target
 //	@Description	Run script on target with NS ID, MCI ID and VM ID.
-//	@Tags			[Cicada Task Component]
+//	@Tags			[Cicada Built-in API]
 //	@Accept			json
 //	@Produce		json
 //	@Param			request body 	model.RunScriptReq true "Workflow content"
@@ -65,7 +65,7 @@ func RunScript(c echo.Context) error {
 //	@ID				sleep-time
 //	@Summary		Run sleep command on cicada
 //	@Description	Runs sleep command on cicada and waits for configured time. Wait for 10 seconds if time value is not provided.
-//	@Tags			[Cicada Task Component]
+//	@Tags			[Cicada Built-in API]
 //	@Accept			json
 //	@Produce		json
 //	@Param			request body 	model.SleepTimeReq true "SleepTime request"

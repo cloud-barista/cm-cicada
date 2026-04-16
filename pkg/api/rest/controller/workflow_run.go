@@ -16,7 +16,7 @@ import (
 //	@ID		run-workflow
 //	@Summary	Run Workflow
 //	@Description	Run the workflow.
-//	@Tags		[Workflow]
+//	@Tags		[Workflow Execution]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -46,7 +46,7 @@ func RunWorkflow(c echo.Context) error {
 //	@ID			get-workflow-runs
 //	@Summary	Get workflowRuns
 //	@Description	Get the task Logs.
-//	@Tags	[Workflow]
+//	@Tags	[Workflow Execution]
 //	@Accept	json
 //	@Produce	json
 //	@Param	wfId path string true "DB workflow ID."

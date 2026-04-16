@@ -13,7 +13,7 @@ import (
 //	@ID			get-import-errors
 //	@Summary	Get importErrors
 //	@Description	Get the importErrors.
-//	@Tags	[Workflow]
+//	@Tags	[Admin]
 //	@Accept	json
 //	@Produce	json
 //	@Success	200	{object}	airflow.ImportErrorCollection		"Successfully get the importErrors."

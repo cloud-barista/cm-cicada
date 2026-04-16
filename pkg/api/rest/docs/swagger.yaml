@@ -756,7 +756,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get importErrors
       tags:
-      - '[Workflow]'
+      - '[Admin]'
   /readyz:
     get:
       consumes:
@@ -776,7 +776,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Check Ready
       tags:
-      - "[Admin]\tSystem management"
+      - '[Admin]'
   /run_script:
     post:
       consumes:
@@ -807,7 +807,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Run script on target
       tags:
-      - '[Cicada Task Component]'
+      - '[Cicada Built-in API]'
   /sleep_time:
     post:
       consumes:
@@ -839,7 +839,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Run sleep command on cicada
       tags:
-      - '[Cicada Task Component]'
+      - '[Cicada Built-in API]'
   /task/{taskId}:
     get:
       consumes:
@@ -869,7 +869,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task Directly
       tags:
-      - '[Workflow]'
+      - '[Task]'
   /task_component:
     get:
       consumes:
@@ -1088,7 +1088,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get TaskGroup Directly
       tags:
-      - '[Workflow]'
+      - '[Task Group]'
   /workflow:
     get:
       consumes:
@@ -1291,7 +1291,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Eventlog
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/run:
     post:
       consumes:
@@ -1321,7 +1321,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Run Workflow
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/runs:
     get:
       consumes:
@@ -1353,7 +1353,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get workflowRuns
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/status:
     get:
       consumes:
@@ -1417,7 +1417,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: List Task
       tags:
-      - '[Workflow]'
+      - '[Task]'
   /workflow/{wfId}/task/{taskId}:
     get:
       consumes:
@@ -1452,7 +1452,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task
       tags:
-      - '[Workflow]'
+      - '[Task]'
   /workflow/{wfId}/task_group:
     get:
       consumes:
@@ -1484,7 +1484,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: List TaskGroup
       tags:
-      - '[Workflow]'
+      - '[Task Group]'
   /workflow/{wfId}/task_group/{tgId}:
     get:
       consumes:
@@ -1519,7 +1519,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get TaskGroup
       tags:
-      - '[Workflow]'
+      - '[Task Group]'
   /workflow/{wfId}/task_group/{tgId}/task:
     get:
       consumes:
@@ -1556,7 +1556,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: List Task from Task Group
       tags:
-      - '[Workflow]'
+      - '[Task]'
   /workflow/{wfId}/task_group/{tgId}/task/{taskId}:
     get:
       consumes:
@@ -1596,7 +1596,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task from Task Group
       tags:
-      - '[Workflow]'
+      - '[Task]'
   /workflow/{wfId}/version:
     get:
       consumes:
@@ -1712,7 +1712,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Clear taskInstances
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs:
     get:
       consumes:
@@ -1757,7 +1757,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Task Logs
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs/download:
     get:
       consumes:
@@ -1802,7 +1802,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Download Task Logs
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/{wfId}/workflowRun/{wfRunId}/taskInstances:
     get:
       consumes:
@@ -1837,7 +1837,7 @@ paths:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get taskInstances
       tags:
-      - '[Workflow]'
+      - '[Workflow Execution]'
   /workflow/name/{wfName}:
     get:
       consumes:

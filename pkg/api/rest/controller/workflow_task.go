@@ -16,7 +16,7 @@ var _ model.Task
 //	@ID		list-task-from-task-group
 //	@Summary	List Task from Task Group
 //	@Description	Get a task list from the task group.
-//	@Tags		[Workflow]
+//	@Tags		[Task]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -55,7 +55,7 @@ func ListTaskFromTaskGroup(c echo.Context) error {
 //	@ID		get-task-from-task-group
 //	@Summary	Get Task from Task Group
 //	@Description	Get the task from the task group.
-//	@Tags		[Workflow]
+//	@Tags		[Task]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -100,7 +100,7 @@ func GetTaskFromTaskGroup(c echo.Context) error {
 //	@ID		list-task
 //	@Summary	List Task
 //	@Description	Get a task list of the workflow.
-//	@Tags		[Workflow]
+//	@Tags		[Task]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -133,7 +133,7 @@ func ListTask(c echo.Context) error {
 //	@ID		get-task
 //	@Summary	Get Task
 //	@Description	Get the task.
-//	@Tags		[Workflow]
+//	@Tags		[Task]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -172,7 +172,7 @@ func GetTask(c echo.Context) error {
 //	@ID		get-task-directly
 //	@Summary	Get Task Directly
 //	@Description	Get the task directly.
-//	@Tags		[Workflow]
+//	@Tags		[Task]
 //	@Accept		json
 //	@Produce	json
 //	@Param		taskId path string true "ID of the task."

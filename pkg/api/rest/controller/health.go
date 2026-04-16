@@ -16,7 +16,7 @@ var IsReady = false
 //	@ID				health-check-readyz
 //	@Summary		Check Ready
 //	@Description	Check Cicada is ready
-//	@Tags [Admin]	System management
+//	@Tags			[Admin]
 //	@Accept			json
 //	@Produce		json
 //	@Success		200 {object}	model.SimpleMsg			"Successfully get ready state."

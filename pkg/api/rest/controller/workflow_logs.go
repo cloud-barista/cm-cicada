@@ -18,7 +18,7 @@ var _ model.EventLog
 //	@ID			get-task-logs
 //	@Summary	Get Task Logs
 //	@Description	Get the task Logs.
-//	@Tags	[Workflow]
+//	@Tags	[Workflow Execution]
 //	@Accept	json
 //	@Produce	json
 //	@Param	wfId path string true "DB workflow ID."
@@ -65,7 +65,7 @@ func GetTaskLogs(c echo.Context) error {
 //	@ID			get-task-logs-download
 //	@Summary	Download Task Logs
 //	@Description	Download the task logs as a file.
-//	@Tags		[Workflow]
+//	@Tags		[Workflow Execution]
 //	@Accept		json
 //	@Produce	text/plain
 //	@Param		wfId path string true "DB workflow ID."
@@ -114,7 +114,7 @@ func GetTaskLogDownload(c echo.Context) error {
 //	@ID			get-event-logs
 //	@Summary		Get Eventlog
 //	@Description	Get Eventlog.
-//	@Tags		[Workflow]
+//	@Tags		[Workflow Execution]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."

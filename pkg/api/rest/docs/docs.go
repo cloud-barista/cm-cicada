@@ -273,7 +273,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Admin]"
                 ],
                 "summary": "Get importErrors",
                 "operationId": "get-import-errors",
@@ -309,7 +309,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Admin]\tSystem management"
+                    "[Admin]"
                 ],
                 "summary": "Check Ready",
                 "operationId": "health-check-readyz",
@@ -339,7 +339,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Cicada Task Component]"
+                    "[Cicada Built-in API]"
                 ],
                 "summary": "Run script on target",
                 "operationId": "run-script",
@@ -386,7 +386,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Cicada Task Component]"
+                    "[Cicada Built-in API]"
                 ],
                 "summary": "Run sleep command on cicada",
                 "operationId": "sleep-time",
@@ -433,7 +433,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task]"
                 ],
                 "summary": "Get Task Directly",
                 "operationId": "get-task-directly",
@@ -761,7 +761,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task Group]"
                 ],
                 "summary": "Get TaskGroup Directly",
                 "operationId": "get-task-group-directly",
@@ -1095,7 +1095,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Get Eventlog",
                 "operationId": "get-event-logs",
@@ -1155,7 +1155,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Run Workflow",
                 "operationId": "run-workflow",
@@ -1200,7 +1200,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Get workflowRuns",
                 "operationId": "get-workflow-runs",
@@ -1296,7 +1296,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task]"
                 ],
                 "summary": "List Task",
                 "operationId": "list-task",
@@ -1344,7 +1344,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task]"
                 ],
                 "summary": "Get Task",
                 "operationId": "get-task",
@@ -1396,7 +1396,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task Group]"
                 ],
                 "summary": "List TaskGroup",
                 "operationId": "list-task-group",
@@ -1444,7 +1444,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task Group]"
                 ],
                 "summary": "Get TaskGroup",
                 "operationId": "get-task-group",
@@ -1496,7 +1496,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task]"
                 ],
                 "summary": "List Task from Task Group",
                 "operationId": "list-task-from-task-group",
@@ -1551,7 +1551,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Task]"
                 ],
                 "summary": "Get Task from Task Group",
                 "operationId": "get-task-from-task-group",
@@ -1722,7 +1722,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Clear taskInstances",
                 "operationId": "clear-task-instances",
@@ -1783,7 +1783,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Get Task Logs",
                 "operationId": "get-task-logs",
@@ -1849,7 +1849,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Download Task Logs",
                 "operationId": "get-task-logs-download",
@@ -1915,7 +1915,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "[Workflow]"
+                    "[Workflow Execution]"
                 ],
                 "summary": "Get taskInstances",
                 "operationId": "get-task-instances",
