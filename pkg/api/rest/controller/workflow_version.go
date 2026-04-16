@@ -12,7 +12,7 @@ import (
 // ListWorkflowVersion godoc
 //
 //	@ID		list-workflowVersion
-//	@Summary	List workflowVersion
+//	@Summary	List Workflow Versions
 //	@Description	Get a workflowVersion list.
 //	@Tags		[Workflow]
 //	@Accept		json
@@ -50,7 +50,7 @@ func ListWorkflowVersion(c echo.Context) error {
 // GetWorkflowVersion godoc
 //
 //	@ID		get-WorkflowVersion
-//	@Summary	Get WorkflowVersion
+//	@Summary	Get Workflow Version
 //	@Description	Get the WorkflowVersion.
 //	@Tags		[Workflow]
 //	@Accept		json

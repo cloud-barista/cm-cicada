@@ -13,7 +13,7 @@ import (
 // RunScript godoc
 //
 //	@ID				run-script
-//	@Summary		Run script on target
+//	@Summary		Run Script on Target
 //	@Description	Run script on target with NS ID, MCI ID and VM ID.
 //	@Tags			[Cicada Built-in API]
 //	@Accept			json
@@ -63,7 +63,7 @@ func RunScript(c echo.Context) error {
 // SleepTime godoc
 //
 //	@ID				sleep-time
-//	@Summary		Run sleep command on cicada
+//	@Summary		Run Sleep Command
 //	@Description	Runs sleep command on cicada and waits for configured time. Wait for 10 seconds if time value is not provided.
 //	@Tags			[Cicada Built-in API]
 //	@Accept			json

@@ -99,7 +99,7 @@ func GetConnection(c echo.Context) error {
 // ListConnection godoc
 //
 //	@ID		list-connection
-//	@Summary	List Connection
+//	@Summary	List Connections
 //	@Description	List Airflow connections.
 //	@Tags		[Connection]
 //	@Accept		json

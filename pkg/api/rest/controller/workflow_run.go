@@ -44,7 +44,7 @@ func RunWorkflow(c echo.Context) error {
 // GetWorkflowRuns godoc
 //
 //	@ID			get-workflow-runs
-//	@Summary	Get workflowRuns
+//	@Summary	List Workflow Runs
 //	@Description	Get the task Logs.
 //	@Tags	[Workflow Execution]
 //	@Accept	json

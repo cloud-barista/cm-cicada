@@ -31,7 +31,7 @@ const docTemplate = `{
                 "tags": [
                     "[Connection]"
                 ],
-                "summary": "List Connection",
+                "summary": "List Connections",
                 "operationId": "list-connection",
                 "parameters": [
                     {
@@ -265,7 +265,7 @@ const docTemplate = `{
         },
         "/importErrors": {
             "get": {
-                "description": "Get the importErrors.",
+                "description": "List DAG import errors reported by Airflow.",
                 "consumes": [
                     "application/json"
                 ],
@@ -275,7 +275,7 @@ const docTemplate = `{
                 "tags": [
                     "[Admin]"
                 ],
-                "summary": "Get importErrors",
+                "summary": "List Airflow Import Errors",
                 "operationId": "get-import-errors",
                 "responses": {
                     "200": {
@@ -341,7 +341,7 @@ const docTemplate = `{
                 "tags": [
                     "[Cicada Built-in API]"
                 ],
-                "summary": "Run script on target",
+                "summary": "Run Script on Target",
                 "operationId": "run-script",
                 "parameters": [
                     {
@@ -388,7 +388,7 @@ const docTemplate = `{
                 "tags": [
                     "[Cicada Built-in API]"
                 ],
-                "summary": "Run sleep command on cicada",
+                "summary": "Run Sleep Command",
                 "operationId": "sleep-time",
                 "parameters": [
                     {
@@ -480,7 +480,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "List TaskComponent",
+                "summary": "List Task Components",
                 "operationId": "list-task-component",
                 "parameters": [
                     {
@@ -531,7 +531,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "Create TaskComponent",
+                "summary": "Create Task Component",
                 "operationId": "create-task-component",
                 "parameters": [
                     {
@@ -578,7 +578,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "Get TaskComponent by Name",
+                "summary": "Get Task Component by Name",
                 "operationId": "get-task-component-by-name",
                 "parameters": [
                     {
@@ -623,7 +623,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "Get TaskComponent",
+                "summary": "Get Task Component",
                 "operationId": "get-task-component",
                 "parameters": [
                     {
@@ -666,7 +666,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "Update TaskComponent",
+                "summary": "Update Task Component",
                 "operationId": "update-task-component",
                 "parameters": [
                     {
@@ -718,7 +718,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Component]"
                 ],
-                "summary": "Delete TaskComponent",
+                "summary": "Delete Task Component",
                 "operationId": "delete-task-component",
                 "parameters": [
                     {
@@ -763,7 +763,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Group]"
                 ],
-                "summary": "Get TaskGroup Directly",
+                "summary": "Get Task Group Directly",
                 "operationId": "get-task-group-directly",
                 "parameters": [
                     {
@@ -808,7 +808,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "List Workflow",
+                "summary": "List Workflows",
                 "operationId": "list-workflow",
                 "parameters": [
                     {
@@ -1097,7 +1097,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Execution]"
                 ],
-                "summary": "Get Eventlog",
+                "summary": "List Event Logs",
                 "operationId": "get-event-logs",
                 "parameters": [
                     {
@@ -1202,7 +1202,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Execution]"
                 ],
-                "summary": "Get workflowRuns",
+                "summary": "List Workflow Runs",
                 "operationId": "get-workflow-runs",
                 "parameters": [
                     {
@@ -1250,7 +1250,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "Get WorkflowStatus",
+                "summary": "Get Workflow Status",
                 "operationId": "get-WorkflowStatus",
                 "parameters": [
                     {
@@ -1298,7 +1298,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task]"
                 ],
-                "summary": "List Task",
+                "summary": "List Tasks",
                 "operationId": "list-task",
                 "parameters": [
                     {
@@ -1398,7 +1398,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Group]"
                 ],
-                "summary": "List TaskGroup",
+                "summary": "List Task Groups",
                 "operationId": "list-task-group",
                 "parameters": [
                     {
@@ -1446,7 +1446,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task Group]"
                 ],
-                "summary": "Get TaskGroup",
+                "summary": "Get Task Group",
                 "operationId": "get-task-group",
                 "parameters": [
                     {
@@ -1498,7 +1498,7 @@ const docTemplate = `{
                 "tags": [
                     "[Task]"
                 ],
-                "summary": "List Task from Task Group",
+                "summary": "List Tasks from Task Group",
                 "operationId": "list-task-from-task-group",
                 "parameters": [
                     {
@@ -1612,7 +1612,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "List workflowVersion",
+                "summary": "List Workflow Versions",
                 "operationId": "list-workflowVersion",
                 "parameters": [
                     {
@@ -1672,7 +1672,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow]"
                 ],
-                "summary": "Get WorkflowVersion",
+                "summary": "Get Workflow Version",
                 "operationId": "get-WorkflowVersion",
                 "parameters": [
                     {
@@ -1724,7 +1724,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Execution]"
                 ],
-                "summary": "Clear taskInstances",
+                "summary": "Clear Task Instances",
                 "operationId": "clear-task-instances",
                 "parameters": [
                     {
@@ -1917,7 +1917,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Execution]"
                 ],
-                "summary": "Get taskInstances",
+                "summary": "List Task Instances",
                 "operationId": "get-task-instances",
                 "parameters": [
                     {
@@ -1969,7 +1969,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Template]"
                 ],
-                "summary": "List WorkflowTemplate",
+                "summary": "List Workflow Templates",
                 "operationId": "list-workflow-template",
                 "parameters": [
                     {
@@ -2028,7 +2028,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Template]"
                 ],
-                "summary": "Get WorkflowTemplate by Name",
+                "summary": "Get Workflow Template by Name",
                 "operationId": "get-workflow-template-by-name",
                 "parameters": [
                     {
@@ -2073,7 +2073,7 @@ const docTemplate = `{
                 "tags": [
                     "[Workflow Template]"
                 ],
-                "summary": "Get WorkflowTemplate",
+                "summary": "Get Workflow Template",
                 "operationId": "get-workflow-template",
                 "parameters": [
                     {

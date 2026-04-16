@@ -14,7 +14,7 @@ var _ model.TaskGroup
 // ListTaskGroup godoc
 //
 //	@ID		list-task-group
-//	@Summary	List TaskGroup
+//	@Summary	List Task Groups
 //	@Description	Get a task group list of the workflow.
 //	@Tags		[Task Group]
 //	@Accept		json
@@ -47,7 +47,7 @@ func ListTaskGroup(c echo.Context) error {
 // GetTaskGroup godoc
 //
 //	@ID		get-task-group
-//	@Summary	Get TaskGroup
+//	@Summary	Get Task Group
 //	@Description	Get the task group.
 //	@Tags	[Task Group]
 //	@Accept	json
@@ -86,7 +86,7 @@ func GetTaskGroup(c echo.Context) error {
 // GetTaskGroupDirectly godoc
 //
 //	@ID		get-task-group-directly
-//	@Summary	Get TaskGroup Directly
+//	@Summary	Get Task Group Directly
 //	@Description	Get the task group directly.
 //	@Tags	[Task Group]
 //	@Accept	json

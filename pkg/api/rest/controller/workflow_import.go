@@ -11,8 +11,8 @@ import (
 // GetImportErrors godoc
 //
 //	@ID			get-import-errors
-//	@Summary	Get importErrors
-//	@Description	Get the importErrors.
+//	@Summary	List Airflow Import Errors
+//	@Description	List DAG import errors reported by Airflow.
 //	@Tags	[Admin]
 //	@Accept	json
 //	@Produce	json

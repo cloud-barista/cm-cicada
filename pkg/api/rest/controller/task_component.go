@@ -12,7 +12,7 @@ import (
 // CreateTaskComponent godoc
 //
 //	@ID				create-task-component
-//	@Summary		Create TaskComponent
+//	@Summary		Create Task Component
 //	@Description	Register the task component.
 //	@Tags		[Task Component]
 //	@Accept		json
@@ -49,7 +49,7 @@ func CreateTaskComponent(c echo.Context) error {
 // GetTaskComponent godoc
 //
 //	@ID				get-task-component
-//	@Summary		Get TaskComponent
+//	@Summary		Get Task Component
 //	@Description	Get the task component.
 //	@Tags		[Task Component]
 //	@Accept		json
@@ -74,7 +74,7 @@ func GetTaskComponent(c echo.Context) error {
 // GetTaskComponentByName godoc
 //
 //	@ID				get-task-component-by-name
-//	@Summary		Get TaskComponent by Name
+//	@Summary		Get Task Component by Name
 //	@Description	Get the task component by name.
 //	@Tags		[Task Component]
 //	@Accept		json
@@ -99,7 +99,7 @@ func GetTaskComponentByName(c echo.Context) error {
 // ListTaskComponent godoc
 //
 //	@ID				list-task-component
-//	@Summary		List TaskComponent
+//	@Summary		List Task Components
 //	@Description	Get a list of task component.
 //	@Tags			[Task Component]
 //	@Accept			json
@@ -126,7 +126,7 @@ func ListTaskComponent(c echo.Context) error {
 // UpdateTaskComponent godoc
 //
 //	@ID				update-task-component
-//	@Summary		Update TaskComponent
+//	@Summary		Update Task Component
 //	@Description	Update the task component.
 //	@Tags		[Task Component]
 //	@Accept		json
@@ -170,7 +170,7 @@ func UpdateTaskComponent(c echo.Context) error {
 // DeleteTaskComponent godoc
 //
 //	@ID				delete-task-component
-//	@Summary		Delete TaskComponent
+//	@Summary		Delete Task Component
 //	@Description	Delete the task component.
 //	@Tags		[Task Component]
 //	@Accept		json

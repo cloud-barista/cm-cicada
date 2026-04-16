@@ -606,7 +606,7 @@ paths:
           description: Failed to get connection list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List Connection
+      summary: List Connections
       tags:
       - '[Connection]'
     post:
@@ -737,7 +737,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the importErrors.
+      description: List DAG import errors reported by Airflow.
       operationId: get-import-errors
       produces:
       - application/json
@@ -754,7 +754,7 @@ paths:
           description: Failed to get the importErrors.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get importErrors
+      summary: List Airflow Import Errors
       tags:
       - '[Admin]'
   /readyz:
@@ -805,7 +805,7 @@ paths:
           description: Failed to run script
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Run script on target
+      summary: Run Script on Target
       tags:
       - '[Cicada Built-in API]'
   /sleep_time:
@@ -837,7 +837,7 @@ paths:
           description: Failed to run script
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Run sleep command on cicada
+      summary: Run Sleep Command
       tags:
       - '[Cicada Built-in API]'
   /task/{taskId}:
@@ -902,7 +902,7 @@ paths:
           description: Failed to get a list of task component.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List TaskComponent
+      summary: List Task Components
       tags:
       - '[Task Component]'
     post:
@@ -932,7 +932,7 @@ paths:
           description: Failed to register the task component
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Create TaskComponent
+      summary: Create Task Component
       tags:
       - '[Task Component]'
   /task_component/{tcId}:
@@ -962,7 +962,7 @@ paths:
           description: Failed to delete the task component
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Delete TaskComponent
+      summary: Delete Task Component
       tags:
       - '[Task Component]'
     get:
@@ -991,7 +991,7 @@ paths:
           description: Failed to get the task component
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get TaskComponent
+      summary: Get Task Component
       tags:
       - '[Task Component]'
     put:
@@ -1026,7 +1026,7 @@ paths:
           description: Failed to update the task component
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Update TaskComponent
+      summary: Update Task Component
       tags:
       - '[Task Component]'
   /task_component/name/{tcName}:
@@ -1056,7 +1056,7 @@ paths:
           description: Failed to get the task component
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get TaskComponent by Name
+      summary: Get Task Component by Name
       tags:
       - '[Task Component]'
   /task_group/{tgId}:
@@ -1086,7 +1086,7 @@ paths:
           description: Failed to get the task group.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get TaskGroup Directly
+      summary: Get Task Group Directly
       tags:
       - '[Task Group]'
   /workflow:
@@ -1125,7 +1125,7 @@ paths:
           description: Failed to get a workflow list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List Workflow
+      summary: List Workflows
       tags:
       - '[Workflow]'
     post:
@@ -1289,7 +1289,7 @@ paths:
           description: Failed to get the workflow.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get Eventlog
+      summary: List Event Logs
       tags:
       - '[Workflow Execution]'
   /workflow/{wfId}/run:
@@ -1351,7 +1351,7 @@ paths:
           description: Failed to get the workflowRuns.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get workflowRuns
+      summary: List Workflow Runs
       tags:
       - '[Workflow Execution]'
   /workflow/{wfId}/status:
@@ -1383,7 +1383,7 @@ paths:
           description: Failed to get the WorkflowVersion.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get WorkflowStatus
+      summary: Get Workflow Status
       tags:
       - '[Workflow]'
   /workflow/{wfId}/task:
@@ -1415,7 +1415,7 @@ paths:
           description: Failed to get a task list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List Task
+      summary: List Tasks
       tags:
       - '[Task]'
   /workflow/{wfId}/task/{taskId}:
@@ -1482,7 +1482,7 @@ paths:
           description: Failed to get a task group list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List TaskGroup
+      summary: List Task Groups
       tags:
       - '[Task Group]'
   /workflow/{wfId}/task_group/{tgId}:
@@ -1517,7 +1517,7 @@ paths:
           description: Failed to get the task group.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get TaskGroup
+      summary: Get Task Group
       tags:
       - '[Task Group]'
   /workflow/{wfId}/task_group/{tgId}/task:
@@ -1554,7 +1554,7 @@ paths:
           description: Failed to get a task list from the task group.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List Task from Task Group
+      summary: List Tasks from Task Group
       tags:
       - '[Task]'
   /workflow/{wfId}/task_group/{tgId}/task/{taskId}:
@@ -1634,7 +1634,7 @@ paths:
           description: Failed to get a workflowVersion list.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List workflowVersion
+      summary: List Workflow Versions
       tags:
       - '[Workflow]'
   /workflow/{wfId}/version/{verId}:
@@ -1669,7 +1669,7 @@ paths:
           description: Failed to get the WorkflowVersion.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get WorkflowVersion
+      summary: Get Workflow Version
       tags:
       - '[Workflow]'
   /workflow/{wfId}/workflowRun/{wfRunId}/range:
@@ -1710,7 +1710,7 @@ paths:
           description: Failed to clear the taskInstances.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Clear taskInstances
+      summary: Clear Task Instances
       tags:
       - '[Workflow Execution]'
   /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs:
@@ -1835,7 +1835,7 @@ paths:
           description: Failed to get the taskInstances.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get taskInstances
+      summary: List Task Instances
       tags:
       - '[Workflow Execution]'
   /workflow/name/{wfName}:
@@ -1904,7 +1904,7 @@ paths:
           description: Failed to get a list of workflow template.
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: List WorkflowTemplate
+      summary: List Workflow Templates
       tags:
       - '[Workflow Template]'
   /workflow_template/{wftId}:
@@ -1934,7 +1934,7 @@ paths:
           description: Failed to get the workflow template
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get WorkflowTemplate
+      summary: Get Workflow Template
       tags:
       - '[Workflow Template]'
   /workflow_template/name/{wfName}:
@@ -1964,7 +1964,7 @@ paths:
           description: Failed to get the workflow template
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
-      summary: Get WorkflowTemplate by Name
+      summary: Get Workflow Template by Name
       tags:
       - '[Workflow Template]'
 swagger: "2.0"

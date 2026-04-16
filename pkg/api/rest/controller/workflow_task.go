@@ -14,7 +14,7 @@ var _ model.Task
 // ListTaskFromTaskGroup godoc
 //
 //	@ID		list-task-from-task-group
-//	@Summary	List Task from Task Group
+//	@Summary	List Tasks from Task Group
 //	@Description	Get a task list from the task group.
 //	@Tags		[Task]
 //	@Accept		json
@@ -98,7 +98,7 @@ func GetTaskFromTaskGroup(c echo.Context) error {
 // ListTask godoc
 //
 //	@ID		list-task
-//	@Summary	List Task
+//	@Summary	List Tasks
 //	@Description	Get a task list of the workflow.
 //	@Tags		[Task]
 //	@Accept		json

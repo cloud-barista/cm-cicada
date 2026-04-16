@@ -14,7 +14,7 @@ import (
 // GetWorkflowStatus godoc
 //
 //	@ID		get-WorkflowStatus
-//	@Summary	Get WorkflowStatus
+//	@Summary	Get Workflow Status
 //	@Description	Get the WorkflowStatus.
 //	@Tags		[Workflow]
 //	@Accept		json

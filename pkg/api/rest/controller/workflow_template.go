@@ -11,7 +11,7 @@ import (
 // GetWorkflowTemplate godoc
 //
 //	@ID				get-workflow-template
-//	@Summary		Get WorkflowTemplate
+//	@Summary		Get Workflow Template
 //	@Description	Get the workflow template.
 //	@Tags			[Workflow Template]
 //	@Accept			json
@@ -36,7 +36,7 @@ func GetWorkflowTemplate(c echo.Context) error {
 // GetWorkflowTemplateByName godoc
 //
 //	@ID				get-workflow-template-by-name
-//	@Summary		Get WorkflowTemplate by Name
+//	@Summary		Get Workflow Template by Name
 //	@Description	Get the workflow template by name.
 //	@Tags			[Workflow Template]
 //	@Accept			json
@@ -65,7 +65,7 @@ func GetWorkflowTemplateByName(c echo.Context) error {
 // ListWorkflowTemplate godoc
 //
 //	@ID				list-workflow-template
-//	@Summary		List WorkflowTemplate
+//	@Summary		List Workflow Templates
 //	@Description	Get a list of workflow template.
 //	@Tags			[Workflow Template]
 //	@Accept			json

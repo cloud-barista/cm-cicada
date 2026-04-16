@@ -112,7 +112,7 @@ func GetTaskLogDownload(c echo.Context) error {
 // GetEventLogs godoc
 //
 //	@ID			get-event-logs
-//	@Summary		Get Eventlog
+//	@Summary		List Event Logs
 //	@Description	Get Eventlog.
 //	@Tags		[Workflow Execution]
 //	@Accept		json
