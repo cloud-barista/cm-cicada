@@ -3,10 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/lib/cmd"
-	"github.com/cloud-barista/cm-cicada/lib/ssh"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,38 +23,16 @@ import (
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to run script"
 //	@Router			/run_script [post]
 func RunScript(c echo.Context) error {
-	runScriptReq := new(model.RunScriptReq)
-	err := c.Bind(runScriptReq)
-	if err != nil {
+	req := new(model.RunScriptReq)
+	if err := c.Bind(req); err != nil {
 		return err
 	}
 
-	if runScriptReq.NSID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the ns_id.")
-	}
-
-	if runScriptReq.MCIID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the mci_id.")
-	}
-
-	if runScriptReq.VMID == "" {
-		return common.ReturnErrorMsg(c, "Please provide the vm_id.")
-	}
-
-	if runScriptReq.Content == "" {
-		return common.ReturnErrorMsg(c, "Please provide the content.")
-	}
-
-	var result model.ScriptResult
-
-	output, err := ssh.ExecuteScript(runScriptReq.NSID, runScriptReq.MCIID, runScriptReq.VMID, runScriptReq.Content)
+	svc := service.NewCicadaBuiltinService()
+	result, err := svc.RunScript(*req)
 	if err != nil {
-		result.IsSuccess = false
-		result.Error = err.Error()
-	} else {
-		result.IsSuccess = true
+		return common.ReturnErrorMsg(c, err.Error())
 	}
-	result.Output = string(output)
 
 	return c.JSONPretty(http.StatusOK, result, " ")
 }
@@ -74,23 +51,15 @@ func RunScript(c echo.Context) error {
 //	@Failure		500	{object}	common.ErrorResponse	"Failed to run script"
 //	@Router			/sleep_time [post]
 func SleepTime(c echo.Context) error {
-	sleepTimeReq := new(model.SleepTimeReq)
-	err := c.Bind(sleepTimeReq)
-	if err != nil {
+	req := new(model.SleepTimeReq)
+	if err := c.Bind(req); err != nil {
 		return err
 	}
 
-	if sleepTimeReq.Time == "" {
-		sleepTimeReq.Time = "10s"
-	}
-
-	var result model.SimpleMsg
-
-	_, err = cmd.RunBash("sleep " + sleepTimeReq.Time)
+	svc := service.NewCicadaBuiltinService()
+	result, err := svc.SleepTime(*req)
 	if err != nil {
-		result.Message = err.Error()
-	} else {
-		result.Message = "success"
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	return c.JSONPretty(http.StatusOK, result, " ")
