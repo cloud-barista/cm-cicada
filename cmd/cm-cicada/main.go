@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -11,6 +12,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/bootstrap"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/controller"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/server"
@@ -50,6 +52,18 @@ func init() {
 	err = db.Open()
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err.Error())
+	}
+
+	logger.Println(logger.INFO, false, "Loading workflow templates...")
+	if err := bootstrap.WorkflowTemplateInit(); err != nil {
+		logger.Println(logger.ERROR, true, err)
+	}
+
+	if loadExamples, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.TaskComponent.LoadExamples); loadExamples {
+		logger.Println(logger.INFO, false, "Loading task components...")
+		if err := bootstrap.TaskComponentInit(); err != nil {
+			logger.Println(logger.ERROR, true, err)
+		}
 	}
 
 	controller.OkMessage.Message = "Airflow connection is not ready"

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cloud-barista/cm-cicada/common"
-	"github.com/cloud-barista/cm-cicada/db"
+	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
@@ -32,7 +32,7 @@ func checkWorkflow(workflow *model.Workflow) error {
 
 	for _, tg := range workflow.Data.TaskGroups {
 		for _, t := range tg.Tasks {
-			taskComponent := db.TaskComponentGetByName(t.TaskComponent)
+			taskComponent := dao.TaskComponentGetByName(t.TaskComponent)
 			if taskComponent == nil {
 				return errors.New("task component '" + t.TaskComponent + "' not found")
 			}
@@ -266,16 +266,12 @@ func buildTaskAirflowIDByName(workflow *model.Workflow) map[string]string {
 	for _, tg := range workflow.Data.TaskGroups {
 		for _, t := range tg.Tasks {
 			taskAirflowID := t.Name
-			if db.DB != nil {
-				taskModel := &model.TaskDBModel{}
-				result := db.DB.Where("workflow_id = ? AND name = ? AND is_deleted = ?", workflow.ID, t.Name, false).First(taskModel)
-				if result.Error == nil {
-					switch {
-					case taskModel.TaskKey != "":
-						taskAirflowID = taskModel.TaskKey
-					case taskModel.ID != "":
-						taskAirflowID = taskModel.ID
-					}
+			if taskModel, err := dao.TaskGetByWorkflowIDAndName(workflow.ID, t.Name); err == nil {
+				switch {
+				case taskModel.TaskKey != "":
+					taskAirflowID = taskModel.TaskKey
+				case taskModel.ID != "":
+					taskAirflowID = taskModel.ID
 				}
 			}
 			taskAirflowIDByName[t.Name] = taskAirflowID
@@ -370,7 +366,7 @@ func buildTaskOptions(
 ) (map[string]any, error) {
 	// Task 옵션을 구성한다(기본 HTTP 또는 커스텀 operator).
 	taskOptions := make(map[string]any)
-	taskComponent := db.TaskComponentGetByName(t.TaskComponent)
+	taskComponent := dao.TaskComponentGetByName(t.TaskComponent)
 	if taskComponent == nil {
 		return nil, errors.New("task component '" + t.TaskComponent + "' not found")
 	}

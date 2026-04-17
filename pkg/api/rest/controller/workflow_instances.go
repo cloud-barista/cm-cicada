@@ -13,9 +13,9 @@ import (
 // GetTaskInstances godoc
 //
 //	@ID			get-task-instances
-//	@Summary	Get taskInstances
+//	@Summary	List Task Instances
 //	@Description	Get the task Logs.
-//	@Tags	[Workflow]
+//	@Tags	[Workflow Execution]
 //	@Accept	json
 //	@Produce	json
 //	@Param	wfId path string true "DB workflow ID."
@@ -46,9 +46,9 @@ func GetTaskInstances(c echo.Context) error {
 // ClearTaskInstances godoc
 //
 //	@ID			clear-task-instances
-//	@Summary	Clear taskInstances
+//	@Summary	Clear Task Instances
 //	@Description	Clear the task Instance.
-//	@Tags	[Workflow]
+//	@Tags	[Workflow Execution]
 //	@Accept	json
 //	@Produce	json
 //	@Param	wfId path string true "DB workflow ID."

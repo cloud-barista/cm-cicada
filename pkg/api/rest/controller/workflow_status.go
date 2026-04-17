@@ -3,18 +3,18 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
-	"github.com/jollaman999/utils/logger"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
+
+var _ model.WorkflowStatus // swag type reference
 
 // GetWorkflowStatus godoc
 //
 //	@ID		get-WorkflowStatus
-//	@Summary	Get WorkflowStatus
+//	@Summary	Get Workflow Status
 //	@Description	Get the WorkflowStatus.
 //	@Tags		[Workflow]
 //	@Accept		json
@@ -29,27 +29,11 @@ func GetWorkflowStatus(c echo.Context) error {
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-	client, err := airflow.GetClient()
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-	enumStatus := client.GetAllowedDagStateEnumValues()
-	var statusList []model.WorkflowStatus
-	for _, v := range enumStatus {
 
-		resp, err := client.GetDagStatus(common.WorkflowDagID(workflow), string(*v.Ptr()))
-		if err != nil {
-			logger.Println(logger.ERROR, false,
-				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
-		}
-		statusList = append(statusList, model.WorkflowStatus{
-			State: string(*v.Ptr()),
-			Count: len(*resp.DagRuns),
-		})
+	svc := service.NewWorkflowRuntimeService()
+	statusList, err := svc.GetWorkflowStatus(wfId)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
 
 	return c.JSONPretty(http.StatusOK, statusList, " ")

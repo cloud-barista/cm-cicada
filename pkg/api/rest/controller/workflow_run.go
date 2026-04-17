@@ -3,8 +3,6 @@ package controller
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
@@ -16,7 +14,7 @@ import (
 //	@ID		run-workflow
 //	@Summary	Run Workflow
 //	@Description	Run the workflow.
-//	@Tags		[Workflow]
+//	@Tags		[Workflow Execution]
 //	@Accept		json
 //	@Produce	json
 //	@Param		wfId path string true "DB workflow ID."
@@ -44,9 +42,9 @@ func RunWorkflow(c echo.Context) error {
 // GetWorkflowRuns godoc
 //
 //	@ID			get-workflow-runs
-//	@Summary	Get workflowRuns
+//	@Summary	List Workflow Runs
 //	@Description	Get the task Logs.
-//	@Tags	[Workflow]
+//	@Tags	[Workflow Execution]
 //	@Accept	json
 //	@Produce	json
 //	@Param	wfId path string true "DB workflow ID."
@@ -60,41 +58,11 @@ func GetWorkflowRuns(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	client, err := airflow.GetClient()
+	svc := service.NewWorkflowRuntimeService()
+	runs, err := svc.GetWorkflowRuns(wfId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflow, err := dao.WorkflowGet(wfId)
-	if err != nil {
-		return common.ReturnErrorMsg(c, err.Error())
-	}
-
-	runList, err := client.GetDAGRuns(common.WorkflowDagID(workflow))
-	if err != nil {
-		return common.ReturnErrorMsg(c, "Failed to get the workflow runs: "+err.Error())
-	}
-
-	var transformedRuns []model.WorkflowRun
-	dbWorkflowID := workflow.ID
-
-	for _, dagRun := range *runList.DagRuns {
-		transformedRun := model.WorkflowRun{
-			WorkflowID:             &dbWorkflowID,
-			DagID:                  dagRun.DagId,
-			WorkflowRunID:          dagRun.GetDagRunId(),
-			DataIntervalStart:      dagRun.GetDataIntervalStart(),
-			DataIntervalEnd:        dagRun.GetDataIntervalEnd(),
-			State:                  string(dagRun.GetState()),
-			ExecutionDate:          dagRun.GetExecutionDate(),
-			StartDate:              dagRun.GetStartDate(),
-			EndDate:                dagRun.GetEndDate(),
-			RunType:                dagRun.GetRunType(),
-			LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
-			DurationDate:           (dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds()),
-		}
-		transformedRuns = append(transformedRuns, transformedRun)
-	}
-
-	return c.JSONPretty(http.StatusOK, transformedRuns, " ")
+	return c.JSONPretty(http.StatusOK, runs, " ")
 }

@@ -1,18 +1,20 @@
 package controller
 
 import (
-	"github.com/cloud-barista/cm-cicada/dao"
-	"github.com/cloud-barista/cm-cicada/db"
+	"net/http"
+
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
+
+var _ model.WorkflowTemplate // swag type reference
 
 // GetWorkflowTemplate godoc
 //
 //	@ID				get-workflow-template
-//	@Summary		Get WorkflowTemplate
+//	@Summary		Get Workflow Template
 //	@Description	Get the workflow template.
 //	@Tags			[Workflow Template]
 //	@Accept			json
@@ -27,17 +29,20 @@ func GetWorkflowTemplate(c echo.Context) error {
 	if wftId == "" {
 		return common.ReturnErrorMsg(c, "wftId is empty")
 	}
-	workflowTemplate, err := dao.WorkflowTemplateGet(wftId)
+
+	svc := service.NewWorkflowTemplateService()
+	workflowTemplate, err := svc.Get(wftId)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
+
 	return c.JSONPretty(http.StatusOK, workflowTemplate, "")
 }
 
 // GetWorkflowTemplateByName godoc
 //
 //	@ID				get-workflow-template-by-name
-//	@Summary		Get WorkflowTemplate by Name
+//	@Summary		Get Workflow Template by Name
 //	@Description	Get the workflow template by name.
 //	@Tags			[Workflow Template]
 //	@Accept			json
@@ -52,21 +57,20 @@ func GetWorkflowTemplateByName(c echo.Context) error {
 	if wfName == "" {
 		return common.ReturnErrorMsg(c, "wfName is empty")
 	}
-	workflowTemplate := db.WorkflowTemplateGetByName(wfName)
-	if workflowTemplate == nil {
-		return common.ReturnErrorMsg(c, "workflow template not found with the provided name")
+
+	svc := service.NewWorkflowTemplateService()
+	workflowTemplate, err := svc.GetByName(wfName)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
 	}
-	return c.JSONPretty(http.StatusOK, model.GetWorkflowTemplate{
-		SpecVersion: workflowTemplate.SpecVersion,
-		Name:        workflowTemplate.Name,
-		Data:        workflowTemplate.Data,
-	}, "")
+
+	return c.JSONPretty(http.StatusOK, workflowTemplate, "")
 }
 
 // ListWorkflowTemplate godoc
 //
 //	@ID				list-workflow-template
-//	@Summary		List WorkflowTemplate
+//	@Summary		List Workflow Templates
 //	@Description	Get a list of workflow template.
 //	@Tags			[Workflow Template]
 //	@Accept			json
@@ -84,13 +88,13 @@ func ListWorkflowTemplate(c echo.Context) error {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
 
-	workflowTemplate := &model.WorkflowTemplate{
-		Name: c.QueryParam("name"),
-	}
+	name := c.QueryParam("name")
 
-	workflowTemplateList, err := dao.WorkflowTemplateGetList(workflowTemplate, page, row)
+	svc := service.NewWorkflowTemplateService()
+	list, err := svc.List(name, page, row)
 	if err != nil {
 		return common.ReturnErrorMsg(c, err.Error())
 	}
-	return c.JSONPretty(http.StatusOK, workflowTemplateList, "")
+
+	return c.JSONPretty(http.StatusOK, list, "")
 }

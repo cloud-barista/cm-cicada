@@ -29,6 +29,22 @@ func TaskComponentGet(id string) (*model.TaskComponent, error) {
 	return taskComponent, nil
 }
 
+// TaskComponentGetByName returns the task component matching the given name,
+// or nil when not found. Errors other than ErrRecordNotFound are logged by
+// the caller's flow via nil checking (parity with legacy db.TaskComponentGetByName).
+func TaskComponentGetByName(name string) *model.TaskComponent {
+	if db.DB == nil {
+		return nil
+	}
+
+	taskComponent := &model.TaskComponent{}
+	result := db.DB.Where("name = ?", name).First(taskComponent)
+	if result.Error != nil {
+		return nil
+	}
+	return taskComponent
+}
+
 func TaskComponentGetList(page int, row int) (*[]model.TaskComponent, error) {
 	taskComponentList := &[]model.TaskComponent{}
 	// Ensure db.DB is not nil to avoid runtime panics
