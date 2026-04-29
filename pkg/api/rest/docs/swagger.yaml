@@ -141,26 +141,14 @@ definitions:
         items:
           type: string
         type: array
-      extra:
-        additionalProperties: true
-        type: object
       name:
         type: string
-      path_params:
-        additionalProperties:
-          type: string
-        type: object
-      query_params:
-        additionalProperties:
-          type: string
-        type: object
-      request_body:
-        type: string
+      spec:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec'
       task_component:
         type: string
     required:
     - name
-    - request_body
     - task_component
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowReq:
@@ -262,31 +250,19 @@ definitions:
         items:
           type: string
         type: array
-      extra:
-        additionalProperties: true
-        type: object
       id:
         type: string
       is_deleted_task:
         type: boolean
       name:
         type: string
-      path_params:
-        additionalProperties:
-          type: string
-        type: object
-      query_params:
-        additionalProperties:
-          type: string
-        type: object
-      request_body:
-        type: string
+      spec:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec'
       task_component:
         type: string
     required:
     - id
     - name
-    - request_body
     - task_component
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskClearOption:
@@ -342,23 +318,12 @@ definitions:
         items:
           type: string
         type: array
-      extra:
-        additionalProperties: true
-        type: object
       id:
         type: string
       name:
         type: string
-      path_params:
-        additionalProperties:
-          type: string
-        type: object
-      query_params:
-        additionalProperties:
-          type: string
-        type: object
-      request_body:
-        type: string
+      spec:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec'
       task_component:
         type: string
       task_group_id:
@@ -368,7 +333,6 @@ definitions:
     required:
     - id
     - name
-    - request_body
     - task_component
     - task_group_id
     - workflow_id

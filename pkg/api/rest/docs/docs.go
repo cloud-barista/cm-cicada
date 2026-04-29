@@ -2393,7 +2393,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "request_body",
                 "task_component"
             ],
             "properties": {
@@ -2403,27 +2402,11 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "extra": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "name": {
                     "type": "string"
                 },
-                "path_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "query_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "request_body": {
-                    "type": "string"
+                "spec": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec"
                 },
                 "task_component": {
                     "type": "string"
@@ -2574,7 +2557,6 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "request_body",
                 "task_component"
             ],
             "properties": {
@@ -2583,10 +2565,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "extra": {
-                    "type": "object",
-                    "additionalProperties": true
                 },
                 "id": {
                     "type": "string"
@@ -2597,20 +2575,8 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "path_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "query_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "request_body": {
-                    "type": "string"
+                "spec": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec"
                 },
                 "task_component": {
                     "type": "string"
@@ -2686,7 +2652,6 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "request_body",
                 "task_component",
                 "task_group_id",
                 "workflow_id"
@@ -2698,30 +2663,14 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "extra": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "path_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "query_params": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "request_body": {
-                    "type": "string"
+                "spec": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec"
                 },
                 "task_component": {
                     "type": "string"

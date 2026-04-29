@@ -51,10 +51,7 @@ func CreateDataReqToData(specVersion string, createDataReq model.CreateDataReq) 
 						ID:            uuid.New().String(),
 						Name:          tReq.Name,
 						TaskComponent: tReq.TaskComponent,
-						RequestBody:   tReq.RequestBody,
-						PathParams:    tReq.PathParams,
-						QueryParams:   tReq.QueryParams,
-						Extra:         tReq.Extra,
+						Spec:          tReq.Spec,
 						Dependencies:  tReq.Dependencies,
 					})
 				}

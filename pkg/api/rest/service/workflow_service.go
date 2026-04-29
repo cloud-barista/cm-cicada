@@ -314,10 +314,7 @@ func captureSoftDroppedTaskSnapshots(workflow *model.Workflow, droppedTasks []mo
 				ID:            taskDB.ID,
 				Name:          taskDB.Name,
 				TaskComponent: "",
-				RequestBody:   "",
-				PathParams:    nil,
-				QueryParams:   nil,
-				Extra:         nil,
+				Spec:          nil,
 				Dependencies:  []string{},
 			}
 		}
