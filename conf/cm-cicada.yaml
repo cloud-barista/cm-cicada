@@ -4,6 +4,7 @@ cm-cicada:
         examples_directory: "./lib/airflow/example/task_component/"
     workflow_template:
         templates_directory: "./lib/airflow/example/workflow_template/"
+    task_types_path: "./conf/task_types.yaml"
     airflow-server:
         address: 127.0.0.1:8080
         use_tls: false
