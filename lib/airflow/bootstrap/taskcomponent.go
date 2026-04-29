@@ -14,6 +14,7 @@ import (
 
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/db"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
@@ -85,11 +86,14 @@ func TaskComponentInit() error {
 // buildTaskComponent resolves a ConfigFile into an in-memory TaskComponent.
 // Returns (nil, nil) when the descriptor references an unknown connection —
 // the caller treats that as a soft-skip to keep startup resilient.
+//
+// When the descriptor carries a pre-populated `extra` object the Swagger
+// round trip is skipped: the operator class inside extra is matched against
+// the catalog to determine the task type, and the remaining fields become
+// the TaskComponent.Spec.
 func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
 	if configFile.Extra != nil {
-		taskComponent := &model.TaskComponent{}
-		taskComponent.Data.Options.Extra = configFile.Extra
-		return taskComponent, nil
+		return buildTaskComponentFromExtra(configFile.Extra)
 	}
 
 	connection, ok := findConnection(configFile.APIConnectionID)
@@ -108,6 +112,40 @@ func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
 		return nil, fmt.Errorf("failed to process endpoint: %v", err)
 	}
 	return taskComponent, nil
+}
+
+func buildTaskComponentFromExtra(extra map[string]any) (*model.TaskComponent, error) {
+	operatorClass, _ := extra["operator"].(string)
+	if operatorClass == "" {
+		return nil, fmt.Errorf("extra.operator is missing or not a string")
+	}
+
+	typeID, ok := findTypeByOperator(operatorClass)
+	if !ok {
+		return nil, fmt.Errorf("no catalog task type matches operator class: %s", operatorClass)
+	}
+
+	specMap := model.Spec{}
+	for k, v := range extra {
+		if k == "operator" {
+			continue
+		}
+		specMap[k] = v
+	}
+
+	return &model.TaskComponent{
+		Type: typeID,
+		Spec: specMap,
+	}, nil
+}
+
+func findTypeByOperator(operatorClass string) (string, bool) {
+	for _, t := range catalog.List() {
+		if t.OperatorClass == operatorClass {
+			return t.ID, true
+		}
+	}
+	return "", false
 }
 
 func findConnection(id string) (model.Connection, bool) {

@@ -109,13 +109,17 @@ definitions:
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq:
     properties:
-      data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData'
+      description:
+        type: string
       name:
         type: string
+      spec:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec'
+      type:
+        type: string
     required:
-    - data
     - name
+    - type
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskGroupReq:
     properties:
@@ -216,40 +220,6 @@ definitions:
     - name
     - spec_version
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure:
-    properties:
-      properties:
-        additionalProperties:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
-        type: object
-      required:
-        items:
-          type: string
-        type: array
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef:
-    properties:
-      default: {}
-      description:
-        type: string
-      enum:
-        items:
-          type: string
-        type: array
-      example: {}
-      items:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
-      properties:
-        additionalProperties:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef'
-        type: object
-      required:
-        items:
-          type: string
-        type: array
-      type:
-        type: string
-    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq:
     properties:
       content:
@@ -282,6 +252,9 @@ definitions:
         description: 'Ex: 300 = 300sec, 1m 30s = 1min 30seconds, 1h 10m 15s = 1hour
           10minutes 15seconds, 1d 1s = 1day 1second, No Input Default: 10s'
         type: string
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec:
+    additionalProperties: {}
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task:
     properties:
@@ -344,8 +317,6 @@ definitions:
     properties:
       created_at:
         type: string
-      data:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData'
       description:
         type: string
       id:
@@ -354,37 +325,16 @@ definitions:
         type: boolean
       name:
         type: string
+      spec:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec'
+      type:
+        type: string
       updated_at:
         type: string
     required:
-    - data
     - id
     - name
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData:
-    properties:
-      body_params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
-      options:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions'
-      path_params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
-      query_params:
-        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure'
-    type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions:
-    properties:
-      api_connection_id:
-        type: string
-      endpoint:
-        type: string
-      extra:
-        additionalProperties: true
-        type: object
-      method:
-        type: string
-      request_body:
-        type: string
+    - type
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskDirectly:
     properties:

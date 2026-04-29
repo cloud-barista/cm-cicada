@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/google/uuid"
 )
@@ -18,18 +19,22 @@ func (s *TaskComponentService) Create(req model.CreateTaskComponentReq) (*model.
 	if req.Name == "" {
 		return nil, errors.New("please provide the name")
 	}
+	if err := s.validateType(req.Type); err != nil {
+		return nil, err
+	}
 
 	taskComponent := model.TaskComponent{
-		ID:   uuid.New().String(),
-		Name: req.Name,
-		Data: req.Data,
+		ID:          uuid.New().String(),
+		Name:        req.Name,
+		Description: req.Description,
+		Type:        req.Type,
+		Spec:        req.Spec,
 	}
 
 	created, err := dao.TaskComponentCreate(&taskComponent)
 	if err != nil {
 		return nil, err
 	}
-
 	return created, nil
 }
 
@@ -54,16 +59,25 @@ func (s *TaskComponentService) Update(id string, req model.CreateTaskComponentRe
 	if err != nil {
 		return nil, err
 	}
-
+	if req.Type != "" {
+		if err := s.validateType(req.Type); err != nil {
+			return nil, err
+		}
+		existing.Type = req.Type
+	}
 	if req.Name != "" {
 		existing.Name = req.Name
 	}
-	existing.Data = req.Data
+	if req.Description != "" {
+		existing.Description = req.Description
+	}
+	if req.Spec != nil {
+		existing.Spec = req.Spec
+	}
 
 	if err := dao.TaskComponentUpdate(existing); err != nil {
 		return nil, err
 	}
-
 	return existing, nil
 }
 
@@ -72,6 +86,15 @@ func (s *TaskComponentService) Delete(id string) error {
 	if err != nil {
 		return err
 	}
-
 	return dao.TaskComponentDelete(taskComponent)
+}
+
+func (s *TaskComponentService) validateType(typeID string) error {
+	if typeID == "" {
+		return errors.New("please provide the type")
+	}
+	if !catalog.Has(typeID) {
+		return errors.New("unknown task type: " + typeID)
+	}
+	return nil
 }

@@ -2350,14 +2350,20 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateTaskComponentReq": {
             "type": "object",
             "required": [
-                "data",
-                "name"
+                "name",
+                "type"
             ],
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData"
+                "description": {
+                    "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -2510,57 +2516,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure": {
-            "type": "object",
-            "properties": {
-                "properties": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef"
-                    }
-                },
-                "required": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef": {
-            "type": "object",
-            "properties": {
-                "default": {},
-                "description": {
-                    "type": "string"
-                },
-                "enum": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "example": {},
-                "items": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef"
-                },
-                "properties": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.PropertyDef"
-                    }
-                },
-                "required": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq": {
             "type": "object",
             "properties": {
@@ -2609,6 +2564,10 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec": {
+            "type": "object",
+            "additionalProperties": {}
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Task": {
             "type": "object",
@@ -2691,16 +2650,13 @@ const docTemplate = `{
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponent": {
             "type": "object",
             "required": [
-                "data",
                 "id",
-                "name"
+                "name",
+                "type"
             ],
             "properties": {
                 "created_at": {
                     "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData"
                 },
                 "description": {
                     "type": "string"
@@ -2714,45 +2670,13 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "spec": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Spec"
+                },
+                "type": {
+                    "type": "string"
+                },
                 "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentData": {
-            "type": "object",
-            "properties": {
-                "body_params": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure"
-                },
-                "options": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions"
-                },
-                "path_params": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure"
-                },
-                "query_params": {
-                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ParameterStructure"
-                }
-            }
-        },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskComponentOptions": {
-            "type": "object",
-            "properties": {
-                "api_connection_id": {
-                    "type": "string"
-                },
-                "endpoint": {
-                    "type": "string"
-                },
-                "extra": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "method": {
-                    "type": "string"
-                },
-                "request_body": {
                     "type": "string"
                 }
             }

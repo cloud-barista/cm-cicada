@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
@@ -364,52 +365,159 @@ func buildTaskOptions(
 	t model.Task,
 	taskAirflowIDByName map[string]string,
 ) (map[string]any, error) {
-	// Task 옵션을 구성한다(기본 HTTP 또는 커스텀 operator).
-	taskOptions := make(map[string]any)
 	taskComponent := dao.TaskComponentGetByName(t.TaskComponent)
 	if taskComponent == nil {
 		return nil, errors.New("task component '" + t.TaskComponent + "' not found")
 	}
 
-	logger.Println(logger.INFO, true, fmt.Sprintf("task component extra: %v", taskComponent.Data.Options.Extra))
-	logger.Println(logger.INFO, true, fmt.Sprintf("task  extra: %v", t))
-
-	if taskComponent.Data.Options.Extra != nil {
-		taskOptions = copyMap(taskComponent.Data.Options.Extra)
-		if t.Extra != nil {
-			mergeMaps(taskOptions, t.Extra)
-		}
-		return taskOptions, nil
+	typeDef, ok := catalog.Get(taskComponent.Type)
+	if !ok {
+		return nil, errors.New("unknown task type in catalog: " + taskComponent.Type)
 	}
 
-	if isTaskExist(workflow, t.RequestBody) {
-		taskOptions["operator"] = "local.JsonHttpRequestOperator"
-		xcomTaskID, exists := taskAirflowIDByName[t.RequestBody]
-		if exists {
-			taskOptions["xcom_task"] = xcomTaskID
-		} else {
-			taskOptions["xcom_task"] = t.RequestBody
-		}
-	} else {
-		taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
-		taskOptions["headers"] = map[string]any{
-			"Content-Type": "application/json",
-		}
-		taskOptions["log_response"] = true
-		taskOptions["data"] = t.RequestBody
-		// Allow workflow task.extra.headers and coerce header values to string.
-		applyTaskExtraHeaders(taskOptions, t.Extra)
-	}
+	logger.Println(logger.INFO, true,
+		fmt.Sprintf("task component name=%s type=%s spec=%v",
+			taskComponent.Name, taskComponent.Type, taskComponent.Spec))
 
-	taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-	endpoint, err := parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+	switch taskComponent.Type {
+	case "http":
+		return buildHTTPTaskOptions(typeDef, taskComponent, t)
+	case "http_xcom":
+		return buildHTTPXcomTaskOptions(typeDef, taskComponent, t, workflow, taskAirflowIDByName)
+	case "bash":
+		return buildBashTaskOptions(typeDef, taskComponent, t)
+	case "ssh":
+		return buildSSHTaskOptions(typeDef, taskComponent, t)
+	case "trigger_workflow":
+		return buildTriggerWorkflowTaskOptions(typeDef, taskComponent, t)
+	default:
+		// Fallback: pass-through with operator class only.
+		return map[string]any{"operator": typeDef.OperatorClass}, nil
+	}
+}
+
+func buildHTTPTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	taskOptions := map[string]any{
+		"operator":      typeDef.OperatorClass,
+		"http_conn_id":  specString(c.Spec, "api_connection_id"),
+		"method":        specString(c.Spec, "method"),
+		"log_response":  true,
+		"headers":       map[string]any{"Content-Type": "application/json"},
+		"data":          t.RequestBody,
+	}
+	endpointTemplate := specString(c.Spec, "endpoint")
+	endpoint, err := parseEndpoint(t.PathParams, t.QueryParams, endpointTemplate)
 	if err != nil {
 		return nil, err
 	}
 	taskOptions["endpoint"] = endpoint
-	taskOptions["method"] = taskComponent.Data.Options.Method
-
+	applyTaskExtraHeaders(taskOptions, t.Extra)
 	return taskOptions, nil
+}
+
+func buildHTTPXcomTaskOptions(
+	typeDef catalog.TaskTypeDef,
+	c *model.TaskComponent,
+	t model.Task,
+	workflow *model.Workflow,
+	taskAirflowIDByName map[string]string,
+) (map[string]any, error) {
+	taskOptions := map[string]any{
+		"operator":     typeDef.OperatorClass,
+		"http_conn_id": specString(c.Spec, "api_connection_id"),
+		"method":       specString(c.Spec, "method"),
+	}
+	endpointTemplate := specString(c.Spec, "endpoint")
+	endpoint, err := parseEndpoint(t.PathParams, t.QueryParams, endpointTemplate)
+	if err != nil {
+		return nil, err
+	}
+	taskOptions["endpoint"] = endpoint
+
+	// Resolve xcom source: prefer Task.RequestBody (referencing another task name).
+	xcomSource := t.RequestBody
+	if xcomSource == "" {
+		// Allow component.spec.xcom_task as default if no override.
+		xcomSource = specString(c.Spec, "xcom_task")
+	}
+	if xcomSource == "" {
+		return nil, errors.New("http_xcom task requires a referenced task name (RequestBody or spec.xcom_task)")
+	}
+	if isTaskExist(workflow, xcomSource) {
+		if id, ok := taskAirflowIDByName[xcomSource]; ok {
+			taskOptions["xcom_task"] = id
+		} else {
+			taskOptions["xcom_task"] = xcomSource
+		}
+	} else {
+		taskOptions["xcom_task"] = xcomSource
+	}
+	return taskOptions, nil
+}
+
+func buildBashTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	cmd := specString(c.Spec, "bash_command")
+	if t.RequestBody != "" {
+		// Allow override through Task.RequestBody for now; replaced by Task.Spec
+		// in the next commit.
+		cmd = t.RequestBody
+	}
+	if cmd == "" {
+		return nil, errors.New("bash task component is missing bash_command")
+	}
+	return map[string]any{
+		"operator":     typeDef.OperatorClass,
+		"bash_command": cmd,
+	}, nil
+}
+
+func buildSSHTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	connID := specString(c.Spec, "ssh_conn_id")
+	if connID == "" {
+		return nil, errors.New("ssh task component is missing ssh_conn_id")
+	}
+	cmd := t.RequestBody
+	if cmd == "" {
+		cmd = specString(c.Spec, "command")
+	}
+	if cmd == "" {
+		return nil, errors.New("ssh task is missing command")
+	}
+	return map[string]any{
+		"operator":    typeDef.OperatorClass,
+		"ssh_conn_id": connID,
+		"command":     cmd,
+	}, nil
+}
+
+func buildTriggerWorkflowTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	taskOptions := map[string]any{
+		"operator": typeDef.OperatorClass,
+	}
+	for k, v := range c.Spec {
+		taskOptions[k] = v
+	}
+	if t.Extra != nil {
+		mergeMaps(taskOptions, t.Extra)
+	}
+	if _, ok := taskOptions["trigger_dag_id"]; !ok {
+		return nil, errors.New("trigger_workflow task is missing trigger_dag_id")
+	}
+	return taskOptions, nil
+}
+
+func specString(s model.Spec, key string) string {
+	if s == nil {
+		return ""
+	}
+	v, ok := s[key]
+	if !ok {
+		return ""
+	}
+	if str, ok := v.(string); ok {
+		return str
+	}
+	return fmt.Sprint(v)
 }
 
 func resolveDependencies(dependencies []string, taskAirflowIDByName map[string]string) []string {
@@ -508,22 +616,6 @@ func cleanupStaleTaskFilesInGroup(groupDir string, expectedTaskFilePaths map[str
 	}
 
 	return nil
-}
-
-func copyMap(src map[string]any) map[string]any {
-	// 중첩 map까지 안전하게 복사한다.
-	if src == nil {
-		return nil
-	}
-	dst := make(map[string]any, len(src))
-	for k, v := range src {
-		if nestedMap, ok := v.(map[string]any); ok {
-			dst[k] = copyMap(nestedMap)
-		} else {
-			dst[k] = v
-		}
-	}
-	return dst
 }
 
 func mergeMaps(dst map[string]any, src map[string]any) {

@@ -212,76 +212,6 @@ func resolveSchemaRef(ref string, definitions map[string]SchemaModel) SchemaMode
 	return schema
 }
 
-func getPropertyType(schema SchemaModel) string {
-	if schema.Type != "" {
-		return schema.Type
-	}
-
-	if schema.Ref != "" {
-		return "object"
-	}
-
-	if len(schema.Properties) > 0 {
-		return "object"
-	}
-
-	if schema.Items != nil {
-		return "array"
-	}
-
-	return "object"
-}
-
-func convertToPropertyDef(schema SchemaModel) model.PropertyDef {
-	property := model.PropertyDef{
-		Type:        getPropertyType(schema),
-		Required:    schema.Required,
-		Properties:  make(map[string]model.PropertyDef),
-		Description: schema.Description,
-		Default:     schema.Default,
-		Enum:        schema.Enum,
-		Example:     schema.Example,
-	}
-
-	if property.Type == "object" || len(schema.Properties) > 0 {
-		for name, prop := range schema.Properties {
-			property.Properties[name] = convertToPropertyDef(prop)
-		}
-	}
-
-	if property.Type == "array" && schema.Items != nil {
-		property.Items = &model.PropertyDef{
-			Type:        getPropertyType(*schema.Items),
-			Properties:  make(map[string]model.PropertyDef),
-			Description: schema.Items.Description,
-			Default:     schema.Items.Default,
-			Enum:        schema.Items.Enum,
-			Example:     schema.Items.Example,
-		}
-
-		if len(schema.Items.Properties) > 0 {
-			for name, prop := range schema.Items.Properties {
-				property.Items.Properties[name] = convertToPropertyDef(prop)
-			}
-		}
-	}
-
-	return property
-}
-
-func convertSchemaToParams(schema SchemaModel) model.ParameterStructure {
-	params := model.ParameterStructure{
-		Required:   schema.Required,
-		Properties: make(map[string]model.PropertyDef),
-	}
-
-	for name, propSchema := range schema.Properties {
-		params.Properties[name] = convertToPropertyDef(propSchema)
-	}
-
-	return params
-}
-
 func generateExampleValue(schema SchemaModel) interface{} {
 	if schema.Example != nil {
 		return schema.Example
@@ -333,8 +263,8 @@ func generateRequestBodyExample(schema SchemaModel) string {
 }
 
 // processEndpoint walks a SwaggerSpec, locates the target endpoint+method, and
-// builds a TaskComponent reflecting its path/query/body parameters and an
-// example request body.
+// builds a TaskComponent of type "http" with the resolved endpoint, method,
+// connection id, and (when available) an example request body.
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, targetMethod string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 	for path, pathItem := range spec.Paths {
@@ -357,66 +287,29 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, tar
 					" (Please specify the method from the task component example JSON file.)", targetEndpoint)
 			}
 
-			taskComponent := &model.TaskComponent{
-				Data: model.TaskComponentData{
-					Options: model.TaskComponentOptions{
-						APIConnectionID: connectionID,
-						Endpoint:        joinPaths(spec.BasePath, path),
-						Method:          strings.ToUpper(method),
-					},
-				},
-			}
-
-			pathParams := model.ParameterStructure{
-				Properties: make(map[string]model.PropertyDef),
-			}
-			queryParams := model.ParameterStructure{
-				Properties: make(map[string]model.PropertyDef),
+			specMap := model.Spec{
+				"api_connection_id": connectionID,
+				"method":            strings.ToUpper(method),
+				"endpoint":          joinPaths(spec.BasePath, path),
 			}
 
 			for _, param := range operation.Parameters {
-				switch param.In {
-				case "path":
-					if param.Required {
-						pathParams.Required = append(pathParams.Required, param.Name)
-					}
-					pathParams.Properties[param.Name] = model.PropertyDef{
-						Type:        param.Type,
-						Description: param.Description,
-						Default:     param.Default,
-						Enum:        param.Enum,
-					}
-				case "query":
-					if param.Required {
-						queryParams.Required = append(queryParams.Required, param.Name)
-					}
-					queryParams.Properties[param.Name] = model.PropertyDef{
-						Type:        param.Type,
-						Description: param.Description,
-						Default:     param.Default,
-						Enum:        param.Enum,
-					}
-				case "body":
-					if param.Schema != nil && param.Schema.Ref != "" {
-						schema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
-						taskComponent.Data.BodyParams = convertSchemaToParams(schema)
-
-						requestBodyExample := generateRequestBodyExample(schema)
-						if requestBodyExample != "" {
-							taskComponent.Data.Options.RequestBody = requestBodyExample
-						}
-					}
+				if param.In != "body" {
+					continue
+				}
+				if param.Schema == nil || param.Schema.Ref == "" {
+					continue
+				}
+				bodySchema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
+				if example := generateRequestBodyExample(bodySchema); example != "" {
+					specMap["request_body_example"] = example
 				}
 			}
 
-			if len(pathParams.Properties) > 0 {
-				taskComponent.Data.PathParams = pathParams
-			}
-			if len(queryParams.Properties) > 0 {
-				taskComponent.Data.QueryParams = queryParams
-			}
-
-			return taskComponent, nil
+			return &model.TaskComponent{
+				Type: "http",
+				Spec: specMap,
+			}, nil
 		}
 	}
 
