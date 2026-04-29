@@ -789,6 +789,84 @@
                 }
             }
         },
+        "/task_type": {
+            "get": {
+                "description": "List all available task types defined in the catalog.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Task Type]"
+                ],
+                "summary": "List Task Types",
+                "operationId": "list-task-type",
+                "responses": {
+                    "200": {
+                        "description": "Successfully list task types",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_lib_airflow_catalog.TaskTypeDef"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to list task types",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task_type/{id}": {
+            "get": {
+                "description": "Get a specific task type definition (including schemas).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Task Type]"
+                ],
+                "summary": "Get Task Type",
+                "operationId": "get-task-type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task type id (e.g. http, bash, ssh)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully get the task type",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_lib_airflow_catalog.TaskTypeDef"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Task type not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow": {
             "get": {
                 "description": "Get a workflow list.",
@@ -2145,6 +2223,58 @@
                 },
                 "continuation_token": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_lib_airflow_catalog.FieldSchema": {
+            "type": "object",
+            "properties": {
+                "enum": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "max": {
+                    "type": "integer"
+                },
+                "min": {
+                    "type": "integer"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_lib_airflow_catalog.TaskTypeDef": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "componentSchema": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_lib_airflow_catalog.FieldSchema"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "operatorClass": {
+                    "type": "string"
+                },
+                "taskSchema": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_lib_airflow_catalog.FieldSchema"
+                    }
                 }
             }
         },
