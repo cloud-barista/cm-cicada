@@ -1,0 +1,8 @@
+{
+  "name": "_v2_bash_delay",
+  "description": "[V2 Sample] 30초 대기 (BashOperator + sleep)",
+  "type": "bash",
+  "spec": {
+    "bash_command": "sleep 30"
+  }
+}

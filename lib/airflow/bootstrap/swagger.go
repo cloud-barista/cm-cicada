@@ -16,16 +16,30 @@ import (
 )
 
 // ConfigFile describes one task component example JSON entry under
-// lib/airflow/example/task_component/. Each entry points to a remote module's
-// Swagger endpoint and the specific API operation to introspect.
+// lib/airflow/example/task_component/.
+//
+// Two formats are supported in the same directory:
+//   - V1 (legacy, kept under legacy/): Swagger introspection — set
+//     api_connection_id / swagger_yaml_endpoint / endpoint / method,
+//     or extra for native Airflow operators.
+//   - V2 (catalog-based): set type + spec directly. Skips Swagger fetch.
+//
+// Files are distinguished at runtime: when `type` is non-empty the descriptor
+// is treated as V2.
 type ConfigFile struct {
-	Name                string                 `json:"name"`
-	Description         string                 `json:"description"`
-	APIConnectionID     string                 `json:"api_connection_id"`
-	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint"`
-	Endpoint            string                 `json:"endpoint"`
-	Method              string                 `json:"method"`
-	Extra               map[string]interface{} `json:"extra"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+
+	// V1 fields (Swagger fetch path).
+	APIConnectionID     string                 `json:"api_connection_id,omitempty"`
+	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint,omitempty"`
+	Endpoint            string                 `json:"endpoint,omitempty"`
+	Method              string                 `json:"method,omitempty"`
+	Extra               map[string]interface{} `json:"extra,omitempty"`
+
+	// V2 fields (catalog-based, no Swagger fetch).
+	Type string         `json:"type,omitempty"`
+	Spec map[string]any `json:"spec,omitempty"`
 }
 
 // SwaggerSpec is a minimal Swagger 2.0 document model tailored for

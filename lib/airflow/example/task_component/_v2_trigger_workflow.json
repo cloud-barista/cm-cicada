@@ -1,0 +1,8 @@
+{
+  "name": "_v2_trigger_workflow",
+  "description": "[V2 Sample] 다른 워크플로우(monitor_dag) 트리거",
+  "type": "trigger_workflow",
+  "spec": {
+    "trigger_dag_id": "monitor_dag"
+  }
+}

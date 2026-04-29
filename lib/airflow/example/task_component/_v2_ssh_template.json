@@ -1,0 +1,8 @@
+{
+  "name": "_v2_ssh_template",
+  "description": "[V2 Sample] 외부 호스트 SSH 명령 실행 (실제 사용 시 ssh_conn_id를 Airflow Connection에 등록 필요)",
+  "type": "ssh",
+  "spec": {
+    "ssh_conn_id": "external_host_example"
+  }
+}

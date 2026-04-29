@@ -87,11 +87,16 @@ func TaskComponentInit() error {
 // Returns (nil, nil) when the descriptor references an unknown connection —
 // the caller treats that as a soft-skip to keep startup resilient.
 //
-// When the descriptor carries a pre-populated `extra` object the Swagger
-// round trip is skipped: the operator class inside extra is matched against
-// the catalog to determine the task type, and the remaining fields become
-// the TaskComponent.Spec.
+// Resolution order:
+//  1. V2 (`type` set): catalog-based, copy `spec` verbatim after type validation.
+//  2. V1 with `extra`: match operator class against catalog, copy remaining
+//     fields into Spec.
+//  3. V1 Swagger fetch: introspect remote spec (legacy path).
 func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
+	if configFile.Type != "" {
+		return buildTaskComponentV2(configFile)
+	}
+
 	if configFile.Extra != nil {
 		return buildTaskComponentFromExtra(configFile.Extra)
 	}
@@ -112,6 +117,16 @@ func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
 		return nil, fmt.Errorf("failed to process endpoint: %v", err)
 	}
 	return taskComponent, nil
+}
+
+func buildTaskComponentV2(configFile ConfigFile) (*model.TaskComponent, error) {
+	if !catalog.Has(configFile.Type) {
+		return nil, fmt.Errorf("unknown task type in catalog: %s", configFile.Type)
+	}
+	return &model.TaskComponent{
+		Type: configFile.Type,
+		Spec: model.Spec(configFile.Spec),
+	}, nil
 }
 
 func buildTaskComponentFromExtra(extra map[string]any) (*model.TaskComponent, error) {

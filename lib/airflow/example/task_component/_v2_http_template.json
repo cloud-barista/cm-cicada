@@ -1,0 +1,10 @@
+{
+  "name": "_v2_http_template",
+  "description": "[V2 Sample] HTTP API 호출 — Swagger fetch 없이 직접 endpoint 정의",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "honeybee_api",
+    "method": "GET",
+    "endpoint": "/honeybee/api/source_group"
+  }
+}
