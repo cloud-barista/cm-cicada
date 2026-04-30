@@ -1,0 +1,10 @@
+{
+  "name": "cicada_task_time_sleep",
+  "description": "Pause with configurable time.",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "cicada_api",
+    "method": "POST",
+    "endpoint": "/cicada/api/sleep_time"
+  }
+}

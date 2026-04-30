@@ -1,0 +1,10 @@
+{
+  "name": "damselfly_task_get_target_software_model",
+  "description": "Get software migration model from Damselfly",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "damselfly_api",
+    "method": "GET",
+    "endpoint": "/damselfly/api/softwaremodel/source/{id}"
+  }
+}

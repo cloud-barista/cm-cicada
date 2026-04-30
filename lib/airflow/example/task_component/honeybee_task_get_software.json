@@ -1,0 +1,10 @@
+{
+  "name": "honeybee_task_get_software",
+  "description": "Get saved software information by honeybee.",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "honeybee_api",
+    "method": "GET",
+    "endpoint": "/honeybee/api/source_group/{sgId}/software"
+  }
+}

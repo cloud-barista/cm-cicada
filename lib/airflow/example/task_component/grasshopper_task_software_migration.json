@@ -1,0 +1,10 @@
+{
+  "name": "grasshopper_task_software_migration",
+  "description": "Do software migration by grasshopper.",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "grasshopper_api",
+    "method": "POST",
+    "endpoint": "/grasshopper/api/software/migrate"
+  }
+}

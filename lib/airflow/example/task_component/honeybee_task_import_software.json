@@ -1,0 +1,10 @@
+{
+  "name": "honeybee_task_import_software",
+  "description": "Import software information by honeybee.",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "honeybee_api",
+    "method": "POST",
+    "endpoint": "/honeybee/api/source_group/{sgId}/import/software"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "beetle_task_infra_migration",
+  "description": "Do infra migration with beetle.",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "beetle_api",
+    "method": "POST",
+    "endpoint": "/beetle/api/migration/ns/{nsId}/mci"
+  }
+}
