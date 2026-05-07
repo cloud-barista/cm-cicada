@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0",
+  "name": "_v2_ssh_remote_inspect_workflow",
+  "data": {
+    "description": "[V2 Sample] SSHOperator 시연 — 원격 호스트 헬스체크 → 디스크 사용량 점검 → 정리 명령 순차 실행. 사용 전 'example_remote_host' SSH connection 등록 필요.",
+    "task_groups": [
+      {
+        "name": "remote_inspect",
+        "description": "remote host inspection sequence",
+        "tasks": [
+          {
+            "name": "health_check",
+            "task_component": "_v2_ssh_remote_health_check",
+            "spec": {},
+            "dependencies": []
+          },
+          {
+            "name": "disk_usage",
+            "task_component": "_v2_ssh_remote_disk_usage",
+            "spec": {},
+            "dependencies": [
+              "health_check"
+            ]
+          },
+          {
+            "name": "cleanup_tmp",
+            "task_component": "_v2_ssh_remote_health_check",
+            "spec": {
+              "command": "find /tmp -type f -mtime +7 -name '*.log' -print"
+            },
+            "dependencies": [
+              "disk_usage"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

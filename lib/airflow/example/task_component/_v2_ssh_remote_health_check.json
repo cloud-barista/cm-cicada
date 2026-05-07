@@ -1,0 +1,9 @@
+{
+  "name": "_v2_ssh_remote_health_check",
+  "description": "[V2 Sample] 원격 호스트의 uptime/load/메모리 상태 확인 (SSHOperator). ssh_conn_id에 해당하는 SSH connection을 Airflow에 미리 등록해야 함.",
+  "type": "ssh",
+  "spec": {
+    "ssh_conn_id": "example_remote_host",
+    "command": "uptime && echo '---' && free -h"
+  }
+}
