@@ -406,7 +406,7 @@ func buildHTTPTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t
 		"log_response": true,
 	}
 
-	body := specString(merged, "body")
+	body := specString(merged, "request_body")
 	if body != "" {
 		taskOptions["data"] = body
 	}
@@ -454,9 +454,9 @@ func buildHTTPXcomTaskOptions(
 	}
 	taskOptions["endpoint"] = endpoint
 
-	xcomSource := specString(merged, "xcom_task")
+	xcomSource := specString(merged, "request_body")
 	if xcomSource == "" {
-		return nil, errors.New("http_xcom task is missing spec.xcom_task")
+		return nil, errors.New("http_xcom task is missing spec.request_body")
 	}
 	if isTaskExist(workflow, xcomSource) {
 		if id, ok := taskAirflowIDByName[xcomSource]; ok {

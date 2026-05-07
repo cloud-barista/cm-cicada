@@ -10,7 +10,7 @@ task_types:
     task_schema:
       path_params:  { type: object, required: false }
       query_params: { type: object, required: false }
-      body:         { type: string, required: false }
+      request_body: { type: string, required: false }
       headers:      { type: object, required: false }
 
   - id: http_xcom
@@ -22,7 +22,7 @@ task_types:
       method:            { type: string, required: true }
       endpoint:          { type: string, required: true }
     task_schema:
-      xcom_task: { type: string, required: true }
+      request_body: { type: string, required: true }
 
   - id: bash
     label: Bash 명령 실행
