@@ -4,7 +4,8 @@
   "type": "http",
   "spec": {
     "api_connection_id": "cicada_api",
+    "swagger_yaml_endpoint": "/cicada/api/doc.yaml",
     "method": "POST",
-    "endpoint": "/cicada/api/run_script"
+    "endpoint": "/run_script"
   }
 }

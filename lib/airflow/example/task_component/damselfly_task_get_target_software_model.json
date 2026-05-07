@@ -4,7 +4,8 @@
   "type": "http",
   "spec": {
     "api_connection_id": "damselfly_api",
+    "swagger_yaml_endpoint": "/damselfly/api/doc.yaml",
     "method": "GET",
-    "endpoint": "/damselfly/api/softwaremodel/source/{id}"
+    "endpoint": "/softwaremodel/source/{id}"
   }
 }

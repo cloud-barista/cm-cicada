@@ -4,7 +4,8 @@
   "type": "http",
   "spec": {
     "api_connection_id": "honeybee_api",
+    "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
     "method": "GET",
-    "endpoint": "/honeybee/api/source_group/{sgId}/infra/refined"
+    "endpoint": "/source_group/{sgId}/infra/refined"
   }
 }

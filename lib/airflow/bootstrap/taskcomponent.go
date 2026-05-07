@@ -119,13 +119,60 @@ func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
 	return taskComponent, nil
 }
 
+// buildTaskComponentV2 produces a catalog-typed TaskComponent.
+//
+// When the spec carries `swagger_yaml_endpoint`, the function fetches the
+// referenced Swagger document at boot, prefixes the configured `endpoint` with
+// the spec's BasePath, and inlines a generated `request_body` plus parameter
+// schemas (`path_params_schema`, `query_params_schema`, `body_params_schema`)
+// — the same enrichment V1 descriptors received. The enrichment keys
+// overwrite their counterparts in the source spec; `swagger_yaml_endpoint` is
+// dropped after use because it is only metadata for the boot-time fetch.
 func buildTaskComponentV2(configFile ConfigFile) (*model.TaskComponent, error) {
 	if !catalog.Has(configFile.Type) {
 		return nil, fmt.Errorf("unknown task type in catalog: %s", configFile.Type)
 	}
+
+	spec := model.Spec{}
+	for k, v := range configFile.Spec {
+		spec[k] = v
+	}
+
+	swaggerEndpoint, _ := spec["swagger_yaml_endpoint"].(string)
+	if swaggerEndpoint != "" {
+		apiConnID, _ := spec["api_connection_id"].(string)
+		if apiConnID == "" {
+			return nil, fmt.Errorf("swagger_yaml_endpoint requires api_connection_id in spec")
+		}
+
+		connection, ok := findConnection(apiConnID)
+		if !ok {
+			return nil, fmt.Errorf("failed to find connection with ID %s", apiConnID)
+		}
+
+		swagger, err := fetchAndParseYAML(connection, swaggerEndpoint)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch and parse swagger spec: %v", err)
+		}
+
+		endpoint, _ := spec["endpoint"].(string)
+		method, _ := spec["method"].(string)
+		endpoint = strings.TrimPrefix(endpoint, swagger.BasePath)
+
+		enriched, err := processEndpoint(connection.ID, swagger, endpoint, method)
+		if err != nil {
+			return nil, fmt.Errorf("failed to process endpoint: %v", err)
+		}
+
+		for k, v := range enriched.Spec {
+			spec[k] = v
+		}
+		delete(spec, "swagger_yaml_endpoint")
+	}
+
 	return &model.TaskComponent{
 		Type: configFile.Type,
-		Spec: model.Spec(configFile.Spec),
+		Spec: spec,
 	}, nil
 }
 

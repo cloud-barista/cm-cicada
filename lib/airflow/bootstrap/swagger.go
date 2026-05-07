@@ -276,9 +276,82 @@ func generateRequestBodyExample(schema SchemaModel) string {
 	return string(jsonBytes)
 }
 
+// schemaToMap renders a resolved Swagger SchemaModel into a JSON-friendly map.
+// Empty fields are omitted so the resulting spec keys stay terse.
+func schemaToMap(schema SchemaModel) map[string]any {
+	m := map[string]any{}
+
+	typ := schema.Type
+	if typ == "" {
+		switch {
+		case len(schema.Properties) > 0:
+			typ = "object"
+		case schema.Items != nil:
+			typ = "array"
+		}
+	}
+	if typ != "" {
+		m["type"] = typ
+	}
+	if len(schema.Required) > 0 {
+		m["required"] = schema.Required
+	}
+	if len(schema.Properties) > 0 {
+		props := map[string]any{}
+		for name, p := range schema.Properties {
+			props[name] = schemaToMap(p)
+		}
+		m["properties"] = props
+	}
+	if schema.Items != nil {
+		m["items"] = schemaToMap(*schema.Items)
+	}
+	if schema.Description != "" {
+		m["description"] = schema.Description
+	}
+	if schema.Default != nil {
+		m["default"] = schema.Default
+	}
+	if len(schema.Enum) > 0 {
+		m["enum"] = schema.Enum
+	}
+	if schema.Example != nil {
+		m["example"] = schema.Example
+	}
+	return m
+}
+
+// parameterToMap renders a Swagger path/query parameter into a JSON-friendly
+// map. Body parameters are handled separately via schemaToMap.
+func parameterToMap(p Parameter) map[string]any {
+	m := map[string]any{}
+	if p.Type != "" {
+		m["type"] = p.Type
+	}
+	if p.Required {
+		m["required"] = true
+	}
+	if p.Description != "" {
+		m["description"] = p.Description
+	}
+	if p.Default != nil {
+		m["default"] = p.Default
+	}
+	if len(p.Enum) > 0 {
+		m["enum"] = p.Enum
+	}
+	if p.Example != nil {
+		m["example"] = p.Example
+	}
+	return m
+}
+
 // processEndpoint walks a SwaggerSpec, locates the target endpoint+method, and
 // builds a TaskComponent of type "http" with the resolved endpoint, method,
-// connection id, and (when available) an example request body.
+// connection id, generated request body example, and parameter schemas
+// (path_params_schema, query_params_schema, body_params_schema). Schemas are
+// stored as raw maps so any swagger metadata (description/default/enum/
+// example/required) is preserved without bespoke types.
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, targetMethod string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 	for path, pathItem := range spec.Paths {
@@ -307,17 +380,32 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, tar
 				"endpoint":          joinPaths(spec.BasePath, path),
 			}
 
+			pathSchema := map[string]any{}
+			querySchema := map[string]any{}
+
 			for _, param := range operation.Parameters {
-				if param.In != "body" {
-					continue
+				switch param.In {
+				case "path":
+					pathSchema[param.Name] = parameterToMap(param)
+				case "query":
+					querySchema[param.Name] = parameterToMap(param)
+				case "body":
+					if param.Schema == nil || param.Schema.Ref == "" {
+						continue
+					}
+					bodySchema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
+					specMap["body_params_schema"] = schemaToMap(bodySchema)
+					if example := generateRequestBodyExample(bodySchema); example != "" {
+						specMap["request_body"] = example
+					}
 				}
-				if param.Schema == nil || param.Schema.Ref == "" {
-					continue
-				}
-				bodySchema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
-				if example := generateRequestBodyExample(bodySchema); example != "" {
-					specMap["request_body_example"] = example
-				}
+			}
+
+			if len(pathSchema) > 0 {
+				specMap["path_params_schema"] = pathSchema
+			}
+			if len(querySchema) > 0 {
+				specMap["query_params_schema"] = querySchema
 			}
 
 			return &model.TaskComponent{

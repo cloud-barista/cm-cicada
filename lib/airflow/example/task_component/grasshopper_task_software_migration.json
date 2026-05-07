@@ -4,7 +4,8 @@
   "type": "http",
   "spec": {
     "api_connection_id": "grasshopper_api",
+    "swagger_yaml_endpoint": "/grasshopper/api/doc.yaml",
     "method": "POST",
-    "endpoint": "/grasshopper/api/software/migrate"
+    "endpoint": "/software/migrate"
   }
 }

@@ -4,7 +4,8 @@
   "type": "http",
   "spec": {
     "api_connection_id": "tumblebug_api",
+    "swagger_yaml_endpoint": "/tumblebug/api/doc.yaml",
     "method": "POST",
-    "endpoint": "/tumblebug/api/ns/{nsId}/mciDynamic"
+    "endpoint": "/ns/{nsId}/mciDynamic"
   }
 }
