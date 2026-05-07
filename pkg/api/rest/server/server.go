@@ -64,6 +64,7 @@ func Init() {
 	route.WorkflowTemplate(e)
 	route.Workflow(e)
 	route.Connection(e)
+	route.Example(e)
 	route.RegisterSwagger(e)
 	route.RegisterUtility(e)
 

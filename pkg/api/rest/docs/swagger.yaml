@@ -681,6 +681,40 @@ paths:
       summary: Update Connection
       tags:
       - '[Connection]'
+  /example/data:
+    get:
+      description: Return a deterministic JSON payload used by the http_xcom workflow
+        example.
+      operationId: example-get-data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sample payload
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Sample data for xcom example
+      tags:
+      - '[Example]'
+  /example/echo:
+    post:
+      consumes:
+      - application/json
+      description: Echo the raw request body back. Used by the http_xcom workflow
+        example to verify body propagation.
+      operationId: example-post-echo
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Echoed body
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Echo request body
+      tags:
+      - '[Example]'
   /importErrors:
     get:
       consumes:

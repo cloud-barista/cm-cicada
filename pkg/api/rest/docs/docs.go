@@ -263,6 +263,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/example/data": {
+            "get": {
+                "description": "Return a deterministic JSON payload used by the http_xcom workflow example.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Example]"
+                ],
+                "summary": "Sample data for xcom example",
+                "operationId": "example-get-data",
+                "responses": {
+                    "200": {
+                        "description": "Sample payload",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/example/echo": {
+            "post": {
+                "description": "Echo the raw request body back. Used by the http_xcom workflow example to verify body propagation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Example]"
+                ],
+                "summary": "Echo request body",
+                "operationId": "example-post-echo",
+                "responses": {
+                    "200": {
+                        "description": "Echoed body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/importErrors": {
             "get": {
                 "description": "List DAG import errors reported by Airflow.",
