@@ -12,3 +12,8 @@ _airflow/.env
 .smtp.env
 docs/refactoring
 docs/test
+
+# Local SQLite runtime artifacts
+CM-CICADA.db
+CM-CICADA.db-shm
+CM-CICADA.db-wal
