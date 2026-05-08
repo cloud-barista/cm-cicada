@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/google/uuid"
 	"github.com/jollaman999/utils/logger"
@@ -104,7 +105,7 @@ func CreateDataReqToData(specVersion string, createDataReq model.CreateDataReq) 
 }
 
 func BuildWorkflowGraphDiff(workflow *model.Workflow, incoming model.Data) (*WorkflowGraphDiff, error) {
-	workflowKey := workflowDagID(workflow)
+	workflowKey := common.WorkflowDagID(workflow)
 	taskGroupsFromDB, err := dao.TaskGroupGetListByWorkflowID(workflow.ID, true)
 	if err != nil {
 		return nil, err
@@ -293,11 +294,4 @@ func GetWorkflowFromDBIncludeDeleted(workflowID string) (*model.Workflow, error)
 	}
 
 	return workflow, nil
-}
-
-func workflowDagID(workflow *model.Workflow) string {
-	if workflow.WorkflowKey != "" {
-		return workflow.WorkflowKey
-	}
-	return workflow.ID
 }

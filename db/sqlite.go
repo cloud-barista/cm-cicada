@@ -2,10 +2,8 @@ package db
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/cloud-barista/cm-cicada/common"
-	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
 	"gorm.io/driver/sqlite"
@@ -59,21 +57,6 @@ func Open() error {
 	err = ensureWorkflowActiveNameUniqueIndex()
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)
-	}
-
-	logger.Println(logger.INFO, false, "Loading workflow templates...")
-	err = WorkflowTemplateInit()
-	if err != nil {
-		logger.Println(logger.ERROR, true, err)
-	}
-
-	taskComponentLoadExamples, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.TaskComponent.LoadExamples)
-	if taskComponentLoadExamples {
-		logger.Println(logger.INFO, false, "Loading task components...")
-		err = TaskComponentInit()
-		if err != nil {
-			logger.Println(logger.ERROR, true, err)
-		}
 	}
 
 	return err

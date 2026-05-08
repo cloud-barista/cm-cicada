@@ -331,6 +331,15 @@ func captureSoftDroppedTaskSnapshots(workflow *model.Workflow, droppedTasks []mo
 	return nil
 }
 
+func (s *WorkflowService) ListWorkflowVersions(wfID string, page, row int) (*[]model.WorkflowVersion, error) {
+	filter := &model.WorkflowVersion{WorkflowID: wfID}
+	return dao.WorkflowVersionGetList(filter, page, row)
+}
+
+func (s *WorkflowService) GetWorkflowVersion(wfID, versionID string) (*model.WorkflowVersion, error) {
+	return dao.WorkflowVersionGet(versionID, wfID)
+}
+
 func workflowTaskByID(workflow *model.Workflow) map[string]model.Task {
 	tasks := make(map[string]model.Task)
 	if workflow == nil {

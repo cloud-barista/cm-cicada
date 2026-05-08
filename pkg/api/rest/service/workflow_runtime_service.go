@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	af "github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
@@ -19,6 +20,87 @@ type WorkflowRuntimeService struct{}
 
 func NewWorkflowRuntimeService() *WorkflowRuntimeService {
 	return &WorkflowRuntimeService{}
+}
+
+func (s *WorkflowRuntimeService) GetWorkflowRuns(wfID string) ([]model.WorkflowRun, error) {
+	workflow, err := dao.WorkflowGet(wfID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := airflow.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	runList, err := client.GetDAGRuns(common.WorkflowDagID(workflow))
+	if err != nil {
+		return nil, errors.New("failed to get the workflow runs: " + err.Error())
+	}
+
+	dbWorkflowID := workflow.ID
+	var runs []model.WorkflowRun
+	for _, dagRun := range *runList.DagRuns {
+		runs = append(runs, model.WorkflowRun{
+			WorkflowID:             &dbWorkflowID,
+			DagID:                  dagRun.DagId,
+			WorkflowRunID:          dagRun.GetDagRunId(),
+			DataIntervalStart:      dagRun.GetDataIntervalStart(),
+			DataIntervalEnd:        dagRun.GetDataIntervalEnd(),
+			State:                  string(dagRun.GetState()),
+			ExecutionDate:          dagRun.GetExecutionDate(),
+			StartDate:              dagRun.GetStartDate(),
+			EndDate:                dagRun.GetEndDate(),
+			RunType:                dagRun.GetRunType(),
+			LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
+			DurationDate:           dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds(),
+		})
+	}
+
+	return runs, nil
+}
+
+func (s *WorkflowRuntimeService) GetWorkflowStatus(wfID string) ([]model.WorkflowStatus, error) {
+	workflow, err := dao.WorkflowGet(wfID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := airflow.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	enumStatus := client.GetAllowedDagStateEnumValues()
+	dagID := common.WorkflowDagID(workflow)
+	var statusList []model.WorkflowStatus
+	for _, v := range enumStatus {
+		resp, err := client.GetDagStatus(dagID, string(*v.Ptr()))
+		if err != nil {
+			logger.Println(logger.ERROR, false,
+				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+		}
+		statusList = append(statusList, model.WorkflowStatus{
+			State: string(*v.Ptr()),
+			Count: len(*resp.DagRuns),
+		})
+	}
+
+	return statusList, nil
+}
+
+func (s *WorkflowRuntimeService) GetImportErrors() (af.ImportErrorCollection, error) {
+	client, err := airflow.GetClient()
+	if err != nil {
+		return af.ImportErrorCollection{}, err
+	}
+
+	result, err := client.GetImportErrors()
+	if err != nil {
+		return af.ImportErrorCollection{}, errors.New("failed to get import errors: " + err.Error())
+	}
+
+	return result, nil
 }
 
 func (s *WorkflowRuntimeService) GetTaskLogs(wfID, wfRunID, taskID string, taskTryNum int) (*model.TaskLog, error) {

@@ -124,7 +124,7 @@ func GetWorkflowByName(c echo.Context) error {
 // ListWorkflow godoc
 //
 //	@ID		list-workflow
-//	@Summary	List Workflow
+//	@Summary	List Workflows
 //	@Description	Get a workflow list.
 //	@Tags		[Workflow]
 //	@Accept		json

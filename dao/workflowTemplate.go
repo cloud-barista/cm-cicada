@@ -8,6 +8,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// WorkflowTemplateGetByName returns the workflow template matching the given
+// name, or nil when not found (parity with legacy db.WorkflowTemplateGetByName).
+func WorkflowTemplateGetByName(name string) *model.WorkflowTemplate {
+	if db.DB == nil {
+		return nil
+	}
+
+	workflowTemplate := &model.WorkflowTemplate{}
+	result := db.DB.Where("name = ?", name).First(workflowTemplate)
+	if result.Error != nil {
+		return nil
+	}
+	return workflowTemplate
+}
+
 func WorkflowTemplateGet(id string) (*model.GetWorkflowTemplate, error) {
 	workflowTemplate := &model.WorkflowTemplate{}
 
