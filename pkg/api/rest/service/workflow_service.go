@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
@@ -28,6 +29,57 @@ func (s *WorkflowService) CreateWorkflow(req model.CreateWorkflowReq) (*model.Wo
 		specVersion = req.SpecVersion
 	}
 
+	sourceType, sourceTemplateID, err := mapper.ResolveCreateSourceType(specVersion, req.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.createWorkflowInternal(req, specVersion, sourceType, sourceTemplateID)
+}
+
+// CloneWorkflow creates a brand-new Workflow by deep-copying an existing one
+// looked up by srcWfID. The new workflow's name is auto-generated as
+// "<source name>_copy" (with _copy_2, _copy_3 ... suffix on collision).
+// task_groups / tasks are pulled from the source and all IDs are re-issued.
+// Source's runs and snapshots are not copied. The new workflow's first
+// snapshot records source_type="clone" and source_template_id=<source
+// workflow ID> so the lineage is traceable.
+func (s *WorkflowService) CloneWorkflow(srcWfID string) (*model.Workflow, error) {
+	if srcWfID == "" {
+		return nil, errors.New("please provide the source workflow id")
+	}
+
+	src, err := mapper.GetWorkflowFromDB(srcWfID)
+	if err != nil {
+		return nil, errors.New("source workflow not found: " + err.Error())
+	}
+
+	createReq := model.CreateWorkflowReq{
+		SpecVersion: src.SpecVersion,
+		Name:        nextCloneName(src.Name),
+		Data:        mapper.DataToCreateDataReq(src.Data),
+	}
+
+	return s.createWorkflowInternal(createReq, src.SpecVersion, "clone", srcWfID)
+}
+
+// nextCloneName returns the first non-colliding "<base>_copy" / "<base>_copy_N"
+// name. Workflow.name has no DB unique constraint but ambiguous duplicates
+// confuse name-based lookups, so we probe until WorkflowGetByName misses.
+func nextCloneName(baseName string) string {
+	candidate := baseName + "_copy"
+	for i := 2; ; i++ {
+		if existing, _ := dao.WorkflowGetByName(candidate); existing == nil {
+			return candidate
+		}
+		candidate = baseName + "_copy_" + strconv.Itoa(i)
+	}
+}
+
+// createWorkflowInternal persists a new Workflow (DB rows + DAG) using the
+// provided CreateWorkflowReq. Caller decides sourceType / sourceTemplateID for
+// the initial snapshot. Used by both CreateWorkflow and CloneWorkflow.
+func (s *WorkflowService) createWorkflowInternal(req model.CreateWorkflowReq, specVersion, sourceType, sourceTemplateID string) (*model.Workflow, error) {
 	workflowData, err := mapper.CreateDataReqToData(specVersion, req.Data)
 	if err != nil {
 		return nil, err
@@ -79,11 +131,6 @@ func (s *WorkflowService) CreateWorkflow(req model.CreateWorkflowReq) (*model.Wo
 				return nil, err
 			}
 		}
-	}
-
-	sourceType, sourceTemplateID, err := mapper.ResolveCreateSourceType(specVersion, req.Data)
-	if err != nil {
-		return nil, err
 	}
 
 	_, err = dao.WorkflowCreateSnapshot(workflow, "create", sourceType, sourceTemplateID)

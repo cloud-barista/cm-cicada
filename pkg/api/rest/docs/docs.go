@@ -1210,6 +1210,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/{wfId}/clone": {
+            "post": {
+                "description": "Clone an existing workflow as a new workflow. The server copies task_groups / tasks from the source (looked up by wfId) and re-issues all IDs. The first snapshot of the new workflow records source_type=\"clone\" and source_template_id=\u003csource workflow id\u003e.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Clone Workflow",
+                "operationId": "clone-workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the source workflow to clone.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New workflow name (and optional description override).",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully cloned the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Source workflow not found.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to clone the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/eventlogs": {
             "get": {
                 "description": "Get Eventlog.",
@@ -2336,6 +2396,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
