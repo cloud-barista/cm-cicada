@@ -1,0 +1,8 @@
+{
+  "name": "honeybee_register_target_info_to_source_group",
+  "description": "Register target information to the source group by honeybee.",
+  "api_connection_id": "honeybee_api",
+  "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
+  "endpoint": "/source_group/{sgId}/target",
+  "method": "POST"
+}

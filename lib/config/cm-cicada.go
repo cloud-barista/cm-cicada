@@ -25,6 +25,7 @@ type cmCicadaConfig struct {
 		WorkflowTemplate struct {
 			TemplatesDirectory string `yaml:"templates_directory"`
 		} `yaml:"workflow_template"`
+		TaskTypesPath string `yaml:"task_types_path"`
 		AirflowServer struct {
 			Address       string             `yaml:"address"`
 			UseTLS        string             `yaml:"use_tls"`
@@ -67,6 +68,14 @@ func checkCMCicadaConfigFile() error {
 	if !fileutil.IsExist(CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory) {
 		return errors.New("config error: configured directory of cm-cicada.workflow_template.templates_directory is not exist (" +
 			CMCicadaConfig.CMCicada.WorkflowTemplate.TemplatesDirectory + ")")
+	}
+
+	if CMCicadaConfig.CMCicada.TaskTypesPath == "" {
+		CMCicadaConfig.CMCicada.TaskTypesPath = "./conf/task_types.yaml"
+	}
+	if !fileutil.IsExist(CMCicadaConfig.CMCicada.TaskTypesPath) {
+		return errors.New("config error: cm-cicada.task_types_path file does not exist (" +
+			CMCicadaConfig.CMCicada.TaskTypesPath + ")")
 	}
 
 	if CMCicadaConfig.CMCicada.AirflowServer.Address == "" {

@@ -1,0 +1,50 @@
+task_types:
+  - id: http
+    label: HTTP API 호출
+    category: api
+    operator_class: airflow.providers.http.operators.http.SimpleHttpOperator
+    component_schema:
+      api_connection_id: { type: string, required: true }
+      method:            { type: string, required: true, enum: [GET, POST, PUT, DELETE, PATCH] }
+      endpoint:          { type: string, required: true }
+    task_schema:
+      path_params:  { type: object, required: false }
+      query_params: { type: object, required: false }
+      request_body: { type: string, required: false }
+      headers:      { type: object, required: false }
+
+  - id: http_xcom
+    label: HTTP API 호출 (이전 task 결과를 body로)
+    category: api
+    operator_class: local.JsonHttpRequestOperator
+    component_schema:
+      api_connection_id: { type: string, required: true }
+      method:            { type: string, required: true }
+      endpoint:          { type: string, required: true }
+    task_schema:
+      request_body: { type: string, required: true }
+
+  - id: bash
+    label: Bash 명령 실행
+    category: utility
+    operator_class: airflow.operators.bash.BashOperator
+    task_schema:
+      bash_command: { type: string, required: true }
+
+  - id: ssh
+    label: 원격 SSH 명령 실행
+    category: utility
+    operator_class: airflow.providers.ssh.operators.ssh.SSHOperator
+    component_schema:
+      ssh_conn_id: { type: string, required: true }
+    task_schema:
+      command: { type: string, required: true }
+
+  - id: trigger_workflow
+    label: 다른 워크플로우 트리거
+    category: orchestration
+    operator_class: airflow.operators.trigger_dagrun.TriggerDagRunOperator
+    component_schema:
+      trigger_dag_id: { type: string, required: true }
+    task_schema:
+      conf: { type: object, required: false }

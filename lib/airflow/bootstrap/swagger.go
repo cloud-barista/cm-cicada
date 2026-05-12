@@ -16,16 +16,30 @@ import (
 )
 
 // ConfigFile describes one task component example JSON entry under
-// lib/airflow/example/task_component/. Each entry points to a remote module's
-// Swagger endpoint and the specific API operation to introspect.
+// lib/airflow/example/task_component/.
+//
+// Two formats are supported in the same directory:
+//   - V1 (legacy, kept under legacy/): Swagger introspection — set
+//     api_connection_id / swagger_yaml_endpoint / endpoint / method,
+//     or extra for native Airflow operators.
+//   - V2 (catalog-based): set type + spec directly. Skips Swagger fetch.
+//
+// Files are distinguished at runtime: when `type` is non-empty the descriptor
+// is treated as V2.
 type ConfigFile struct {
-	Name                string                 `json:"name"`
-	Description         string                 `json:"description"`
-	APIConnectionID     string                 `json:"api_connection_id"`
-	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint"`
-	Endpoint            string                 `json:"endpoint"`
-	Method              string                 `json:"method"`
-	Extra               map[string]interface{} `json:"extra"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+
+	// V1 fields (Swagger fetch path).
+	APIConnectionID     string                 `json:"api_connection_id,omitempty"`
+	SwaggerYAMLEndpoint string                 `json:"swagger_yaml_endpoint,omitempty"`
+	Endpoint            string                 `json:"endpoint,omitempty"`
+	Method              string                 `json:"method,omitempty"`
+	Extra               map[string]interface{} `json:"extra,omitempty"`
+
+	// V2 fields (catalog-based, no Swagger fetch).
+	Type string         `json:"type,omitempty"`
+	Spec map[string]any `json:"spec,omitempty"`
 }
 
 // SwaggerSpec is a minimal Swagger 2.0 document model tailored for
@@ -212,76 +226,6 @@ func resolveSchemaRef(ref string, definitions map[string]SchemaModel) SchemaMode
 	return schema
 }
 
-func getPropertyType(schema SchemaModel) string {
-	if schema.Type != "" {
-		return schema.Type
-	}
-
-	if schema.Ref != "" {
-		return "object"
-	}
-
-	if len(schema.Properties) > 0 {
-		return "object"
-	}
-
-	if schema.Items != nil {
-		return "array"
-	}
-
-	return "object"
-}
-
-func convertToPropertyDef(schema SchemaModel) model.PropertyDef {
-	property := model.PropertyDef{
-		Type:        getPropertyType(schema),
-		Required:    schema.Required,
-		Properties:  make(map[string]model.PropertyDef),
-		Description: schema.Description,
-		Default:     schema.Default,
-		Enum:        schema.Enum,
-		Example:     schema.Example,
-	}
-
-	if property.Type == "object" || len(schema.Properties) > 0 {
-		for name, prop := range schema.Properties {
-			property.Properties[name] = convertToPropertyDef(prop)
-		}
-	}
-
-	if property.Type == "array" && schema.Items != nil {
-		property.Items = &model.PropertyDef{
-			Type:        getPropertyType(*schema.Items),
-			Properties:  make(map[string]model.PropertyDef),
-			Description: schema.Items.Description,
-			Default:     schema.Items.Default,
-			Enum:        schema.Items.Enum,
-			Example:     schema.Items.Example,
-		}
-
-		if len(schema.Items.Properties) > 0 {
-			for name, prop := range schema.Items.Properties {
-				property.Items.Properties[name] = convertToPropertyDef(prop)
-			}
-		}
-	}
-
-	return property
-}
-
-func convertSchemaToParams(schema SchemaModel) model.ParameterStructure {
-	params := model.ParameterStructure{
-		Required:   schema.Required,
-		Properties: make(map[string]model.PropertyDef),
-	}
-
-	for name, propSchema := range schema.Properties {
-		params.Properties[name] = convertToPropertyDef(propSchema)
-	}
-
-	return params
-}
-
 func generateExampleValue(schema SchemaModel) interface{} {
 	if schema.Example != nil {
 		return schema.Example
@@ -332,9 +276,82 @@ func generateRequestBodyExample(schema SchemaModel) string {
 	return string(jsonBytes)
 }
 
+// schemaToMap renders a resolved Swagger SchemaModel into a JSON-friendly map.
+// Empty fields are omitted so the resulting spec keys stay terse.
+func schemaToMap(schema SchemaModel) map[string]any {
+	m := map[string]any{}
+
+	typ := schema.Type
+	if typ == "" {
+		switch {
+		case len(schema.Properties) > 0:
+			typ = "object"
+		case schema.Items != nil:
+			typ = "array"
+		}
+	}
+	if typ != "" {
+		m["type"] = typ
+	}
+	if len(schema.Required) > 0 {
+		m["required"] = schema.Required
+	}
+	if len(schema.Properties) > 0 {
+		props := map[string]any{}
+		for name, p := range schema.Properties {
+			props[name] = schemaToMap(p)
+		}
+		m["properties"] = props
+	}
+	if schema.Items != nil {
+		m["items"] = schemaToMap(*schema.Items)
+	}
+	if schema.Description != "" {
+		m["description"] = schema.Description
+	}
+	if schema.Default != nil {
+		m["default"] = schema.Default
+	}
+	if len(schema.Enum) > 0 {
+		m["enum"] = schema.Enum
+	}
+	if schema.Example != nil {
+		m["example"] = schema.Example
+	}
+	return m
+}
+
+// parameterToMap renders a Swagger path/query parameter into a JSON-friendly
+// map. Body parameters are handled separately via schemaToMap.
+func parameterToMap(p Parameter) map[string]any {
+	m := map[string]any{}
+	if p.Type != "" {
+		m["type"] = p.Type
+	}
+	if p.Required {
+		m["required"] = true
+	}
+	if p.Description != "" {
+		m["description"] = p.Description
+	}
+	if p.Default != nil {
+		m["default"] = p.Default
+	}
+	if len(p.Enum) > 0 {
+		m["enum"] = p.Enum
+	}
+	if p.Example != nil {
+		m["example"] = p.Example
+	}
+	return m
+}
+
 // processEndpoint walks a SwaggerSpec, locates the target endpoint+method, and
-// builds a TaskComponent reflecting its path/query/body parameters and an
-// example request body.
+// builds a TaskComponent of type "http" with the resolved endpoint, method,
+// connection id, generated request body example, and parameter schemas
+// (path_params_schema, query_params_schema, body_params_schema). Schemas are
+// stored as raw maps so any swagger metadata (description/default/enum/
+// example/required) is preserved without bespoke types.
 func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, targetMethod string) (*model.TaskComponent, error) {
 	targetEndpoint = normalizePath(targetEndpoint)
 	for path, pathItem := range spec.Paths {
@@ -357,66 +374,44 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, tar
 					" (Please specify the method from the task component example JSON file.)", targetEndpoint)
 			}
 
-			taskComponent := &model.TaskComponent{
-				Data: model.TaskComponentData{
-					Options: model.TaskComponentOptions{
-						APIConnectionID: connectionID,
-						Endpoint:        joinPaths(spec.BasePath, path),
-						Method:          strings.ToUpper(method),
-					},
-				},
+			specMap := model.Spec{
+				"api_connection_id": connectionID,
+				"method":            strings.ToUpper(method),
+				"endpoint":          joinPaths(spec.BasePath, path),
 			}
 
-			pathParams := model.ParameterStructure{
-				Properties: make(map[string]model.PropertyDef),
-			}
-			queryParams := model.ParameterStructure{
-				Properties: make(map[string]model.PropertyDef),
-			}
+			pathSchema := map[string]any{}
+			querySchema := map[string]any{}
 
 			for _, param := range operation.Parameters {
 				switch param.In {
 				case "path":
-					if param.Required {
-						pathParams.Required = append(pathParams.Required, param.Name)
-					}
-					pathParams.Properties[param.Name] = model.PropertyDef{
-						Type:        param.Type,
-						Description: param.Description,
-						Default:     param.Default,
-						Enum:        param.Enum,
-					}
+					pathSchema[param.Name] = parameterToMap(param)
 				case "query":
-					if param.Required {
-						queryParams.Required = append(queryParams.Required, param.Name)
-					}
-					queryParams.Properties[param.Name] = model.PropertyDef{
-						Type:        param.Type,
-						Description: param.Description,
-						Default:     param.Default,
-						Enum:        param.Enum,
-					}
+					querySchema[param.Name] = parameterToMap(param)
 				case "body":
-					if param.Schema != nil && param.Schema.Ref != "" {
-						schema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
-						taskComponent.Data.BodyParams = convertSchemaToParams(schema)
-
-						requestBodyExample := generateRequestBodyExample(schema)
-						if requestBodyExample != "" {
-							taskComponent.Data.Options.RequestBody = requestBodyExample
-						}
+					if param.Schema == nil || param.Schema.Ref == "" {
+						continue
+					}
+					bodySchema := resolveSchemaRef(param.Schema.Ref, spec.Definitions)
+					specMap["body_params_schema"] = schemaToMap(bodySchema)
+					if example := generateRequestBodyExample(bodySchema); example != "" {
+						specMap["request_body"] = example
 					}
 				}
 			}
 
-			if len(pathParams.Properties) > 0 {
-				taskComponent.Data.PathParams = pathParams
+			if len(pathSchema) > 0 {
+				specMap["path_params_schema"] = pathSchema
 			}
-			if len(queryParams.Properties) > 0 {
-				taskComponent.Data.QueryParams = queryParams
+			if len(querySchema) > 0 {
+				specMap["query_params_schema"] = querySchema
 			}
 
-			return taskComponent, nil
+			return &model.TaskComponent{
+				Type: "http",
+				Spec: specMap,
+			}, nil
 		}
 	}
 

@@ -1,0 +1,8 @@
+{
+  "name": "cicada_task_time_sleep",
+  "description": "Pause with configurable time.",
+  "api_connection_id": "cicada_api",
+  "swagger_yaml_endpoint": "/cicada/api/doc.yaml",
+  "endpoint": "/sleep_time",
+  "method": "POST"
+}

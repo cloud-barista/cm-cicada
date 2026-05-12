@@ -11,6 +11,7 @@ import (
 
 	"github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/dao"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/fileutil"
@@ -364,52 +365,206 @@ func buildTaskOptions(
 	t model.Task,
 	taskAirflowIDByName map[string]string,
 ) (map[string]any, error) {
-	// Task 옵션을 구성한다(기본 HTTP 또는 커스텀 operator).
-	taskOptions := make(map[string]any)
 	taskComponent := dao.TaskComponentGetByName(t.TaskComponent)
 	if taskComponent == nil {
 		return nil, errors.New("task component '" + t.TaskComponent + "' not found")
 	}
 
-	logger.Println(logger.INFO, true, fmt.Sprintf("task component extra: %v", taskComponent.Data.Options.Extra))
-	logger.Println(logger.INFO, true, fmt.Sprintf("task  extra: %v", t))
-
-	if taskComponent.Data.Options.Extra != nil {
-		taskOptions = copyMap(taskComponent.Data.Options.Extra)
-		if t.Extra != nil {
-			mergeMaps(taskOptions, t.Extra)
-		}
-		return taskOptions, nil
+	typeDef, ok := catalog.Get(taskComponent.Type)
+	if !ok {
+		return nil, errors.New("unknown task type in catalog: " + taskComponent.Type)
 	}
 
-	if isTaskExist(workflow, t.RequestBody) {
-		taskOptions["operator"] = "local.JsonHttpRequestOperator"
-		xcomTaskID, exists := taskAirflowIDByName[t.RequestBody]
-		if exists {
-			taskOptions["xcom_task"] = xcomTaskID
-		} else {
-			taskOptions["xcom_task"] = t.RequestBody
-		}
-	} else {
-		taskOptions["operator"] = "airflow.providers.http.operators.http.SimpleHttpOperator"
-		taskOptions["headers"] = map[string]any{
-			"Content-Type": "application/json",
-		}
-		taskOptions["log_response"] = true
-		taskOptions["data"] = t.RequestBody
-		// Allow workflow task.extra.headers and coerce header values to string.
-		applyTaskExtraHeaders(taskOptions, t.Extra)
+	logger.Println(logger.INFO, true,
+		fmt.Sprintf("task component name=%s type=%s spec=%v",
+			taskComponent.Name, taskComponent.Type, taskComponent.Spec))
+
+	switch taskComponent.Type {
+	case "http":
+		return buildHTTPTaskOptions(typeDef, taskComponent, t)
+	case "http_xcom":
+		return buildHTTPXcomTaskOptions(typeDef, taskComponent, t, workflow, taskAirflowIDByName)
+	case "bash":
+		return buildBashTaskOptions(typeDef, taskComponent, t)
+	case "ssh":
+		return buildSSHTaskOptions(typeDef, taskComponent, t)
+	case "trigger_workflow":
+		return buildTriggerWorkflowTaskOptions(typeDef, taskComponent, t)
+	default:
+		// Fallback: pass-through with operator class only.
+		return map[string]any{"operator": typeDef.OperatorClass}, nil
+	}
+}
+
+func buildHTTPTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	merged := mergeSpecs(c.Spec, t.Spec)
+
+	taskOptions := map[string]any{
+		"operator":     typeDef.OperatorClass,
+		"http_conn_id": specString(merged, "api_connection_id"),
+		"method":       specString(merged, "method"),
+		"log_response": true,
 	}
 
-	taskOptions["http_conn_id"] = taskComponent.Data.Options.APIConnectionID
-	endpoint, err := parseEndpoint(t.PathParams, t.QueryParams, taskComponent.Data.Options.Endpoint)
+	body := specString(merged, "request_body")
+	if body != "" {
+		taskOptions["data"] = body
+	}
+
+	headers := map[string]any{"Content-Type": "application/json"}
+	if extra, ok := merged["headers"].(map[string]any); ok {
+		for k, v := range extra {
+			headers[k] = v
+		}
+	}
+	taskOptions["headers"] = headers
+
+	endpointTemplate := specString(merged, "endpoint")
+	pathParams := specStringMap(merged, "path_params")
+	queryParams := specStringMap(merged, "query_params")
+	endpoint, err := parseEndpoint(pathParams, queryParams, endpointTemplate)
 	if err != nil {
 		return nil, err
 	}
 	taskOptions["endpoint"] = endpoint
-	taskOptions["method"] = taskComponent.Data.Options.Method
 
 	return taskOptions, nil
+}
+
+func buildHTTPXcomTaskOptions(
+	typeDef catalog.TaskTypeDef,
+	c *model.TaskComponent,
+	t model.Task,
+	workflow *model.Workflow,
+	taskAirflowIDByName map[string]string,
+) (map[string]any, error) {
+	merged := mergeSpecs(c.Spec, t.Spec)
+
+	taskOptions := map[string]any{
+		"operator":     typeDef.OperatorClass,
+		"http_conn_id": specString(merged, "api_connection_id"),
+		"method":       specString(merged, "method"),
+	}
+	endpointTemplate := specString(merged, "endpoint")
+	pathParams := specStringMap(merged, "path_params")
+	queryParams := specStringMap(merged, "query_params")
+	endpoint, err := parseEndpoint(pathParams, queryParams, endpointTemplate)
+	if err != nil {
+		return nil, err
+	}
+	taskOptions["endpoint"] = endpoint
+
+	xcomSource := specString(merged, "request_body")
+	if xcomSource == "" {
+		return nil, errors.New("http_xcom task is missing spec.request_body")
+	}
+	if isTaskExist(workflow, xcomSource) {
+		if id, ok := taskAirflowIDByName[xcomSource]; ok {
+			taskOptions["xcom_task"] = id
+		} else {
+			taskOptions["xcom_task"] = xcomSource
+		}
+	} else {
+		taskOptions["xcom_task"] = xcomSource
+	}
+	return taskOptions, nil
+}
+
+func buildBashTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	merged := mergeSpecs(c.Spec, t.Spec)
+	cmd := specString(merged, "bash_command")
+	if cmd == "" {
+		return nil, errors.New("bash task is missing spec.bash_command")
+	}
+	return map[string]any{
+		"operator":     typeDef.OperatorClass,
+		"bash_command": cmd,
+	}, nil
+}
+
+func buildSSHTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	merged := mergeSpecs(c.Spec, t.Spec)
+	connID := specString(merged, "ssh_conn_id")
+	if connID == "" {
+		return nil, errors.New("ssh task is missing spec.ssh_conn_id")
+	}
+	cmd := specString(merged, "command")
+	if cmd == "" {
+		return nil, errors.New("ssh task is missing spec.command")
+	}
+	return map[string]any{
+		"operator":    typeDef.OperatorClass,
+		"ssh_conn_id": connID,
+		"command":     cmd,
+	}, nil
+}
+
+func buildTriggerWorkflowTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+	merged := mergeSpecs(c.Spec, t.Spec)
+	taskOptions := map[string]any{
+		"operator": typeDef.OperatorClass,
+	}
+	for k, v := range merged {
+		taskOptions[k] = v
+	}
+	if _, ok := taskOptions["trigger_dag_id"]; !ok {
+		return nil, errors.New("trigger_workflow task is missing trigger_dag_id")
+	}
+	return taskOptions, nil
+}
+
+// mergeSpecs returns a new Spec that contains all keys from base, overridden
+// by keys from override (task-level wins over component-level).
+func mergeSpecs(base, override model.Spec) model.Spec {
+	out := model.Spec{}
+	for k, v := range base {
+		out[k] = v
+	}
+	for k, v := range override {
+		out[k] = v
+	}
+	return out
+}
+
+// specStringMap extracts a map[string]string from a Spec value.
+// Accepts both map[string]string and map[string]any (string-valued).
+func specStringMap(s model.Spec, key string) map[string]string {
+	if s == nil {
+		return nil
+	}
+	v, ok := s[key]
+	if !ok {
+		return nil
+	}
+	switch m := v.(type) {
+	case map[string]string:
+		return m
+	case map[string]any:
+		out := make(map[string]string, len(m))
+		for k, val := range m {
+			if str, ok := val.(string); ok {
+				out[k] = str
+			} else {
+				out[k] = fmt.Sprint(val)
+			}
+		}
+		return out
+	}
+	return nil
+}
+
+func specString(s model.Spec, key string) string {
+	if s == nil {
+		return ""
+	}
+	v, ok := s[key]
+	if !ok {
+		return ""
+	}
+	if str, ok := v.(string); ok {
+		return str
+	}
+	return fmt.Sprint(v)
 }
 
 func resolveDependencies(dependencies []string, taskAirflowIDByName map[string]string) []string {
@@ -510,153 +665,3 @@ func cleanupStaleTaskFilesInGroup(groupDir string, expectedTaskFilePaths map[str
 	return nil
 }
 
-func copyMap(src map[string]any) map[string]any {
-	// 중첩 map까지 안전하게 복사한다.
-	if src == nil {
-		return nil
-	}
-	dst := make(map[string]any, len(src))
-	for k, v := range src {
-		if nestedMap, ok := v.(map[string]any); ok {
-			dst[k] = copyMap(nestedMap)
-		} else {
-			dst[k] = v
-		}
-	}
-	return dst
-}
-
-func mergeMaps(dst map[string]any, src map[string]any) {
-	// dst에 src를 병합한다(중첩 map 지원).
-	if dst == nil || src == nil {
-		return
-	}
-
-	for k, srcValue := range src {
-		// dst에 같은 키가 없으면 그대로 추가
-		if _, exists := dst[k]; !exists {
-			dst[k] = srcValue
-			continue
-		}
-
-		// dst에 같은 키가 있는 경우
-		dstValue := dst[k]
-
-		if dstMap, dstOk := dstValue.(map[string]any); dstOk {
-			if srcMap, srcOk := srcValue.(map[string]any); srcOk {
-				mergeMaps(dstMap, srcMap)
-				continue
-			}
-		}
-
-		dst[k] = srcValue
-	}
-}
-
-func applyTaskExtraHeaders(taskOptions map[string]any, taskExtra map[string]any) {
-	// task.extra.headers를 기본 헤더에 병합하고 문자열로 정규화한다.
-	if taskOptions == nil || taskExtra == nil {
-		return
-	}
-
-	rawHeaders, exists := taskExtra["headers"]
-	if !exists {
-		return
-	}
-
-	merged := map[string]any{
-		"Content-Type": "application/json",
-	}
-
-	if existing, ok := toStringHeaderMap(taskOptions["headers"]); ok {
-		for key, value := range existing {
-			merged[key] = value
-		}
-	}
-
-	userHeaders, ok := toStringHeaderMap(rawHeaders)
-	if !ok {
-		return
-	}
-	for key, value := range userHeaders {
-		merged[key] = value
-	}
-
-	taskOptions["headers"] = merged
-}
-
-func toStringHeaderMap(raw any) (map[string]string, bool) {
-	// 헤더 map을 string map으로 변환한다.
-	if raw == nil {
-		return nil, false
-	}
-
-	out := make(map[string]string)
-
-	switch headers := raw.(type) {
-	case map[string]any:
-		for key, value := range headers {
-			if key == "" {
-				continue
-			}
-			strValue, ok := toHeaderString(value)
-			if !ok {
-				continue
-			}
-			out[key] = strValue
-		}
-		return out, true
-
-	case map[string]string:
-		for key, value := range headers {
-			if key == "" {
-				continue
-			}
-			out[key] = value
-		}
-		return out, true
-	}
-
-	return nil, false
-}
-
-func toHeaderString(value any) (string, bool) {
-	// 다양한 타입의 값을 헤더용 문자열로 변환한다.
-	switch v := value.(type) {
-	case string:
-		return v, true
-	case bool:
-		if v {
-			return "true", true
-		}
-		return "false", true
-	case int:
-		return fmt.Sprintf("%d", v), true
-	case int8:
-		return fmt.Sprintf("%d", v), true
-	case int16:
-		return fmt.Sprintf("%d", v), true
-	case int32:
-		return fmt.Sprintf("%d", v), true
-	case int64:
-		return fmt.Sprintf("%d", v), true
-	case uint:
-		return fmt.Sprintf("%d", v), true
-	case uint8:
-		return fmt.Sprintf("%d", v), true
-	case uint16:
-		return fmt.Sprintf("%d", v), true
-	case uint32:
-		return fmt.Sprintf("%d", v), true
-	case uint64:
-		return fmt.Sprintf("%d", v), true
-	case float32:
-		return fmt.Sprintf("%v", v), true
-	case float64:
-		return fmt.Sprintf("%v", v), true
-	case fmt.Stringer:
-		return v.String(), true
-	default:
-		return "", false
-	}
-}

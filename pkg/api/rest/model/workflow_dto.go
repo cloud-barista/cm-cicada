@@ -15,43 +15,34 @@ const (
 )
 
 // Task is the domain/API representation of a task inside a workflow graph.
-// Kept separate from TaskDBModel so API payloads and DB rows can diverge
-// without contaminating each other's tag sets.
+// The Spec map carries type-specific runtime values (validated against the
+// catalog's task_schema for the referenced TaskComponent.Type).
 type Task struct {
-	ID            string                 `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name          string                 `json:"name" mapstructure:"name" validate:"required"`
-	TaskComponent string                 `json:"task_component" mapstructure:"task_component" validate:"required"`
-	RequestBody   string                 `json:"request_body" mapstructure:"request_body" validate:"required"`
-	PathParams    map[string]string      `json:"path_params" mapstructure:"path_params"`
-	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
-	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
-	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
-	IsDeletedTask bool                   `json:"is_deleted_task"`
+	ID            string   `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
+	Spec          Spec     `json:"spec,omitempty" mapstructure:"spec"`
+	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
+	IsDeletedTask bool     `json:"is_deleted_task"`
 }
 
 // TaskDirectly is a flat variant used by the "direct create" path where a
 // task is created with its workflow/task-group IDs embedded in the payload.
 type TaskDirectly struct {
-	ID            string                 `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	WorkflowID    string                 `json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
-	TaskGroupID   string                 `json:"task_group_id" mapstructure:"task_group_id" validate:"required"`
-	Name          string                 `json:"name" mapstructure:"name" validate:"required"`
-	TaskComponent string                 `json:"task_component" mapstructure:"task_component" validate:"required"`
-	RequestBody   string                 `json:"request_body" mapstructure:"request_body" validate:"required"`
-	PathParams    map[string]string      `json:"path_params" mapstructure:"path_params"`
-	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
-	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
-	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
+	ID            string   `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	WorkflowID    string   `json:"workflow_id" mapstructure:"workflow_id" validate:"required"`
+	TaskGroupID   string   `json:"task_group_id" mapstructure:"task_group_id" validate:"required"`
+	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
+	Spec          Spec     `json:"spec,omitempty" mapstructure:"spec"`
+	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
 }
 
 type CreateTaskReq struct {
-	Name          string                 `json:"name" mapstructure:"name" validate:"required"`
-	TaskComponent string                 `json:"task_component" mapstructure:"task_component" validate:"required"`
-	RequestBody   string                 `json:"request_body" mapstructure:"request_body" validate:"required"`
-	PathParams    map[string]string      `json:"path_params" mapstructure:"path_params"`
-	QueryParams   map[string]string      `json:"query_params" mapstructure:"query_params"`
-	Extra         map[string]interface{} `json:"extra,omitempty" mapstructure:"extra"`
-	Dependencies  []string               `json:"dependencies" mapstructure:"dependencies"`
+	Name          string   `json:"name" mapstructure:"name" validate:"required"`
+	TaskComponent string   `json:"task_component" mapstructure:"task_component" validate:"required"`
+	Spec          Spec     `json:"spec,omitempty" mapstructure:"spec"`
+	Dependencies  []string `json:"dependencies" mapstructure:"dependencies"`
 }
 
 type TaskGroup struct {

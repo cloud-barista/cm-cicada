@@ -1,0 +1,8 @@
+{
+  "name": "_v2_bash_notice",
+  "description": "[V2 Sample] 안내 메시지 출력 (BashOperator + echo)",
+  "type": "bash",
+  "spec": {
+    "bash_command": "echo '===== Migration 시작합니다 ====='"
+  }
+}

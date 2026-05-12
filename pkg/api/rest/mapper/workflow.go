@@ -22,6 +22,36 @@ type WorkflowGraphDiff struct {
 	TasksToSoftDrop      []model.TaskDBModel
 }
 
+// DataToCreateDataReq strips IDs from a persisted Data graph so it can be fed
+// back into createWorkflowInternal as a fresh CreateDataReq (with new IDs to
+// be issued downstream). Used by the workflow clone path.
+func DataToCreateDataReq(data model.Data) model.CreateDataReq {
+	tgs := make([]model.CreateTaskGroupReq, 0, len(data.TaskGroups))
+	for _, tg := range data.TaskGroups {
+		tasks := make([]model.CreateTaskReq, 0, len(tg.Tasks))
+		for _, t := range tg.Tasks {
+			if t.IsDeletedTask {
+				continue
+			}
+			tasks = append(tasks, model.CreateTaskReq{
+				Name:          t.Name,
+				TaskComponent: t.TaskComponent,
+				Spec:          t.Spec,
+				Dependencies:  t.Dependencies,
+			})
+		}
+		tgs = append(tgs, model.CreateTaskGroupReq{
+			Name:        tg.Name,
+			Description: tg.Description,
+			Tasks:       tasks,
+		})
+	}
+	return model.CreateDataReq{
+		Description: data.Description,
+		TaskGroups:  tgs,
+	}
+}
+
 func CreateDataReqToData(specVersion string, createDataReq model.CreateDataReq) (model.Data, error) {
 	specVersionSpilit := strings.Split(specVersion, ".")
 	if len(specVersionSpilit) != 2 {
@@ -51,10 +81,7 @@ func CreateDataReqToData(specVersion string, createDataReq model.CreateDataReq) 
 						ID:            uuid.New().String(),
 						Name:          tReq.Name,
 						TaskComponent: tReq.TaskComponent,
-						RequestBody:   tReq.RequestBody,
-						PathParams:    tReq.PathParams,
-						QueryParams:   tReq.QueryParams,
-						Extra:         tReq.Extra,
+						Spec:          tReq.Spec,
 						Dependencies:  tReq.Dependencies,
 					})
 				}

@@ -1,0 +1,31 @@
+{
+  "spec_version": "1.0",
+  "name": "_v2_example_xcom_workflow",
+  "data": {
+    "description": "[V2 Sample] http_xcom 시연 — cm-cicada 내장 example API로 GET → xcom → POST",
+    "task_groups": [
+      {
+        "name": "example_xcom_flow",
+        "description": "GET /example/data → 응답을 xcom으로 받아 POST /example/echo의 body로 전달",
+        "tasks": [
+          {
+            "name": "fetch_sample_data",
+            "task_component": "_v2_example_get_data",
+            "spec": {},
+            "dependencies": []
+          },
+          {
+            "name": "echo_via_xcom",
+            "task_component": "_v2_example_post_echo_xcom",
+            "spec": {
+              "request_body": "fetch_sample_data"
+            },
+            "dependencies": [
+              "fetch_sample_data"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

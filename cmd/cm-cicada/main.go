@@ -13,6 +13,7 @@ import (
 	"github.com/cloud-barista/cm-cicada/db"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/lib/airflow/bootstrap"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/controller"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/server"
@@ -51,6 +52,11 @@ func init() {
 	controller.OkMessage.Message = "Database is not ready"
 	err = db.Open()
 	if err != nil {
+		logger.Panicln(logger.ERROR, true, err.Error())
+	}
+
+	logger.Println(logger.INFO, false, "Loading task type catalog...")
+	if err := catalog.Load(config.CMCicadaConfig.CMCicada.TaskTypesPath); err != nil {
 		logger.Panicln(logger.ERROR, true, err.Error())
 	}
 

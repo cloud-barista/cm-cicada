@@ -297,10 +297,7 @@ func (s *WorkflowTaskService) GetTaskDirectly(taskID string, includeDeleted bool
 						TaskGroupID:   tDB.TaskGroupID,
 						Name:          task.Name,
 						TaskComponent: task.TaskComponent,
-						RequestBody:   task.RequestBody,
-						PathParams:    task.PathParams,
-						QueryParams:   task.QueryParams,
-						Extra:         task.Extra,
+						Spec:          task.Spec,
 						Dependencies:  task.Dependencies,
 					}, nil
 				}
@@ -316,10 +313,7 @@ func (s *WorkflowTaskService) GetTaskDirectly(taskID string, includeDeleted bool
 			TaskGroupID:   tDB.TaskGroupID,
 			Name:          task.Name,
 			TaskComponent: task.TaskComponent,
-			RequestBody:   task.RequestBody,
-			PathParams:    task.PathParams,
-			QueryParams:   task.QueryParams,
-			Extra:         task.Extra,
+			Spec:          task.Spec,
 			Dependencies:  task.Dependencies,
 		}, nil
 	}
@@ -339,10 +333,7 @@ func (s *WorkflowTaskService) restoreTaskFromSnapshot(taskDB model.TaskDBModel) 
 		ID:            taskDB.ID,
 		Name:          taskDB.Name,
 		TaskComponent: "",
-		RequestBody:   "",
-		PathParams:    nil,
-		QueryParams:   nil,
-		Extra:         nil,
+		Spec:          nil,
 		Dependencies:  []string{},
 		IsDeletedTask: taskDB.IsDeleted,
 	}

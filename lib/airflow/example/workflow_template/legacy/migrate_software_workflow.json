@@ -1,0 +1,41 @@
+{
+  "spec_version": "1.0",
+  "name": "migrate_software_workflow",
+  "data": {
+    "description": "Migrate Softwares to deployed Cloud VMs",
+    "task_groups": [
+      {
+        "name": "migrate_software",
+        "description": "Migrate Software",
+        "tasks": [
+          {
+            "name": "get_target_software_model",
+            "task_component": "damselfly_task_get_target_software_model",
+            "path_params": {
+              "id": "49KLTdyzBUtt8q8"
+            }
+          },
+          {
+            "name": "run_software_migration",
+            "task_component": "grasshopper_task_software_migration",
+            "request_body": "get_target_software_model",
+            "query_params": {
+              "nsId": "mig01",
+              "mciId": "mmci01"
+            },
+            "dependencies": [
+              "get_target_software_model"
+            ]
+          },
+          {
+            "name": "send_result_via_email",
+            "task_component": "trigger_email",
+            "dependencies": [
+              "run_software_migration"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

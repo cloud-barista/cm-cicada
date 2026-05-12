@@ -1,8 +1,11 @@
 {
   "name": "honeybee_task_import_software",
   "description": "Import software information by honeybee.",
-  "api_connection_id": "honeybee_api",
-  "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
-  "endpoint": "/source_group/{sgId}/import/software",
-  "method": "POST"
+  "type": "http",
+  "spec": {
+    "api_connection_id": "honeybee_api",
+    "swagger_yaml_endpoint": "/honeybee/api/doc.yaml",
+    "method": "POST",
+    "endpoint": "/source_group/{sgId}/import/software"
+  }
 }

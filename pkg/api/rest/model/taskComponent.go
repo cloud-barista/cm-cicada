@@ -7,68 +7,45 @@ import (
 	"time"
 )
 
-type PropertyDef struct {
-	Type        string                 `json:"type"`
-	Required    []string               `json:"required,omitempty"`
-	Properties  map[string]PropertyDef `json:"properties,omitempty"`
-	Items       *PropertyDef           `json:"items,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Default     interface{}            `json:"default,omitempty"`
-	Enum        []string               `json:"enum,omitempty"`
-	Example     interface{}            `json:"example,omitempty"`
+// Spec is a free-form key/value map persisted as JSON. Catalog
+// (conf/task_types.yaml) defines which keys are valid per task type.
+type Spec map[string]any
+
+func (s Spec) Value() (driver.Value, error) {
+	if s == nil {
+		return nil, nil
+	}
+	return json.Marshal(s)
 }
 
-type ParameterStructure struct {
-	Required   []string               `json:"required,omitempty"`
-	Properties map[string]PropertyDef `json:"properties,omitempty"`
-}
-
-type TaskComponentOptions struct {
-	APIConnectionID string                 `json:"api_connection_id"`
-	Endpoint        string                 `json:"endpoint"`
-	Method          string                 `json:"method"`
-	RequestBody     string                 `json:"request_body"`
-	Extra           map[string]interface{} `json:"extra,omitempty"`
-}
-
-type TaskComponentData struct {
-	Options     TaskComponentOptions `json:"options"`
-	BodyParams  ParameterStructure   `json:"body_params,omitempty"`
-	PathParams  ParameterStructure   `json:"path_params,omitempty"`
-	QueryParams ParameterStructure   `json:"query_params,omitempty"`
-}
-
-type TaskComponent struct {
-	ID          string            `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
-	Name        string            `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
-	Description string            `gorm:"column:description" json:"description"`
-	Data        TaskComponentData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-	CreatedAt   time.Time         `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
-	UpdatedAt   time.Time         `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
-	IsExample   bool              `gorm:"column:is_example" json:"is_example" mapstructure:"is_example"`
-}
-
-type CreateTaskComponentReq struct {
-	Name string            `json:"name" mapstructure:"name" validate:"required"`
-	Data TaskComponentData `gorm:"column:data" json:"data" mapstructure:"data" validate:"required"`
-}
-
-type Params struct {
-	Required   []string    `json:"required" mapstructure:"required" validate:"required"`
-	Properties interface{} `json:"properties" mapstructure:"properties" validate:"required"`
-}
-
-func (d TaskComponentData) Value() (driver.Value, error) {
-	return json.Marshal(d)
-}
-
-func (d *TaskComponentData) Scan(value interface{}) error {
+func (s *Spec) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
 	bytes, ok := value.([]byte)
 	if !ok {
-		return errors.New("invalid type for TaskComponentData")
+		return errors.New("invalid type for Spec")
 	}
-	return json.Unmarshal(bytes, d)
+	return json.Unmarshal(bytes, s)
+}
+
+// TaskComponent is a reusable definition that workflow tasks can reference.
+// Type points to a catalog entry (conf/task_types.yaml), Spec carries the
+// component-level values for that type.
+type TaskComponent struct {
+	ID          string    `gorm:"primaryKey" json:"id" mapstructure:"id" validate:"required"`
+	Name        string    `gorm:"index:,column:name,unique;type:text collate nocase" json:"name" mapstructure:"name" validate:"required"`
+	Description string    `gorm:"column:description" json:"description"`
+	Type        string    `gorm:"column:type;index" json:"type" mapstructure:"type" validate:"required"`
+	Spec        Spec      `gorm:"column:spec;type:text" json:"spec"`
+	IsExample   bool      `gorm:"column:is_example" json:"is_example" mapstructure:"is_example"`
+	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime:false" json:"created_at" mapstructure:"created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;autoCreateTime:false" json:"updated_at" mapstructure:"updated_at"`
+}
+
+type CreateTaskComponentReq struct {
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description"`
+	Type        string `json:"type" validate:"required"`
+	Spec        Spec   `json:"spec"`
 }

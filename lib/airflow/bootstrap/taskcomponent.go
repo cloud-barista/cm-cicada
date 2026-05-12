@@ -14,6 +14,7 @@ import (
 
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/db"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/catalog"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 )
@@ -85,11 +86,19 @@ func TaskComponentInit() error {
 // buildTaskComponent resolves a ConfigFile into an in-memory TaskComponent.
 // Returns (nil, nil) when the descriptor references an unknown connection —
 // the caller treats that as a soft-skip to keep startup resilient.
+//
+// Resolution order:
+//  1. V2 (`type` set): catalog-based, copy `spec` verbatim after type validation.
+//  2. V1 with `extra`: match operator class against catalog, copy remaining
+//     fields into Spec.
+//  3. V1 Swagger fetch: introspect remote spec (legacy path).
 func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
+	if configFile.Type != "" {
+		return buildTaskComponentV2(configFile)
+	}
+
 	if configFile.Extra != nil {
-		taskComponent := &model.TaskComponent{}
-		taskComponent.Data.Options.Extra = configFile.Extra
-		return taskComponent, nil
+		return buildTaskComponentFromExtra(configFile.Extra)
 	}
 
 	connection, ok := findConnection(configFile.APIConnectionID)
@@ -108,6 +117,97 @@ func buildTaskComponent(configFile ConfigFile) (*model.TaskComponent, error) {
 		return nil, fmt.Errorf("failed to process endpoint: %v", err)
 	}
 	return taskComponent, nil
+}
+
+// buildTaskComponentV2 produces a catalog-typed TaskComponent.
+//
+// When the spec carries `swagger_yaml_endpoint`, the function fetches the
+// referenced Swagger document at boot, prefixes the configured `endpoint` with
+// the spec's BasePath, and inlines a generated `request_body` plus parameter
+// schemas (`path_params_schema`, `query_params_schema`, `body_params_schema`)
+// — the same enrichment V1 descriptors received. The enrichment keys
+// overwrite their counterparts in the source spec; `swagger_yaml_endpoint` is
+// dropped after use because it is only metadata for the boot-time fetch.
+func buildTaskComponentV2(configFile ConfigFile) (*model.TaskComponent, error) {
+	if !catalog.Has(configFile.Type) {
+		return nil, fmt.Errorf("unknown task type in catalog: %s", configFile.Type)
+	}
+
+	spec := model.Spec{}
+	for k, v := range configFile.Spec {
+		spec[k] = v
+	}
+
+	swaggerEndpoint, _ := spec["swagger_yaml_endpoint"].(string)
+	if swaggerEndpoint != "" {
+		apiConnID, _ := spec["api_connection_id"].(string)
+		if apiConnID == "" {
+			return nil, fmt.Errorf("swagger_yaml_endpoint requires api_connection_id in spec")
+		}
+
+		connection, ok := findConnection(apiConnID)
+		if !ok {
+			return nil, fmt.Errorf("failed to find connection with ID %s", apiConnID)
+		}
+
+		swagger, err := fetchAndParseYAML(connection, swaggerEndpoint)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch and parse swagger spec: %v", err)
+		}
+
+		endpoint, _ := spec["endpoint"].(string)
+		method, _ := spec["method"].(string)
+		endpoint = strings.TrimPrefix(endpoint, swagger.BasePath)
+
+		enriched, err := processEndpoint(connection.ID, swagger, endpoint, method)
+		if err != nil {
+			return nil, fmt.Errorf("failed to process endpoint: %v", err)
+		}
+
+		for k, v := range enriched.Spec {
+			spec[k] = v
+		}
+		delete(spec, "swagger_yaml_endpoint")
+	}
+
+	return &model.TaskComponent{
+		Type: configFile.Type,
+		Spec: spec,
+	}, nil
+}
+
+func buildTaskComponentFromExtra(extra map[string]any) (*model.TaskComponent, error) {
+	operatorClass, _ := extra["operator"].(string)
+	if operatorClass == "" {
+		return nil, fmt.Errorf("extra.operator is missing or not a string")
+	}
+
+	typeID, ok := findTypeByOperator(operatorClass)
+	if !ok {
+		return nil, fmt.Errorf("no catalog task type matches operator class: %s", operatorClass)
+	}
+
+	specMap := model.Spec{}
+	for k, v := range extra {
+		if k == "operator" {
+			continue
+		}
+		specMap[k] = v
+	}
+
+	return &model.TaskComponent{
+		Type: typeID,
+		Spec: specMap,
+	}, nil
+}
+
+func findTypeByOperator(operatorClass string) (string, bool) {
+	for _, t := range catalog.List() {
+		if t.OperatorClass == operatorClass {
+			return t.ID, true
+		}
+	}
+	return "", false
 }
 
 func findConnection(id string) (model.Connection, bool) {
