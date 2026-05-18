@@ -231,6 +231,8 @@ func ensureWorkflowDir(workflow *model.Workflow) (string, error) {
 
 func writeDAGMetadata(workflow *model.Workflow, dagDir string) error {
 	// DAG 메타데이터(METADATA.yml)를 기록한다.
+	// 워크플로우에 active schedule이 있으면 Airflow가 알아서 1회 실행하도록
+	// schedule="@once", start_date=run_at,  catchup=false 를 함께 기록한다.
 	type defaultArgs struct {
 		Owner         string `yaml:"owner"`
 		StartDate     string `yaml:"start_date"`
@@ -239,14 +241,35 @@ func writeDAGMetadata(workflow *model.Workflow, dagDir string) error {
 	}
 
 	var dagInfo struct {
-		defaultArgs    defaultArgs `yaml:"default_args"`
+		DefaultArgs    defaultArgs `yaml:"default_args"`
 		Description    string      `yaml:"description"`
 		DagDisplayName string      `yaml:"dag_display_name"`
+		Schedule       string      `yaml:"schedule,omitempty"`
+		Catchup        *bool       `yaml:"catchup,omitempty"`
 	}
 
-	dagInfo.defaultArgs = defaultArgs{
+	startDate := time.Now().Format(time.DateOnly)
+	if schedule, err := dao.WorkflowScheduleGetActive(workflow.ID); err == nil && schedule != nil {
+		switch schedule.Type {
+		case model.WorkflowScheduleTypeOnce:
+			if schedule.RunAt != nil {
+				startDate = schedule.RunAt.UTC().Format(time.RFC3339)
+				dagInfo.Schedule = "@once"
+				catchup := false
+				dagInfo.Catchup = &catchup
+			}
+		case model.WorkflowScheduleTypeCron:
+			if schedule.Cron != nil && *schedule.Cron != "" {
+				dagInfo.Schedule = *schedule.Cron
+				catchup := false
+				dagInfo.Catchup = &catchup
+			}
+		}
+	}
+
+	dagInfo.DefaultArgs = defaultArgs{
 		Owner:         strings.ToLower(common.ModuleName),
-		StartDate:     time.Now().Format(time.DateOnly),
+		StartDate:     startDate,
 		Retries:       0,
 		RetryDelaySec: 0,
 	}
@@ -664,4 +687,3 @@ func cleanupStaleTaskFilesInGroup(groupDir string, expectedTaskFilePaths map[str
 
 	return nil
 }
-

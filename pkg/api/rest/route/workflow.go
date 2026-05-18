@@ -16,6 +16,9 @@ func Workflow(e *echo.Echo) {
 	e.PUT("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.UpdateWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/run", controller.RunWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/clone", controller.CloneWorkflow)
+	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.ScheduleWorkflow)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.GetWorkflowSchedule)
+	e.DELETE("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.CancelWorkflowSchedule)
 	e.DELETE("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.DeleteWorkflow)
 
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group", controller.ListTaskGroup)

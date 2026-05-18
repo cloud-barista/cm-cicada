@@ -20,7 +20,7 @@
           },
           {
             "name": "run_software_migration",
-            "task_component": "grasshopper_task_software_migration_xcom",
+            "task_component": "grasshopper_task_software_migration",
             "spec": {
               "request_body": "get_target_software_model",
               "query_params": {
