@@ -2031,6 +2031,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/{wfId}/version/{versionNo}/rollback": {
+            "post": {
+                "description": "Restore the workflow's task graph and metadata from the snapshot identified by versionNo. Existing active tasks are soft-deleted and re-issued with fresh UUIDs from the target version's raw_data. The rollback itself is recorded as a new WorkflowVersion with action=\"rollback\" and source_template_id=\u003csource version id\u003e. workflow_schedules rows are left untouched.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Rollback Workflow to a Past Version",
+                "operationId": "rollback-workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Target version_no within the workflow (1-based, positive integer).",
+                        "name": "versionNo",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workflow after rollback.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Workflow or version not found.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Cannot rollback to this version (e.g. delete action).",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to rollback the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/{wfId}/workflowRun/{wfRunId}/range": {
             "post": {
                 "description": "Clear the task Instance.",

@@ -367,3 +367,23 @@ func WorkflowVersionGet(id string, wkID string) (*model.WorkflowVersion, error) 
 
 	return workflowVersion, nil
 }
+
+// WorkflowVersionGetByNo looks up a workflow version by its sequential
+// version_no inside a workflow. Returns (nil, nil) when the row does not
+// exist so callers can distinguish "missing" from "error".
+func WorkflowVersionGetByNo(workflowID string, versionNo int) (*model.WorkflowVersion, error) {
+	if err := ensureDB(); err != nil {
+		return nil, err
+	}
+
+	workflowVersion := &model.WorkflowVersion{}
+	result := db.DB.Where("workflowId = ? AND version_no = ?", workflowID, versionNo).First(workflowVersion)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+
+	return workflowVersion, nil
+}
