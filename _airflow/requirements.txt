@@ -8,7 +8,7 @@ amqp==5.2.0
 anyio==4.6.2.post1
 
 # Airflow + 필요한 프로바이더는 extras로 한 줄만 (개별 provider 핀 제거)
-apache-airflow[celery,cncf.kubernetes,docker,ftp,http,imap,mysql,smtp,sqlite,ssh]==2.10.3
+apache-airflow[celery,cncf.kubernetes,docker,ftp,http,imap,mysql,smtp,sqlite,ssh]==3.2.1rc1
 apache-airflow-providers-standard==1.0.0
 
 apispec==6.7.1
