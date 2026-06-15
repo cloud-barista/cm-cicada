@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
@@ -77,4 +78,39 @@ func GetWorkflowVersion(c echo.Context) error {
 	}
 
 	return c.JSONPretty(http.StatusOK, version, " ")
+}
+
+// RollbackWorkflow godoc
+//
+//	@ID		rollback-workflow
+//	@Summary	Rollback Workflow to a Past Version
+//	@Description	Restore the workflow's task graph and metadata from the snapshot identified by versionNo. Existing active tasks are soft-deleted and re-issued with fresh UUIDs from the target version's raw_data. The rollback itself is recorded as a new WorkflowVersion with action="rollback" and source_template_id=<source version id>. workflow_schedules rows are left untouched.
+//	@Tags		[Workflow]
+//	@Produce	json
+//	@Param		wfId path 	string true "Workflow ID."
+//	@Param		versionNo path 	int true "Target version_no within the workflow (1-based, positive integer)."
+//	@Success	200	{object}	model.Workflow		"Workflow after rollback."
+//	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
+//	@Failure	404	{object}	common.ErrorResponse	"Workflow or version not found."
+//	@Failure	409	{object}	common.ErrorResponse	"Cannot rollback to this version (e.g. delete action)."
+//	@Failure	500	{object}	common.ErrorResponse	"Failed to rollback the workflow."
+//	@Router		/workflow/{wfId}/version/{versionNo}/rollback [post]
+func RollbackWorkflow(c echo.Context) error {
+	wfId, err := requireParam(c, "wfId", "wfId")
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+	versionNoStr := c.Param("versionNo")
+	versionNo, err := strconv.Atoi(versionNoStr)
+	if err != nil || versionNo <= 0 {
+		return common.ReturnErrorMsg(c, "version_no must be a positive integer")
+	}
+
+	svc := service.NewWorkflowService()
+	workflow, err := svc.RollbackWorkflow(wfId, versionNo)
+	if err != nil {
+		return common.ReturnErrorMsg(c, err.Error())
+	}
+
+	return c.JSONPretty(http.StatusOK, workflow, " ")
 }

@@ -1212,10 +1212,7 @@ const docTemplate = `{
         },
         "/workflow/{wfId}/clone": {
             "post": {
-                "description": "Clone an existing workflow as a new workflow. The server copies task_groups / tasks from the source (looked up by wfId) and re-issues all IDs. The first snapshot of the new workflow records source_type=\"clone\" and source_template_id=\u003csource workflow id\u003e.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Clone an existing workflow as a new workflow. The server copies task_groups / tasks from the source (looked up by wfId) and re-issues all IDs. The new workflow's name is auto-generated as \"\u003csource name\u003e_copy\" (with _copy_2, _copy_3 ... on collision). The first snapshot of the new workflow records source_type=\"clone\" and source_template_id=\u003csource workflow id\u003e.",
                 "produces": [
                     "application/json"
                 ],
@@ -1231,15 +1228,6 @@ const docTemplate = `{
                         "name": "wfId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "New workflow name (and optional description override).",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq"
-                        }
                     }
                 ],
                 "responses": {
@@ -1416,6 +1404,152 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to get the workflowRuns.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/schedule": {
+            "get": {
+                "description": "Return the workflow's most recently created schedule row regardless of status. Inspect .status to interpret: \"active\" (will fire), \"executed\" (already ran), \"canceled\" (user canceled). Returns null when the workflow has no schedule history.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Get Workflow Schedule",
+                "operationId": "get-workflow-schedule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Latest schedule (any status), or null.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to fetch the schedule.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register a one-shot future execution. Airflow handles the actual triggering via DAG metadata (schedule=\"@once\" + start_date=run_at + catchup=false). Only one active schedule per workflow is allowed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Schedule Workflow (one-shot)",
+                "operationId": "schedule-workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule body (run_at).",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowScheduleReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully scheduled the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Active schedule already exists.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to schedule the workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Cancel the workflow's active schedule. The DAG metadata is rewritten so Airflow no longer triggers the workflow on the originally requested cadence. Returns 404 when no active schedule exists.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Cancel Workflow Schedule",
+                "operationId": "cancel-workflow-schedule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully canceled.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No active schedule for this workflow.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to cancel the schedule.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -1890,6 +2024,67 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to get the WorkflowVersion.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/{wfId}/version/{versionNo}/rollback": {
+            "post": {
+                "description": "Restore the workflow's task graph and metadata from the snapshot identified by versionNo. Existing active tasks are soft-deleted and re-issued with fresh UUIDs from the target version's raw_data. The rollback itself is recorded as a new WorkflowVersion with action=\"rollback\" and source_template_id=\u003csource version id\u003e. workflow_schedules rows are left untouched.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "[Workflow]"
+                ],
+                "summary": "Rollback Workflow to a Past Version",
+                "operationId": "rollback-workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workflow ID.",
+                        "name": "wfId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Target version_no within the workflow (1-based, positive integer).",
+                        "name": "versionNo",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Workflow after rollback.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow"
+                        }
+                    },
+                    "400": {
+                        "description": "Sent bad request.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Workflow or version not found.",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Cannot rollback to this version (e.g. delete action).",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to rollback the workflow.",
                         "schema": {
                             "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse"
                         }
@@ -2400,20 +2595,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection": {
             "type": "object",
             "required": [
@@ -2548,6 +2729,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "spec_version": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowScheduleReq": {
+            "type": "object",
+            "properties": {
+                "cron": {
+                    "type": "string"
+                },
+                "run_at": {
                     "type": "string"
                 }
             }
@@ -2985,6 +3177,59 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "run_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "canceled",
+                "executed"
+            ],
+            "x-enum-varnames": [
+                "WorkflowScheduleStatusActive",
+                "WorkflowScheduleStatusCanceled",
+                "WorkflowScheduleStatusExecuted"
+            ]
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleType": {
+            "type": "string",
+            "enum": [
+                "once",
+                "cron"
+            ],
+            "x-enum-varnames": [
+                "WorkflowScheduleTypeOnce",
+                "WorkflowScheduleTypeCron"
+            ]
         },
         "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus": {
             "type": "object",

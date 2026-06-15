@@ -16,6 +16,9 @@ func Workflow(e *echo.Echo) {
 	e.PUT("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.UpdateWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/run", controller.RunWorkflow)
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/clone", controller.CloneWorkflow)
+	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.ScheduleWorkflow)
+	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.GetWorkflowSchedule)
+	e.DELETE("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/schedule", controller.CancelWorkflowSchedule)
 	e.DELETE("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId", controller.DeleteWorkflow)
 
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/task_group", controller.ListTaskGroup)
@@ -38,6 +41,7 @@ func Workflow(e *echo.Echo) {
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/importErrors", controller.GetImportErrors)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version", controller.ListWorkflowVersion)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version/:verId", controller.GetWorkflowVersion)
+	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/version/:versionNo/rollback", controller.RollbackWorkflow)
 	e.GET("/"+strings.ToLower(common.ShortModuleName)+"/workflow/:wfId/status", controller.GetWorkflowStatus)
 
 	e.POST("/"+strings.ToLower(common.ShortModuleName)+"/run_script", controller.RunScript)

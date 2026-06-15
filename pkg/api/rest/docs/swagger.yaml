@@ -71,15 +71,6 @@ definitions:
       error:
         type: string
     type: object
-  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-    required:
-    - name
-    type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Connection:
     properties:
       description:
@@ -171,6 +162,13 @@ definitions:
     required:
     - data
     - name
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowScheduleReq:
+    properties:
+      cron:
+        type: string
+      run_at:
+        type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Data:
     properties:
@@ -469,6 +467,43 @@ definitions:
       workflow_run_id:
         type: string
     type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule:
+    properties:
+      created_at:
+        type: string
+      cron:
+        type: string
+      id:
+        type: string
+      run_at:
+        type: string
+      status:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleStatus'
+      type:
+        $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleType'
+      updated_at:
+        type: string
+      workflow_id:
+        type: string
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleStatus:
+    enum:
+    - active
+    - canceled
+    - executed
+    type: string
+    x-enum-varnames:
+    - WorkflowScheduleStatusActive
+    - WorkflowScheduleStatusCanceled
+    - WorkflowScheduleStatusExecuted
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowScheduleType:
+    enum:
+    - once
+    - cron
+    type: string
+    x-enum-varnames:
+    - WorkflowScheduleTypeOnce
+    - WorkflowScheduleTypeCron
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowStatus:
     properties:
       count:
@@ -1297,12 +1332,11 @@ paths:
       - '[Workflow]'
   /workflow/{wfId}/clone:
     post:
-      consumes:
-      - application/json
       description: Clone an existing workflow as a new workflow. The server copies
         task_groups / tasks from the source (looked up by wfId) and re-issues all
-        IDs. The first snapshot of the new workflow records source_type="clone" and
-        source_template_id=<source workflow id>.
+        IDs. The new workflow's name is auto-generated as "<source name>_copy" (with
+        _copy_2, _copy_3 ... on collision). The first snapshot of the new workflow
+        records source_type="clone" and source_template_id=<source workflow id>.
       operationId: clone-workflow
       parameters:
       - description: ID of the source workflow to clone.
@@ -1310,12 +1344,6 @@ paths:
         name: wfId
         required: true
         type: string
-      - description: New workflow name (and optional description override).
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CloneWorkflowReq'
       produces:
       - application/json
       responses:
@@ -1440,6 +1468,111 @@ paths:
       summary: List Workflow Runs
       tags:
       - '[Workflow Execution]'
+  /workflow/{wfId}/schedule:
+    delete:
+      description: Cancel the workflow's active schedule. The DAG metadata is rewritten
+        so Airflow no longer triggers the workflow on the originally requested cadence.
+        Returns 404 when no active schedule exists.
+      operationId: cancel-workflow-schedule
+      parameters:
+      - description: Workflow ID.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully canceled.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "404":
+          description: No active schedule for this workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to cancel the schedule.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Cancel Workflow Schedule
+      tags:
+      - '[Workflow]'
+    get:
+      description: 'Return the workflow''s most recently created schedule row regardless
+        of status. Inspect .status to interpret: "active" (will fire), "executed"
+        (already ran), "canceled" (user canceled). Returns null when the workflow
+        has no schedule history.'
+      operationId: get-workflow-schedule
+      parameters:
+      - description: Workflow ID.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Latest schedule (any status), or null.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to fetch the schedule.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Get Workflow Schedule
+      tags:
+      - '[Workflow]'
+    post:
+      consumes:
+      - application/json
+      description: Register a one-shot future execution. Airflow handles the actual
+        triggering via DAG metadata (schedule="@once" + start_date=run_at + catchup=false).
+        Only one active schedule per workflow is allowed.
+      operationId: schedule-workflow
+      parameters:
+      - description: Workflow ID.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: Schedule body (run_at).
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.CreateWorkflowScheduleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully scheduled the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.WorkflowSchedule'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "409":
+          description: Active schedule already exists.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to schedule the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Schedule Workflow (one-shot)
+      tags:
+      - '[Workflow]'
   /workflow/{wfId}/status:
     get:
       consumes:
@@ -1756,6 +1889,51 @@ paths:
           schema:
             $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
       summary: Get Workflow Version
+      tags:
+      - '[Workflow]'
+  /workflow/{wfId}/version/{versionNo}/rollback:
+    post:
+      description: Restore the workflow's task graph and metadata from the snapshot
+        identified by versionNo. Existing active tasks are soft-deleted and re-issued
+        with fresh UUIDs from the target version's raw_data. The rollback itself is
+        recorded as a new WorkflowVersion with action="rollback" and source_template_id=<source
+        version id>. workflow_schedules rows are left untouched.
+      operationId: rollback-workflow
+      parameters:
+      - description: Workflow ID.
+        in: path
+        name: wfId
+        required: true
+        type: string
+      - description: Target version_no within the workflow (1-based, positive integer).
+        in: path
+        name: versionNo
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Workflow after rollback.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow'
+        "400":
+          description: Sent bad request.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "404":
+          description: Workflow or version not found.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "409":
+          description: Cannot rollback to this version (e.g. delete action).
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+        "500":
+          description: Failed to rollback the workflow.
+          schema:
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_common.ErrorResponse'
+      summary: Rollback Workflow to a Past Version
       tags:
       - '[Workflow]'
   /workflow/{wfId}/workflowRun/{wfRunId}/range:

@@ -384,6 +384,118 @@ func (s *WorkflowService) GetWorkflowVersion(wfID, versionID string) (*model.Wor
 	return dao.WorkflowVersionGet(versionID, wfID)
 }
 
+// RollbackWorkflow restores the workflow's task graph + metadata from the
+// snapshot identified by versionNo (1-based, scoped to the workflow). The
+// rollback is recorded as a fresh WorkflowVersion entry with action="rollback"
+// and source_template_id=<source version id>, so the lineage stays
+// queryable.
+//
+// The diff against the current workflow is computed via
+// mapper.BuildWorkflowGraphDiff — same path UpdateWorkflow uses — so tasks
+// that exist by name in both current and target keep their IDs (and Airflow
+// task history continuity), tasks only in the target get fresh IDs, and
+// tasks only in the current get soft-deleted with a "rollback_drop" snapshot
+// for forensics. workflow_schedules rows are left untouched; schedule
+// lifecycle is orthogonal to workflow definition.
+//
+// Refuses to roll back to action="delete" snapshots (no meaningful state to
+// restore). Deleted workflows are not supported in this first cut — restore
+// them first via a future RestoreWorkflow path.
+func (s *WorkflowService) RollbackWorkflow(wfID string, versionNo int) (*model.Workflow, error) {
+	if wfID == "" {
+		return nil, errors.New("please provide the workflow id")
+	}
+	if versionNo <= 0 {
+		return nil, errors.New("version_no must be a positive integer")
+	}
+
+	workflow, err := dao.WorkflowGet(wfID)
+	if err != nil {
+		return nil, err
+	}
+	if workflow.IsDeleted {
+		return nil, errors.New("cannot rollback a deleted workflow")
+	}
+
+	version, err := dao.WorkflowVersionGetByNo(wfID, versionNo)
+	if err != nil {
+		return nil, err
+	}
+	if version == nil {
+		return nil, errors.New("workflow version not found")
+	}
+	if version.Action == "delete" {
+		return nil, errors.New("cannot rollback to a delete-action version")
+	}
+
+	target := version.RawData
+	specVersion := target.SpecVersion
+	if specVersion == "" {
+		specVersion = model.WorkflowSpecVersion_LATEST
+	}
+
+	createDataReq := mapper.DataToCreateDataReq(target.Data)
+	newData, err := mapper.CreateDataReqToData(specVersion, createDataReq)
+	if err != nil {
+		return nil, err
+	}
+
+	diff, err := mapper.BuildWorkflowGraphDiff(workflow, newData)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tg := range diff.TaskGroupsToUpsert {
+		taskGroup := tg
+		if err := dao.TaskGroupSave(&taskGroup); err != nil {
+			return nil, err
+		}
+	}
+	for _, t := range diff.TasksToUpsert {
+		task := t
+		if err := dao.TaskSave(&task); err != nil {
+			return nil, err
+		}
+	}
+	if err := captureSoftDroppedTaskSnapshots(workflow, diff.TasksToSoftDrop, "rollback_drop"); err != nil {
+		return nil, err
+	}
+	for _, t := range diff.TasksToSoftDrop {
+		task := t
+		if err := dao.TaskDelete(&task); err != nil {
+			return nil, err
+		}
+	}
+	for _, tg := range diff.TaskGroupsToSoftDrop {
+		taskGroup := tg
+		if err := dao.TaskGroupDelete(&taskGroup); err != nil {
+			return nil, err
+		}
+	}
+
+	workflow.Name = target.Name
+	workflow.SpecVersion = specVersion
+	workflow.Data = diff.WorkflowData
+
+	if err := dao.WorkflowUpdate(workflow); err != nil {
+		return nil, err
+	}
+
+	if _, err = dao.WorkflowCreateSnapshot(workflow, "rollback", "rollback", version.ID); err != nil {
+		return nil, err
+	}
+
+	client, err := airflow.GetClient()
+	if err != nil {
+		return nil, err
+	}
+	if err := client.CreateDAG(workflow); err != nil {
+		return nil, errors.New("failed to refresh the workflow DAG (error: " + err.Error() + ")")
+	}
+
+	return workflow, nil
+}
+
 func workflowTaskByID(workflow *model.Workflow) map[string]model.Task {
 	tasks := make(map[string]model.Task)
 	if workflow == nil {

@@ -54,6 +54,11 @@ func Open() error {
 		logger.Panicln(logger.ERROR, true, err)
 	}
 
+	err = DB.AutoMigrate(&model.WorkflowSchedule{})
+	if err != nil {
+		logger.Panicln(logger.ERROR, true, err)
+	}
+
 	err = ensureWorkflowActiveNameUniqueIndex()
 	if err != nil {
 		logger.Panicln(logger.ERROR, true, err)
