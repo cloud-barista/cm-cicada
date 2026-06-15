@@ -189,7 +189,7 @@ sql_metadata==2.15.0
 SQLAlchemy==1.4.54
 SQLAlchemy-JSONField==1.0.2
 SQLAlchemy-Utils==0.41.2
-sqlparse==0.5.1
+sqlparse==0.5.4
 sshtunnel==0.4.0
 stack-data==0.6.3
 swagger-ui-bundle==0.0.9
