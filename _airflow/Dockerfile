@@ -23,9 +23,11 @@ WORKDIR /usr/local/airflow
 # Python Requirements
 COPY requirements.txt .
 
-# BuildKit 캐시 사용 + constraints 적용
+# requirements.txt 는 위 CONSTRAINT_URL(2.11.2) 기준으로 생성한 전체 핀 lock 이다.
+# 일부 패키지(PyJWT 등)는 제약조건 이후의 "airflow 2.11.2 호환 범위 내" 최신으로 의도적으로 상향했으므로
+# --constraint 를 적용하지 않고 requirements.txt 자체를 단일 기준으로 설치한다.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install --no-cache-dir -r requirements.txt --constraint "${CONSTRAINT_URL}"
+    pip3 install --no-cache-dir -r requirements.txt
 
 # Sleep forever
 CMD ["sleep", "infinity"]
