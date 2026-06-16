@@ -6,8 +6,8 @@ FROM python:3.12.5-slim-bookworm AS prod-airflow
 # pip/airflow 설정
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_ROOT_USER_ACTION=ignore \
-    AIRFLOW_VERSION=2.10.3 \
-    CONSTRAINT_URL=https://raw.githubusercontent.com/apache/airflow/constraints-2.10.3/constraints-3.12.txt \
+    AIRFLOW_VERSION=2.11.2 \
+    CONSTRAINT_URL=https://raw.githubusercontent.com/apache/airflow/constraints-2.11.2/constraints-3.12.txt \
     AIRFLOW_HOME=/usr/local/airflow
 
 RUN --mount=type=cache,target=/var/cache/apt \

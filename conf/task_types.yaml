@@ -2,7 +2,7 @@ task_types:
   - id: http
     label: HTTP API 호출
     category: api
-    operator_class: airflow.providers.http.operators.http.SimpleHttpOperator
+    operator_class: airflow.providers.http.operators.http.HttpOperator
     component_schema:
       api_connection_id: { type: string, required: true }
       method:            { type: string, required: true, enum: [GET, POST, PUT, DELETE, PATCH] }

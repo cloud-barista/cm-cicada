@@ -1,7 +1,6 @@
 from typing import Any
-from airflow.utils.decorators import apply_defaults
 from airflow.models.baseoperator import BaseOperator
-from airflow.hooks.http_hook import HttpHook
+from airflow.providers.http.hooks.http import HttpHook
 
 import json
 
@@ -34,7 +33,6 @@ def execute_http(context, http_conn_id: str, method: str, endpoint: str, data: s
 
 
 class JsonHttpRequestOperator(BaseOperator):
-    @apply_defaults
     def __init__(self, http_conn_id: str, method: str, endpoint: str, xcom_task: str, *args, **kwargs) -> None:
         self.http_conn_id = http_conn_id
         self.method = method
