@@ -49,7 +49,7 @@
                 },
                 {
                   "name": "data",
-                  "value": "{\n    \"name\": \"recommended-infra01\",\n    \"installMonAgent\": \"no\",\n    \"label\": \"DynamicVM\",\n    \"systemLabel\": \"\",\n    \"description\": \"Made in CB-TB\",\n    \"vm\": [\n        {\n            \"name\": \"recommended-vm01\",\n            \"subGroupSize\": \"3\",\n            \"label\": \"DynamicVM\",\n            \"description\": \"Description\",\n            \"commonSpec\": \"azure-koreacentral-standard-b4ms\",\n            \"commonImage\": \"ubuntu22-04\",\n            \"rootDiskType\": \"default\",\n            \"rootDiskSize\": \"default\",\n            \"vmUserPassword\": \"test\",\n            \"connectionName\": \"azure-koreacentral\"\n        }\n    ]\n}"
+                  "value": "{\n    \"name\": \"recommended-infra01\",\n    \"installMonAgent\": \"no\",\n    \"label\": \"DynamicVM\",\n    \"systemLabel\": \"\",\n    \"description\": \"Made in CB-TB\",\n    \"nodeGroups\": [\n        {\n            \"name\": \"recommended-node01\",\n            \"nodeGroupSize\": \"3\",\n            \"label\": \"DynamicVM\",\n            \"description\": \"Description\",\n            \"commonSpec\": \"azure-koreacentral-standard-b4ms\",\n            \"commonImage\": \"ubuntu22-04\",\n            \"rootDiskType\": \"default\",\n            \"rootDiskSize\": \"default\",\n            \"nodeUserPassword\": \"test\",\n            \"connectionName\": \"azure-koreacentral\"\n        }\n    ]\n}"
                 },
                 {
                   "name": "headers",

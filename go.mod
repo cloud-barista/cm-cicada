@@ -1,9 +1,10 @@
 module github.com/cloud-barista/cm-cicada
 
-go 1.25.0
+go 1.26.2
 
 require (
 	github.com/apache/airflow-client-go/airflow v0.0.0-20230210234754-8ce0b39cfbb2
+	github.com/cloud-barista/cm-beetle/imdl v0.1.6
 	github.com/google/uuid v1.6.0
 	github.com/jollaman999/utils v1.0.10
 	github.com/labstack/echo/v4 v4.15.1

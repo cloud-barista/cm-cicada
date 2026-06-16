@@ -225,11 +225,11 @@ The api_connection_id corresponds to one of the connection ids defined in https:
 
 ```json
 {
-  "name": "tumblebug_mci_dynamic",
-  "description": "Create MCI Dynamically from common spec and image.",
+  "name": "tumblebug_infra_dynamic",
+  "description": "Create Infra Dynamically from common spec and image.",
   "api_connection_id": "tumblebug_api",
   "swagger_yaml_endpoint": "/tumblebug/api/doc.yaml",
-  "endpoint": "/ns/{nsId}/mciDynamic"
+  "endpoint": "/ns/{nsId}/infraDynamic"
 }
 ```
 
@@ -244,19 +244,19 @@ The Task Component automatically generated from the above JSON is as follows:
 ```json
 {
   "id": "796645fc-c594-4263-a9ff-243051d1f3a5",
-  "name": "tumblebug_mci_dynamic",
-  "description": "Create MCI Dynamically from common spec and image.",
+  "name": "tumblebug_infra_dynamic",
+  "description": "Create Infra Dynamically from common spec and image.",
   "data": {
     "options": {
       "api_connection_id": "tumblebug_api",
-      "endpoint": "/tumblebug/ns/{nsId}/mciDynamic",
+      "endpoint": "/tumblebug/ns/{nsId}/infraDynamic",
       "method": "POST",
-      "request_body": "{\n    \"description\": \"Made in CB-TB\",\n    \"installMonAgent\": \"no\",\n    \"label\": {},\n    \"name\": \"mci01\",\n    \"systemLabel\": \"\",\n    \"vm\": [\n        {\n            \"commonImage\": \"ubuntu18.04\",\n            \"commonSpec\": \"aws+ap-northeast-2+t2.small\",\n            \"connectionName\": \"string\",\n            \"description\": \"Description\",\n            \"label\": {},\n            \"name\": \"g1-1\",\n            \"rootDiskSize\": \"default, 30, 42, ...\",\n            \"rootDiskType\": \"default, TYPE1, ...\",\n            \"subGroupSize\": \"3\",\n            \"vmUserPassword\": \"string\"\n        }\n    ]\n}"
+      "request_body": "{\n    \"description\": \"Made in CB-TB\",\n    \"installMonAgent\": \"no\",\n    \"label\": {},\n    \"name\": \"infra01\",\n    \"systemLabel\": \"\",\n    \"nodeGroups\": [\n        {\n            \"commonImage\": \"ubuntu18.04\",\n            \"commonSpec\": \"aws+ap-northeast-2+t2.small\",\n            \"connectionName\": \"string\",\n            \"description\": \"Description\",\n            \"label\": {},\n            \"name\": \"g1-1\",\n            \"rootDiskSize\": \"default, 30, 42, ...\",\n            \"rootDiskType\": \"default, TYPE1, ...\",\n            \"nodeGroupSize\": \"3\",\n            \"nodeUserPassword\": \"string\"\n        }\n    ]\n}"
     },
     "body_params": {
       "required": [
         "name",
-        "vm"
+        "nodeGroups"
       ],
       "properties": {
         "description": {
@@ -279,14 +279,14 @@ The Task Component automatically generated from the above JSON is as follows:
         },
         "name": {
           "type": "string",
-          "example": "mci01"
+          "example": "infra01"
         },
         "systemLabel": {
           "type": "string",
-          "description": "SystemLabel is for describing the mci in a keyword (any string can be used) for special System purpose",
+          "description": "SystemLabel is for describing the infra in a keyword (any string can be used) for special System purpose",
           "example": ""
         },
-        "vm": {
+        "nodeGroups": {
           "type": "array",
           "items": {
             "type": "object",
@@ -303,7 +303,7 @@ The Task Component automatically generated from the above JSON is as follows:
               },
               "connectionName": {
                 "type": "string",
-                "description": "if ConnectionName is given, the VM tries to use associtated credential.\nif not, it will use predefined ConnectionName in Spec objects"
+                "description": "if ConnectionName is given, the Node tries to use associtated credential.\nif not, it will use predefined ConnectionName in Spec objects"
               },
               "description": {
                 "type": "string",
@@ -315,7 +315,7 @@ The Task Component automatically generated from the above JSON is as follows:
               },
               "name": {
                 "type": "string",
-                "description": "VM name or subGroup name if is (not empty) && (> 0). If it is a group, actual VM name will be generated with -N postfix.",
+                "description": "Node name or nodeGroup name if is (not empty) && (> 0). If it is a group, actual Node name will be generated with -N postfix.",
                 "example": "g1-1"
               },
               "rootDiskSize": {
@@ -330,13 +330,13 @@ The Task Component automatically generated from the above JSON is as follows:
                 "default": "default",
                 "example": "default, TYPE1, ..."
               },
-              "subGroupSize": {
+              "nodeGroupSize": {
                 "type": "string",
-                "description": "if subGroupSize is (not empty) && (> 0), subGroup will be generated. VMs will be created accordingly.",
+                "description": "if nodeGroupSize is (not empty) && (> 0), nodeGroup will be generated. Nodes will be created accordingly.",
                 "default": "1",
                 "example": "3"
               },
-              "vmUserPassword": {
+              "nodeUserPassword": {
                 "type": "string"
               }
             }
@@ -360,7 +360,7 @@ The Task Component automatically generated from the above JSON is as follows:
       "properties": {
         "option": {
           "type": "string",
-          "description": "Option for MCI creation",
+          "description": "Option for Infra creation",
           "enum": [
             "hold"
           ]

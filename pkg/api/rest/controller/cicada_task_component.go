@@ -13,7 +13,7 @@ import (
 //
 //	@ID				run-script
 //	@Summary		Run Script on Target
-//	@Description	Run script on target with NS ID, MCI ID and VM ID.
+//	@Description	Run script on target with NS ID, Infra ID and Node ID.
 //	@Tags			[Cicada Built-in API]
 //	@Accept			json
 //	@Produce		json

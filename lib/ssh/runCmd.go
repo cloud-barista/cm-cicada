@@ -23,13 +23,13 @@ func decodeScript(base64EncodedContent string) (string, error) {
 	return script, nil
 }
 
-func ExecuteScript(nsID string, mciID string, vmID string, base64EncodedContent string) ([]byte, error) {
+func ExecuteScript(nsID string, infraID string, nodeID string, base64EncodedContent string) ([]byte, error) {
 	var targetClient *Client
 
-	targetClient, err := NewSSHClient(nsID, mciID, vmID)
+	targetClient, err := NewSSHClient(nsID, infraID, nodeID)
 	if err != nil {
-		return []byte{}, fmt.Errorf("failed to connect to target host: NS_ID: %s, MCI_ID: %s, VM_ID: %s (Error: %v)",
-			nsID, mciID, vmID, err)
+		return []byte{}, fmt.Errorf("failed to connect to target host: NS_ID: %s, INFRA_ID: %s, NODE_ID: %s (Error: %v)",
+			nsID, infraID, nodeID, err)
 	}
 
 	defer func() {
@@ -64,7 +64,7 @@ func ExecuteScript(nsID string, mciID string, vmID string, base64EncodedContent 
 				keepAliveSession, err := targetClient.NewSessionWithRetry()
 				if err != nil {
 					logger.Printf(logger.ERROR, true, "Keep-alive session creation failed for target: "+
-						"NS_ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
+						"NS_ID: %s, INFRA_ID: %s, NODE_ID:%s\n", targetClient.nsID, targetClient.infraID, targetClient.id)
 					continue
 				}
 
@@ -77,7 +77,7 @@ func ExecuteScript(nsID string, mciID string, vmID string, base64EncodedContent 
 	cmd := fmt.Sprintf("cat << 'SCRIPT_EOF' | bash\n%s\nSCRIPT_EOF", script)
 
 	logger.Printf(logger.DEBUG, true, "Executing script with keep-alive enabled for target: "+
-		"NS_ID: %s, MCI_ID: %s, VM_ID:%s\n", targetClient.nsID, targetClient.mciID, targetClient.id)
+		"NS_ID: %s, INFRA_ID: %s, NODE_ID:%s\n", targetClient.nsID, targetClient.infraID, targetClient.id)
 	output, err := session.CombinedOutput(cmd)
 
 	cancel()

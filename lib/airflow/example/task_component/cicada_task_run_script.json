@@ -1,6 +1,6 @@
 {
   "name": "cicada_task_run_script",
-  "description": "Run script on target with ns_id, mci_id and vm_id.",
+  "description": "Run script on target with ns_id, infra_id and node_id.",
   "type": "http",
   "spec": {
     "api_connection_id": "cicada_api",

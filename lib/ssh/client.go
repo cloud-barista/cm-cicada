@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	cloudmodel "github.com/cloud-barista/cm-beetle/imdl/cloud-model"
 	comm "github.com/cloud-barista/cm-cicada/common"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
@@ -22,7 +23,7 @@ type Client struct {
 	*goph.Client
 	SSHTarget     *model.SSHTarget
 	nsID          string
-	mciID         string
+	infraID       string
 	id            string
 	keepAliveStop chan struct{}
 	keepAliveOnce sync.Once
@@ -47,7 +48,7 @@ func (c *Client) NewSessionWithRetry() (*ssh.Session, error) {
 			}
 
 			// Recreate connection
-			newClient, reconnectErr := NewSSHClient(c.nsID, c.mciID, c.id)
+			newClient, reconnectErr := NewSSHClient(c.nsID, c.infraID, c.id)
 			if reconnectErr != nil {
 				time.Sleep(time.Second * 2)
 				continue
@@ -106,7 +107,7 @@ func AddKnownHost(host string, remote net.Addr, key ssh.PublicKey) error {
 	return goph.AddKnownHost(host, remote, key, "")
 }
 
-func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
+func NewSSHClient(nsID string, infraID string, nodeID string) (*Client, error) {
 	var client *goph.Client
 	var sshTarget *model.SSHTarget
 
@@ -119,26 +120,23 @@ func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
 
 	data, err := common.GetHTTPRequest("http://"+connection.Host+
 		":"+strconv.Itoa(int(connection.Port))+
-		"/tumblebug/ns/"+nsID+"/mci/"+mciID+"/vm/"+vmID,
+		"/tumblebug/ns/"+nsID+"/infra/"+infraID+"/node/"+nodeID,
 		connection.Login, connection.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	var vmInfo model.TBVMInfo
-	err = json.Unmarshal(data, &vmInfo)
+	var nodeInfo cloudmodel.NodeInfo
+	err = json.Unmarshal(data, &nodeInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	sshPort, err := strconv.Atoi(vmInfo.SSHPort)
-	if err != nil {
-		return nil, errors.New("invalid ssh port")
-	}
+	sshPort := nodeInfo.SSHPort
 
 	data, err = common.GetHTTPRequest("http://"+connection.Host+
 		":"+strconv.Itoa(int(connection.Port))+
-		"/tumblebug/ns/"+nsID+"/resources/sshKey/"+vmInfo.SSHKeyID,
+		"/tumblebug/ns/"+nsID+"/resources/sshKey/"+nodeInfo.SshKeyId,
 		connection.Login, connection.Password)
 	if err != nil {
 		return nil, err
@@ -161,8 +159,8 @@ func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
 	}
 
 	client, err = goph.NewConn(&goph.Config{
-		User:     vmInfo.VMUserName,
-		Addr:     vmInfo.PublicIP,
+		User:     nodeInfo.NodeUserName,
+		Addr:     nodeInfo.PublicIP,
 		Port:     uint(sshPort),
 		Auth:     auth,
 		Timeout:  goph.DefaultTimeout,
@@ -173,10 +171,10 @@ func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
 	}
 
 	sshTarget = &model.SSHTarget{
-		IP:         vmInfo.PublicIP,
+		IP:         nodeInfo.PublicIP,
 		Port:       uint(sshPort),
 		UseKeypair: true,
-		Username:   vmInfo.VMUserName,
+		Username:   nodeInfo.NodeUserName,
 		Password:   "",
 		PrivateKey: sshKeyInfo.PrivateKey,
 	}
@@ -185,8 +183,8 @@ func NewSSHClient(nsID string, mciID string, vmID string) (*Client, error) {
 		Client:    client,
 		SSHTarget: sshTarget,
 		nsID:      nsID,
-		mciID:     mciID,
-		id:        vmID,
+		infraID:   infraID,
+		id:        nodeID,
 	}
 
 	// Start SSH KeepAlive to prevent connection timeout

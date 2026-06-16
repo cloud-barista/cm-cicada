@@ -220,11 +220,11 @@ definitions:
       content:
         description: Base64 encoded script content.
         type: string
-      mci_id:
+      infra_id:
+        type: string
+      node_id:
         type: string
       ns_id:
-        type: string
-      vm_id:
         type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ScriptResult:
@@ -807,7 +807,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Run script on target with NS ID, MCI ID and VM ID.
+      description: Run script on target with NS ID, Infra ID and Node ID.
       operationId: run-script
       parameters:
       - description: Workflow content

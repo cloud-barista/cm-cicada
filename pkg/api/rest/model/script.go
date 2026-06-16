@@ -2,8 +2,8 @@ package model
 
 type RunScriptReq struct {
 	NSID    string `json:"ns_id"`
-	MCIID   string `json:"mci_id"`
-	VMID    string `json:"vm_id"`
+	InfraID string `json:"infra_id"`
+	NodeID  string `json:"node_id"`
 	Content string `json:"content"` // Base64 encoded script content.
 }
 

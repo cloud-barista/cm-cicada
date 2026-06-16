@@ -378,7 +378,7 @@ const docTemplate = `{
         },
         "/run_script": {
             "post": {
-                "description": "Run script on target with NS ID, MCI ID and VM ID.",
+                "description": "Run script on target with NS ID, Infra ID and Node ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2819,13 +2819,13 @@ const docTemplate = `{
                     "description": "Base64 encoded script content.",
                     "type": "string"
                 },
-                "mci_id": {
+                "infra_id": {
+                    "type": "string"
+                },
+                "node_id": {
                     "type": "string"
                 },
                 "ns_id": {
-                    "type": "string"
-                },
-                "vm_id": {
                     "type": "string"
                 }
             }

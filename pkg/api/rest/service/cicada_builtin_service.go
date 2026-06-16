@@ -19,18 +19,18 @@ func (s *CicadaBuiltinService) RunScript(req model.RunScriptReq) (*model.ScriptR
 	if req.NSID == "" {
 		return nil, errors.New("please provide the ns_id")
 	}
-	if req.MCIID == "" {
-		return nil, errors.New("please provide the mci_id")
+	if req.InfraID == "" {
+		return nil, errors.New("please provide the infra_id")
 	}
-	if req.VMID == "" {
-		return nil, errors.New("please provide the vm_id")
+	if req.NodeID == "" {
+		return nil, errors.New("please provide the node_id")
 	}
 	if req.Content == "" {
 		return nil, errors.New("please provide the content")
 	}
 
 	var result model.ScriptResult
-	output, err := ssh.ExecuteScript(req.NSID, req.MCIID, req.VMID, req.Content)
+	output, err := ssh.ExecuteScript(req.NSID, req.InfraID, req.NodeID, req.Content)
 	if err != nil {
 		result.IsSuccess = false
 		result.Error = err.Error()
