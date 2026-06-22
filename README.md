@@ -214,6 +214,8 @@ curl -X 'POST' \
   -d ''
 ```
 
+> **Tip — passing a previous task's output:** For `http_xcom` tasks (e.g. `beetle_task_infra_migration`), set `request_body` to the **name of an upstream task** to forward that task's response as the next request body. To forward only part of it, add an optional `response_path` containing a JSONPath expression — e.g. `"response_path": "$.targetInfra"` sends only that item instead of the whole response. When `response_path` is omitted the whole response is used (the legacy `/beetle/migration` → `targetInfra` extraction still applies as a fallback).
+
 ## About Task Component
 Each task in the workflow references a Task Component.
 

@@ -490,6 +490,13 @@ func buildHTTPXcomTaskOptions(
 	} else {
 		taskOptions["xcom_task"] = xcomSource
 	}
+
+	// Optional JSONPath to extract a specific item from the source task's
+	// response instead of forwarding the whole body.
+	if responsePath := specString(merged, "response_path"); responsePath != "" {
+		taskOptions["xcom_path"] = responsePath
+	}
+
 	return taskOptions, nil
 }
 

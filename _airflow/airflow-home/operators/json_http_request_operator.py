@@ -1,6 +1,7 @@
 from typing import Any
 from airflow.models.baseoperator import BaseOperator
 from airflow.providers.http.hooks.http import HttpHook
+from jsonpath_ng.ext import parse as jsonpath_parse
 
 import json
 
@@ -32,12 +33,37 @@ def execute_http(context, http_conn_id: str, method: str, endpoint: str, data: s
     context['ti'].xcom_push(key='return_value', value=response)
 
 
+def extract_jsonpath(data: str, xcom_path: str) -> str:
+    """Extract item(s) from a JSON string using a JSONPath expression.
+
+    Returns the matched value as a JSON string. A single match is returned as
+    that value; multiple matches are returned as a JSON array of the values.
+    """
+    try:
+        obj = json.loads(data)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse data as JSON: {e}")
+
+    matches = jsonpath_parse(xcom_path).find(obj)
+    if not matches:
+        raise ValueError(f"JSONPath '{xcom_path}' matched nothing in the source response")
+
+    if len(matches) == 1:
+        result = matches[0].value
+    else:
+        result = [m.value for m in matches]
+
+    return json.dumps(result, indent=4)
+
+
 class JsonHttpRequestOperator(BaseOperator):
-    def __init__(self, http_conn_id: str, method: str, endpoint: str, xcom_task: str, *args, **kwargs) -> None:
+    def __init__(self, http_conn_id: str, method: str, endpoint: str, xcom_task: str,
+                 xcom_path: str = "", *args, **kwargs) -> None:
         self.http_conn_id = http_conn_id
         self.method = method
         self.endpoint = endpoint
         self.xcom_task = xcom_task
+        self.xcom_path = xcom_path
         self.args = args
         self.kwargs = kwargs
         super(JsonHttpRequestOperator, self).__init__(*args, **kwargs)
@@ -54,7 +80,13 @@ class JsonHttpRequestOperator(BaseOperator):
             raise ValueError(f"No xcom data found for task_id='{self.xcom_task}', key='return_value'")
 
         print(f"=== endpoint='{self.endpoint}' ===")
-        if self.endpoint.startswith('/beetle/migration'):
+        if self.xcom_path:
+            # Use only the item(s) selected by the configured JSONPath.
+            data = extract_jsonpath(data, self.xcom_path)
+            print(f"=== extracted by JSONPath '{self.xcom_path}' ===")
+            print(data)
+        elif self.endpoint.startswith('/beetle/migration'):
+            # Backward-compatible fallback: beetle migration consumes only targetInfra.
             try:
                 json_data = json.loads(data)
 

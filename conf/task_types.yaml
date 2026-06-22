@@ -22,7 +22,8 @@ task_types:
       method:            { type: string, required: true }
       endpoint:          { type: string, required: true }
     task_schema:
-      request_body: { type: string, required: true }
+      request_body:  { type: string, required: true }                   # name of the source task whose response is used as the body
+      response_path: { type: string, required: false }                  # optional JSONPath to extract from the source response (e.g. $.targetInfra)
 
   - id: bash
     label: Bash 명령 실행
