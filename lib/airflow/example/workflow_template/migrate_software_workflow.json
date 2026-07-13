@@ -13,7 +13,7 @@
             "task_component": "damselfly_task_get_target_software_model",
             "spec": {
               "path_params": {
-                "id": "49KLTdyzBUtt8q8"
+                "id": "1ae898ed-592f-4385-a772-52545ce82ae5"
               }
             },
             "dependencies": []
@@ -25,7 +25,7 @@
               "request_body": "get_target_software_model",
               "query_params": {
                 "nsId": "mig01",
-                "infraId": "mmci01"
+                "infraId": "infra101"
               }
             },
             "dependencies": [
