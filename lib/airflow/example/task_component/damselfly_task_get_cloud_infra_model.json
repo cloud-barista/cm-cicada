@@ -1,0 +1,11 @@
+{
+  "name": "damselfly_task_get_cloud_infra_model",
+  "description": "Get cloud infra migration model from Damselfly",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "damselfly_api",
+    "swagger_yaml_endpoint": "/damselfly/api/doc.yaml",
+    "method": "GET",
+    "endpoint": "/cloudmodel/{id}"
+  }
+}

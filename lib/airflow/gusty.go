@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -126,6 +127,93 @@ func isTaskExist(workflow *model.Workflow, taskID string) bool {
 	}
 
 	return false
+}
+
+// parseTaskReference interprets request_body as a reference to an upstream task's
+// result. Forms:
+//
+//	"<task>"            -> (task, "",            true)  whole response
+//	"<task>.<jsonpath>" -> (task, "$.<jsonpath>", true)  a specific item
+//
+// A bare JSONPath (already starting with "$") after the task name is kept as-is,
+// so both "task.cloudInfraModel" and "task.$.data.node[0].id" work. ok is false
+// when request_body is not a task reference (e.g. a literal JSON body).
+func parseTaskReference(workflow *model.Workflow, requestBody string) (task string, jsonPath string, ok bool) {
+	ref := strings.TrimSpace(requestBody)
+	if ref == "" {
+		return "", "", false
+	}
+
+	if isTaskExist(workflow, ref) {
+		return ref, "", true
+	}
+
+	if idx := strings.Index(ref, "."); idx > 0 {
+		name := ref[:idx]
+		rest := ref[idx+1:]
+		if rest != "" && isTaskExist(workflow, name) {
+			return name, normalizeJSONPath(rest), true
+		}
+	}
+
+	return "", "", false
+}
+
+// normalizeJSONPath turns a path fragment written after a task name into a full
+// JSONPath, e.g. "cloudInfraModel" -> "$.cloudInfraModel". Fragments that already
+// start with "$" are returned unchanged.
+func normalizeJSONPath(path string) string {
+	if strings.HasPrefix(path, "$") {
+		return path
+	}
+	return "$." + path
+}
+
+// httpXcomTemplateRefRegexp matches "${<task>.<jsonpath>}" references embedded in
+// a request_body template.
+var httpXcomTemplateRefRegexp = regexp.MustCompile(`\$\{([^}]+)\}`)
+
+// hasTemplateRef reports whether request_body embeds at least one
+// "${<task>...}" placeholder that refers to an existing task in the workflow.
+func hasTemplateRef(workflow *model.Workflow, requestBody string) bool {
+	for _, match := range httpXcomTemplateRefRegexp.FindAllStringSubmatch(requestBody, -1) {
+		ref := strings.TrimSpace(match[1])
+		name := ref
+		if idx := strings.Index(ref, "."); idx > 0 {
+			name = ref[:idx]
+		}
+		if isTaskExist(workflow, name) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// resolveTemplateXcomTaskIDs maps each task referenced by a "${<task>...}"
+// placeholder in a request_body template to its Airflow task_id, so the operator
+// can pull that task's XCom (placeholders use task names, but XCom is keyed by the
+// Airflow task_id).
+func resolveTemplateXcomTaskIDs(workflow *model.Workflow, template string, taskAirflowIDByName map[string]string) map[string]string {
+	ids := make(map[string]string)
+
+	for _, match := range httpXcomTemplateRefRegexp.FindAllStringSubmatch(template, -1) {
+		ref := strings.TrimSpace(match[1])
+		name := ref
+		if idx := strings.Index(ref, "."); idx > 0 {
+			name = ref[:idx]
+		}
+		if !isTaskExist(workflow, name) {
+			continue
+		}
+		if id, ok := taskAirflowIDByName[name]; ok {
+			ids[name] = id
+		} else {
+			ids[name] = name
+		}
+	}
+
+	return ids
 }
 
 func parseEndpoint(pathParams map[string]string, queryParams map[string]string, endpoint string) (string, error) {
@@ -404,9 +492,7 @@ func buildTaskOptions(
 
 	switch taskComponent.Type {
 	case "http":
-		return buildHTTPTaskOptions(typeDef, taskComponent, t)
-	case "http_xcom":
-		return buildHTTPXcomTaskOptions(typeDef, taskComponent, t, workflow, taskAirflowIDByName)
+		return buildHTTPTaskOptions(typeDef, taskComponent, t, workflow, taskAirflowIDByName)
 	case "bash":
 		return buildBashTaskOptions(typeDef, taskComponent, t)
 	case "ssh":
@@ -419,17 +505,69 @@ func buildTaskOptions(
 	}
 }
 
-func buildHTTPTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t model.Task) (map[string]any, error) {
+// xcomOperatorClass consumes an upstream task's XCom result as the request body.
+const xcomOperatorClass = "local.JsonHttpRequestOperator"
+
+// buildHTTPTaskOptions builds the options for an "http" task. The body source is
+// inferred from request_body:
+//   - a JSON body embedding "${<task>.<jsonpath>}" refs -> template mode
+//     (compose fields from one or more upstream task results)
+//   - an upstream task name "<task>"                    -> that task's whole response
+//   - an upstream task ref "<task>.<jsonpath>"          -> a specific item of it
+//   - anything else                                     -> a literal request body
+//
+// The first three modes pull upstream XCom via JsonHttpRequestOperator; the last
+// uses the standard HttpOperator declared by the catalog type.
+func buildHTTPTaskOptions(
+	typeDef catalog.TaskTypeDef,
+	c *model.TaskComponent,
+	t model.Task,
+	workflow *model.Workflow,
+	taskAirflowIDByName map[string]string,
+) (map[string]any, error) {
 	merged := mergeSpecs(c.Spec, t.Spec)
 
 	taskOptions := map[string]any{
-		"operator":     typeDef.OperatorClass,
 		"http_conn_id": specString(merged, "api_connection_id"),
 		"method":       specString(merged, "method"),
-		"log_response": true,
 	}
 
+	endpointTemplate := specString(merged, "endpoint")
+	pathParams := specStringMap(merged, "path_params")
+	queryParams := specStringMap(merged, "query_params")
+	endpoint, err := parseEndpoint(pathParams, queryParams, endpointTemplate)
+	if err != nil {
+		return nil, err
+	}
+	taskOptions["endpoint"] = endpoint
+
 	body := specString(merged, "request_body")
+
+	// Template mode: request_body embeds "${<task>.<jsonpath>}" references.
+	if hasTemplateRef(workflow, body) {
+		taskOptions["operator"] = xcomOperatorClass
+		taskOptions["data_template"] = body
+		taskOptions["xcom_task_ids"] = resolveTemplateXcomTaskIDs(workflow, body, taskAirflowIDByName)
+		return taskOptions, nil
+	}
+
+	// Reference mode: request_body is "<task>" or "<task>.<jsonpath>".
+	if task, jsonPath, ok := parseTaskReference(workflow, body); ok {
+		taskOptions["operator"] = xcomOperatorClass
+		if id, ok := taskAirflowIDByName[task]; ok {
+			taskOptions["xcom_task"] = id
+		} else {
+			taskOptions["xcom_task"] = task
+		}
+		if jsonPath != "" {
+			taskOptions["xcom_path"] = jsonPath
+		}
+		return taskOptions, nil
+	}
+
+	// Literal mode: send request_body as-is with the standard HTTP operator.
+	taskOptions["operator"] = typeDef.OperatorClass
+	taskOptions["log_response"] = true
 	if body != "" {
 		taskOptions["data"] = body
 	}
@@ -441,61 +579,6 @@ func buildHTTPTaskOptions(typeDef catalog.TaskTypeDef, c *model.TaskComponent, t
 		}
 	}
 	taskOptions["headers"] = headers
-
-	endpointTemplate := specString(merged, "endpoint")
-	pathParams := specStringMap(merged, "path_params")
-	queryParams := specStringMap(merged, "query_params")
-	endpoint, err := parseEndpoint(pathParams, queryParams, endpointTemplate)
-	if err != nil {
-		return nil, err
-	}
-	taskOptions["endpoint"] = endpoint
-
-	return taskOptions, nil
-}
-
-func buildHTTPXcomTaskOptions(
-	typeDef catalog.TaskTypeDef,
-	c *model.TaskComponent,
-	t model.Task,
-	workflow *model.Workflow,
-	taskAirflowIDByName map[string]string,
-) (map[string]any, error) {
-	merged := mergeSpecs(c.Spec, t.Spec)
-
-	taskOptions := map[string]any{
-		"operator":     typeDef.OperatorClass,
-		"http_conn_id": specString(merged, "api_connection_id"),
-		"method":       specString(merged, "method"),
-	}
-	endpointTemplate := specString(merged, "endpoint")
-	pathParams := specStringMap(merged, "path_params")
-	queryParams := specStringMap(merged, "query_params")
-	endpoint, err := parseEndpoint(pathParams, queryParams, endpointTemplate)
-	if err != nil {
-		return nil, err
-	}
-	taskOptions["endpoint"] = endpoint
-
-	xcomSource := specString(merged, "request_body")
-	if xcomSource == "" {
-		return nil, errors.New("http_xcom task is missing spec.request_body")
-	}
-	if isTaskExist(workflow, xcomSource) {
-		if id, ok := taskAirflowIDByName[xcomSource]; ok {
-			taskOptions["xcom_task"] = id
-		} else {
-			taskOptions["xcom_task"] = xcomSource
-		}
-	} else {
-		taskOptions["xcom_task"] = xcomSource
-	}
-
-	// Optional JSONPath to extract a specific item from the source task's
-	// response instead of forwarding the whole body.
-	if responsePath := specString(merged, "response_path"); responsePath != "" {
-		taskOptions["xcom_path"] = responsePath
-	}
 
 	return taskOptions, nil
 }

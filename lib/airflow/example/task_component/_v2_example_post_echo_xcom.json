@@ -1,7 +1,7 @@
 {
   "name": "_v2_example_post_echo_xcom",
   "description": "[V2 Sample] cm-cicada 내장 example API로 POST — upstream task의 xcom 결과를 그대로 body로 전달",
-  "type": "http_xcom",
+  "type": "http",
   "spec": {
     "api_connection_id": "cicada_api",
     "method": "POST",

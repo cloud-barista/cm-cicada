@@ -16,7 +16,7 @@ import (
 //
 //	@ID				example-get-data
 //	@Summary		Sample data for xcom example
-//	@Description	Return a deterministic JSON payload used by the http_xcom workflow example.
+//	@Description	Return a deterministic JSON payload used by the task-reference workflow example.
 //	@Tags			[Example]
 //	@Produce		json
 //	@Success		200 {object} map[string]any "Sample payload"
@@ -35,7 +35,7 @@ func ExampleSampleData(c echo.Context) error {
 //
 //	@ID				example-post-echo
 //	@Summary		Echo request body
-//	@Description	Echo the raw request body back. Used by the http_xcom workflow example to verify body propagation.
+//	@Description	Echo the raw request body back. Used by the task-reference workflow example to verify body propagation.
 //	@Tags			[Example]
 //	@Accept			json
 //	@Produce		json

@@ -10,20 +10,13 @@ task_types:
     task_schema:
       path_params:  { type: object, required: false }
       query_params: { type: object, required: false }
+      # request_body is interpreted by its form:
+      #   "<task>"            -> whole response of an upstream task
+      #   "<task>.<jsonpath>" -> a specific item of it (e.g. "infra_recommend.cloudInfraModel")
+      #   JSON with ${<task>.<jsonpath>} refs -> compose fields from upstream results
+      #   anything else       -> a literal request body
       request_body: { type: string, required: false }
       headers:      { type: object, required: false }
-
-  - id: http_xcom
-    label: HTTP API 호출 (이전 task 결과를 body로)
-    category: api
-    operator_class: local.JsonHttpRequestOperator
-    component_schema:
-      api_connection_id: { type: string, required: true }
-      method:            { type: string, required: true }
-      endpoint:          { type: string, required: true }
-    task_schema:
-      request_body:  { type: string, required: true }                   # name of the source task whose response is used as the body
-      response_path: { type: string, required: false }                  # optional JSONPath to extract from the source response (e.g. $.targetInfra)
 
   - id: bash
     label: Bash 명령 실행

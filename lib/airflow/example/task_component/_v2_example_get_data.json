@@ -1,6 +1,6 @@
 {
   "name": "_v2_example_get_data",
-  "description": "[V2 Sample] cm-cicada 내장 example API에서 샘플 데이터 GET — http_xcom workflow의 upstream task",
+  "description": "[V2 Sample] cm-cicada 내장 example API에서 샘플 데이터 GET — 참조 workflow의 upstream task",
   "type": "http",
   "spec": {
     "api_connection_id": "cicada_api",

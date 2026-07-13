@@ -2,7 +2,7 @@
   "spec_version": "1.0",
   "name": "_v2_example_xcom_workflow",
   "data": {
-    "description": "[V2 Sample] http_xcom 시연 — cm-cicada 내장 example API로 GET → xcom → POST",
+    "description": "[V2 Sample] task 결과 참조 시연 — cm-cicada 내장 example API로 GET → xcom → POST",
     "task_groups": [
       {
         "name": "example_xcom_flow",
