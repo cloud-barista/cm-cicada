@@ -42,10 +42,13 @@ func (s *CicadaBuiltinService) RunScript(req model.RunScriptReq) (*model.ScriptR
 	return &result, nil
 }
 
-// validSleepDuration accepts Go-style durations like "10s", "1m30s", "500ms"
-// or plain integer seconds like "10". Rejects anything else to prevent
-// shell injection via cmd.RunBash.
-var validSleepDuration = regexp.MustCompile(`^[0-9]+([hms]|ms)?$`)
+// validSleepDuration accepts one or more space-separated components, each a
+// number with an optional unit (ms/s/m/h/d) — e.g. "10", "1m", "500ms",
+// "1m 30s", "1h 10m 15s". `sleep` sums space-separated durations, so the
+// compound forms work as written. Only digits, unit letters and single spaces
+// are allowed, which keeps the value safe to pass to cmd.RunBash (no shell
+// metacharacters).
+var validSleepDuration = regexp.MustCompile(`^[0-9]+(ms|[smhd])?( [0-9]+(ms|[smhd])?)*$`)
 
 func (s *CicadaBuiltinService) SleepTime(req model.SleepTimeReq) (*model.SimpleMsg, error) {
 	duration := req.Time
@@ -54,7 +57,7 @@ func (s *CicadaBuiltinService) SleepTime(req model.SleepTimeReq) (*model.SimpleM
 	}
 
 	if !validSleepDuration.MatchString(duration) {
-		return nil, errors.New("invalid time format: must be a number followed by optional h/m/s/ms (e.g. 10s, 1m, 500ms)")
+		return nil, errors.New("invalid time format: numbers with optional ms/s/m/h/d units, optionally space-separated (e.g. 10s, 1m, 500ms, 1m 30s)")
 	}
 
 	_, err := cmd.RunBash("sleep " + duration)
