@@ -34,7 +34,7 @@ services:
             # 아무 효과가 없어서 커넥션 정의로 바꾼다.
             # disable_ssl=true 는 기존 동작(smtp_ssl=False + starttls=True, 587 포트)을 그대로
             # 재현하기 위한 것이다. 빼면 587에 implicit SSL로 붙으려다 실패한다.
-            - AIRFLOW_CONN_SMTP_DEFAULT={"conn_type":"smtp","host":"${SMTP_HOST}","login":"${SMTP_USER}","password":"${SMTP_PASSWORD}","port":${SMTP_PORT},"extra":{"from_email":"${SMTP_MAIL_FROM}","disable_ssl":true}}
+            - AIRFLOW_CONN_SMTP_DEFAULT={"conn_type":"smtp","host":"${SMTP_HOST}","login":"${SMTP_USER}","password":"${SMTP_PASSWORD}","port":"${SMTP_PORT}","extra":{"from_email":"${SMTP_MAIL_FROM}","disable_ssl":true}}
             # monitor_dag가 Airflow REST API(/api/v2)를 호출할 때 쓰는 커넥션.
             # Airflow 3에서는 태스크가 메타DB에 직접 접근할 수 없어서 API를 거쳐야 한다.
             - AIRFLOW_CONN_AIRFLOW_API={"conn_type":"http","host":"localhost","port":8080,"schema":"http","login":"airflow","password":"airflow_pass"}
