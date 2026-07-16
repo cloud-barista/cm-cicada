@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
+	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/service"
 	"github.com/labstack/echo/v4"
 )
+
+var _ model.ImportErrors
 
 // GetImportErrors godoc
 //
@@ -16,7 +19,7 @@ import (
 //	@Tags	[Admin]
 //	@Accept	json
 //	@Produce	json
-//	@Success	200	{object}	airflow.ImportErrorCollection		"Successfully get the importErrors."
+//	@Success	200	{object}	model.ImportErrors		"Successfully get the importErrors."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the importErrors."
 //	@Router	 /importErrors [get]

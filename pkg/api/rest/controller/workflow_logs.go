@@ -25,7 +25,7 @@ var _ model.EventLog
 //	@Param	wfRunId path string true "ID of the workflowRunId."
 //	@Param	taskId path string true "ID of the task."
 //	@Param	taskTryNum path string true "ID of the taskTryNum."
-//	@Success	200	{object}	airflow.InlineResponse200		"Successfully get the task Logs."
+//	@Success	200	{object}	model.TaskLog		"Successfully get the task Logs."
 //	@Failure	400	{object}	common.ErrorResponse	"Sent bad request."
 //	@Failure	500	{object}	common.ErrorResponse	"Failed to get the task Logs."
 //	@Router	 /workflow/{wfId}/workflowRun/{wfRunId}/task/{taskId}/taskTryNum/{taskTryNum}/logs [get]

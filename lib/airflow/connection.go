@@ -3,48 +3,22 @@ package airflow
 import (
 	"errors"
 
-	"github.com/apache/airflow-client-go/airflow"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/client"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
 )
 
-func (client *Client) RegisterConnection(connection *model.Connection) error {
+// RegisterConnection creates a connection, replacing any existing one with the
+// same ID.
+func (c *Client) RegisterConnection(connection *model.Connection) error {
 	ctx, cancel := Context()
 	defer cancel()
 
-	description := airflow.NullableString{}
-	description.Set(&connection.Description)
+	// Delete first so re-registering an existing connection updates it.
+	// A missing connection is fine, so the error is deliberately ignored.
+	_ = c.api.DeleteConnection(ctx, connection.ID)
 
-	host := airflow.NullableString{}
-	host.Set(&connection.Host)
-
-	login := airflow.NullableString{}
-	login.Set(&connection.Login)
-
-	schema := airflow.NullableString{}
-	schema.Set(&connection.Schema)
-
-	port := airflow.NullableInt32{}
-	port.Set(&connection.Port)
-
-	extra := airflow.NullableString{}
-	extra.Set(&connection.Extra)
-
-	conn := airflow.Connection{
-		ConnectionId: &connection.ID,
-		ConnType:     &connection.Type,
-		Description:  description,
-		Host:         host,
-		Login:        login,
-		Schema:       schema,
-		Port:         port,
-		Password:     &connection.Password,
-		Extra:        extra,
-	}
-
-	_, _ = client.ConnectionApi.DeleteConnection(ctx, connection.ID).Execute()
-
-	_, _, err := client.ConnectionApi.PostConnection(ctx).Connection(conn).Execute()
+	_, err := c.api.CreateConnection(ctx, toAirflowConnection(connection))
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while registering connection. (ConnID: " + connection.ID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
@@ -55,12 +29,11 @@ func (client *Client) RegisterConnection(connection *model.Connection) error {
 	return nil
 }
 
-func (client *Client) CreateConnection(connection *model.Connection) (*model.Connection, error) {
+func (c *Client) CreateConnection(connection *model.Connection) (*model.Connection, error) {
 	ctx, cancel := Context()
 	defer cancel()
 
-	conn := toAirflowConnection(connection)
-	created, _, err := client.ConnectionApi.PostConnection(ctx).Connection(conn).Execute()
+	created, err := c.api.CreateConnection(ctx, toAirflowConnection(connection))
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while creating connection. (ConnID: " + connection.ID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
@@ -71,11 +44,11 @@ func (client *Client) CreateConnection(connection *model.Connection) (*model.Con
 	return &result, nil
 }
 
-func (client *Client) GetConnection(connectionID string) (*model.Connection, error) {
+func (c *Client) GetConnection(connectionID string) (*model.Connection, error) {
 	ctx, cancel := Context()
 	defer cancel()
 
-	conn, _, err := client.ConnectionApi.GetConnection(ctx, connectionID).Execute()
+	conn, err := c.api.GetConnection(ctx, connectionID)
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while getting connection. (ConnID: " + connectionID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
@@ -86,44 +59,30 @@ func (client *Client) GetConnection(connectionID string) (*model.Connection, err
 	return &result, nil
 }
 
-func (client *Client) ListConnections(limit int32, offset int32, orderBy string) ([]model.Connection, error) {
+func (c *Client) ListConnections(limit int32, offset int32, orderBy string) ([]model.Connection, error) {
 	ctx, cancel := Context()
 	defer cancel()
 
-	req := client.ConnectionApi.GetConnections(ctx)
-	if limit > 0 {
-		req = req.Limit(limit)
-	}
-	if offset > 0 {
-		req = req.Offset(offset)
-	}
-	if orderBy != "" {
-		req = req.OrderBy(orderBy)
-	}
-
-	collection, _, err := req.Execute()
+	collection, err := c.api.ListConnections(ctx, limit, offset, orderBy)
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while listing connections. (Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	connections := make([]model.Connection, 0)
-	if collection.Connections != nil {
-		for _, item := range *collection.Connections {
-			connections = append(connections, toModelConnectionFromItem(item))
-		}
+	connections := make([]model.Connection, 0, len(collection.Connections))
+	for _, item := range collection.Connections {
+		connections = append(connections, toModelConnectionSummary(item))
 	}
 
 	return connections, nil
 }
 
-func (client *Client) UpdateConnection(connectionID string, connection *model.Connection) (*model.Connection, error) {
+func (c *Client) UpdateConnection(connectionID string, connection *model.Connection) (*model.Connection, error) {
 	ctx, cancel := Context()
 	defer cancel()
 
-	conn := toAirflowConnection(connection)
-	updated, _, err := client.ConnectionApi.PatchConnection(ctx, connectionID).Connection(conn).Execute()
+	updated, err := c.api.UpdateConnection(ctx, connectionID, toAirflowConnection(connection))
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while updating connection. (ConnID: " + connectionID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
@@ -134,11 +93,11 @@ func (client *Client) UpdateConnection(connectionID string, connection *model.Co
 	return &result, nil
 }
 
-func (client *Client) DeleteConnection(connectionID string) error {
+func (c *Client) DeleteConnection(connectionID string) error {
 	ctx, cancel := Context()
 	defer cancel()
 
-	_, err := client.ConnectionApi.DeleteConnection(ctx, connectionID).Execute()
+	err := c.api.DeleteConnection(ctx, connectionID)
 	if err != nil {
 		errMsg := "AIRFLOW: Error occurred while deleting connection. (ConnID: " + connectionID + ", Error: " + err.Error() + ")."
 		logger.Println(logger.ERROR, false, errMsg)
@@ -148,84 +107,59 @@ func (client *Client) DeleteConnection(connectionID string) error {
 	return nil
 }
 
-func toAirflowConnection(connection *model.Connection) airflow.Connection {
-	description := airflow.NullableString{}
-	description.Set(&connection.Description)
-
-	host := airflow.NullableString{}
-	host.Set(&connection.Host)
-
-	login := airflow.NullableString{}
-	login.Set(&connection.Login)
-
-	schema := airflow.NullableString{}
-	schema.Set(&connection.Schema)
-
-	port := airflow.NullableInt32{}
-	port.Set(&connection.Port)
-
-	extra := airflow.NullableString{}
-	extra.Set(&connection.Extra)
-
-	conn := airflow.Connection{
-		ConnectionId: &connection.ID,
-		ConnType:     &connection.Type,
-		Description:  description,
-		Host:         host,
-		Login:        login,
-		Schema:       schema,
-		Port:         port,
+func toAirflowConnection(connection *model.Connection) client.Connection {
+	return client.Connection{
+		ConnectionID: connection.ID,
+		ConnType:     connection.Type,
+		Description:  &connection.Description,
+		Host:         &connection.Host,
+		Login:        &connection.Login,
+		Schema:       &connection.Schema,
+		Port:         &connection.Port,
 		Password:     &connection.Password,
-		Extra:        extra,
+		Extra:        &connection.Extra,
 	}
-	return conn
 }
 
-func toModelConnection(conn airflow.Connection) model.Connection {
+func toModelConnection(conn client.Connection) model.Connection {
 	return model.Connection{
-		ID:          valueOrEmpty(conn.ConnectionId),
-		Type:        valueOrEmpty(conn.ConnType),
-		Description: nullableStringValue(conn.Description),
-		Host:        nullableStringValue(conn.Host),
-		Port:        nullableInt32Value(conn.Port),
-		Schema:      nullableStringValue(conn.Schema),
-		Login:       nullableStringValue(conn.Login),
-		Password:    valueOrEmpty(conn.Password),
-		Extra:       nullableStringValue(conn.Extra),
+		ID:          conn.ConnectionID,
+		Type:        conn.ConnType,
+		Description: stringOrEmpty(conn.Description),
+		Host:        stringOrEmpty(conn.Host),
+		Port:        int32OrZero(conn.Port),
+		Schema:      stringOrEmpty(conn.Schema),
+		Login:       stringOrEmpty(conn.Login),
+		Password:    stringOrEmpty(conn.Password),
+		Extra:       stringOrEmpty(conn.Extra),
 	}
 }
 
-func toModelConnectionFromItem(item airflow.ConnectionCollectionItem) model.Connection {
-	return model.Connection{
-		ID:          valueOrEmpty(item.ConnectionId),
-		Type:        valueOrEmpty(item.ConnType),
-		Description: nullableStringValue(item.Description),
-		Host:        nullableStringValue(item.Host),
-		Port:        nullableInt32Value(item.Port),
-		Schema:      nullableStringValue(item.Schema),
-		Login:       nullableStringValue(item.Login),
-	}
+// toModelConnectionSummary maps a connection for list responses, leaving out
+// password and extra.
+//
+// The Airflow 2 API had a separate, narrower schema for collection items that
+// carried neither field. Airflow 3 returns the full connection in listings, and
+// it only masks extra keys whose names it recognises as secret — a key like
+// "custom_creds" comes back in plaintext. Listings stay narrow so a bulk read
+// cannot hand out credentials.
+func toModelConnectionSummary(conn client.Connection) model.Connection {
+	summary := toModelConnection(conn)
+	summary.Password = ""
+	summary.Extra = ""
+	return summary
 }
 
-func valueOrEmpty(value *string) string {
+func stringOrEmpty(value *string) string {
 	if value == nil {
 		return ""
 	}
 	return *value
 }
 
-func nullableStringValue(value airflow.NullableString) string {
-	val := value.Get()
-	if val == nil {
-		return ""
-	}
-	return *val
-}
-
-func nullableInt32Value(value airflow.NullableInt32) int32 {
-	val := value.Get()
-	if val == nil {
+func int32OrZero(value *int32) int32 {
+	if value == nil {
 		return 0
 	}
-	return *val
+	return *value
 }

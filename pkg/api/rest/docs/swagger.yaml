@@ -1,37 +1,5 @@
 basePath: /cicada
 definitions:
-  airflow.ImportError:
-    properties:
-      filename:
-        description: The filename
-        type: string
-      import_error_id:
-        description: The import error ID.
-        type: integer
-      stack_trace:
-        description: The full stackstrace..
-        type: string
-      timestamp:
-        description: The time when this error was created.
-        type: string
-    type: object
-  airflow.ImportErrorCollection:
-    properties:
-      import_errors:
-        items:
-          $ref: '#/definitions/airflow.ImportError'
-        type: array
-      total_entries:
-        description: Count of objects in the current result set.
-        type: integer
-    type: object
-  airflow.InlineResponse200:
-    properties:
-      content:
-        type: string
-      continuation_token:
-        type: string
-    type: object
   github_com_cloud-barista_cm-cicada_lib_airflow_catalog.FieldSchema:
     properties:
       enum:
@@ -214,6 +182,28 @@ definitions:
     - data
     - name
     - spec_version
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportError:
+    properties:
+      bundle_name:
+        type: string
+      filename:
+        type: string
+      import_error_id:
+        type: integer
+      stack_trace:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportErrors:
+    properties:
+      import_errors:
+        items:
+          $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportError'
+        type: array
+      total_entries:
+        type: integer
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.RunScriptReq:
     properties:
@@ -409,6 +399,11 @@ definitions:
         type: string
       workflow_run_id:
         description: The DAG run ID.
+        type: string
+    type: object
+  github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskLog:
+    properties:
+      content:
         type: string
     type: object
   github_com_cloud-barista_cm-cicada_pkg_api_rest_model.Workflow:
@@ -727,8 +722,8 @@ paths:
       - '[Connection]'
   /example/data:
     get:
-      description: Return a deterministic JSON payload used by the http_xcom workflow
-        example.
+      description: Return a deterministic JSON payload used by the task-reference
+        workflow example.
       operationId: example-get-data
       produces:
       - application/json
@@ -745,7 +740,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Echo the raw request body back. Used by the http_xcom workflow
+      description: Echo the raw request body back. Used by the task-reference workflow
         example to verify body propagation.
       operationId: example-post-echo
       produces:
@@ -771,7 +766,7 @@ paths:
         "200":
           description: Successfully get the importErrors.
           schema:
-            $ref: '#/definitions/airflow.ImportErrorCollection'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportErrors'
         "400":
           description: Sent bad request.
           schema:
@@ -2010,7 +2005,7 @@ paths:
         "200":
           description: Successfully get the task Logs.
           schema:
-            $ref: '#/definitions/airflow.InlineResponse200'
+            $ref: '#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskLog'
         "400":
           description: Sent bad request.
           schema:

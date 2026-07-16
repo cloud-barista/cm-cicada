@@ -265,7 +265,7 @@ const docTemplate = `{
         },
         "/example/data": {
             "get": {
-                "description": "Return a deterministic JSON payload used by the http_xcom workflow example.",
+                "description": "Return a deterministic JSON payload used by the task-reference workflow example.",
                 "produces": [
                     "application/json"
                 ],
@@ -287,7 +287,7 @@ const docTemplate = `{
         },
         "/example/echo": {
             "post": {
-                "description": "Echo the raw request body back. Used by the http_xcom workflow example to verify body propagation.",
+                "description": "Echo the raw request body back. Used by the task-reference workflow example to verify body propagation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -328,7 +328,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the importErrors.",
                         "schema": {
-                            "$ref": "#/definitions/airflow.ImportErrorCollection"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportErrors"
                         }
                     },
                     "400": {
@@ -2201,7 +2201,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully get the task Logs.",
                         "schema": {
-                            "$ref": "#/definitions/airflow.InlineResponse200"
+                            "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskLog"
                         }
                     },
                     "400": {
@@ -2488,53 +2488,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "airflow.ImportError": {
-            "type": "object",
-            "properties": {
-                "filename": {
-                    "description": "The filename",
-                    "type": "string"
-                },
-                "import_error_id": {
-                    "description": "The import error ID.",
-                    "type": "integer"
-                },
-                "stack_trace": {
-                    "description": "The full stackstrace..",
-                    "type": "string"
-                },
-                "timestamp": {
-                    "description": "The time when this error was created.",
-                    "type": "string"
-                }
-            }
-        },
-        "airflow.ImportErrorCollection": {
-            "type": "object",
-            "properties": {
-                "import_errors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/airflow.ImportError"
-                    }
-                },
-                "total_entries": {
-                    "description": "Count of objects in the current result set.",
-                    "type": "integer"
-                }
-            }
-        },
-        "airflow.InlineResponse200": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "continuation_token": {
-                    "type": "string"
-                }
-            }
-        },
         "github_com_cloud-barista_cm-cicada_lib_airflow_catalog.FieldSchema": {
             "type": "object",
             "properties": {
@@ -2809,6 +2762,40 @@ const docTemplate = `{
                 },
                 "spec_version": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportError": {
+            "type": "object",
+            "properties": {
+                "bundle_name": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "import_error_id": {
+                    "type": "integer"
+                },
+                "stack_trace": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportErrors": {
+            "type": "object",
+            "properties": {
+                "import_errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_cloud-barista_cm-cicada_pkg_api_rest_model.ImportError"
+                    }
+                },
+                "total_entries": {
+                    "type": "integer"
                 }
             }
         },
@@ -3091,6 +3078,14 @@ const docTemplate = `{
                 },
                 "workflow_run_id": {
                     "description": "The DAG run ID.",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_cloud-barista_cm-cicada_pkg_api_rest_model.TaskLog": {
+            "type": "object",
+            "properties": {
+                "content": {
                     "type": "string"
                 }
             }

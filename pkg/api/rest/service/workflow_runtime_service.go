@@ -1,13 +1,11 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	af "github.com/apache/airflow-client-go/airflow"
 	"github.com/cloud-barista/cm-cicada/dao"
 	"github.com/cloud-barista/cm-cicada/lib/airflow"
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/common"
@@ -15,6 +13,42 @@ import (
 	"github.com/cloud-barista/cm-cicada/pkg/api/rest/model"
 	"github.com/jollaman999/utils/logger"
 )
+
+// timeOrZero unwraps a nullable Airflow timestamp. Airflow 3 leaves several of
+// these null (logical_date on a manual run, end_date while still running).
+func timeOrZero(t *time.Time) time.Time {
+	if t == nil {
+		return time.Time{}
+	}
+	return *t
+}
+
+// effectiveLogicalDate returns the run's logical date, falling back to run_after.
+//
+// Airflow 2 always stamped execution_date, including on manual runs. Airflow 3
+// leaves logical_date null for them and records the trigger time in run_after,
+// which carries the same meaning. Without the fallback every manually triggered
+// run reports execution_date as the zero time.
+func effectiveLogicalDate(logicalDate, runAfter *time.Time) time.Time {
+	if logicalDate != nil && !logicalDate.IsZero() {
+		return *logicalDate
+	}
+	return timeOrZero(runAfter)
+}
+
+func floatOrZero(f *float64) float64 {
+	if f == nil {
+		return 0
+	}
+	return *f
+}
+
+func stringOrEmpty(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
 
 type WorkflowRuntimeService struct{}
 
@@ -40,20 +74,29 @@ func (s *WorkflowRuntimeService) GetWorkflowRuns(wfID string) ([]model.WorkflowR
 
 	dbWorkflowID := workflow.ID
 	var runs []model.WorkflowRun
-	for _, dagRun := range *runList.DagRuns {
+	for _, dagRun := range runList.DagRuns {
+		dagID := dagRun.DagID
+		logicalDate := effectiveLogicalDate(dagRun.LogicalDate, dagRun.RunAfter)
+
 		runs = append(runs, model.WorkflowRun{
-			WorkflowID:             &dbWorkflowID,
-			DagID:                  dagRun.DagId,
-			WorkflowRunID:          dagRun.GetDagRunId(),
-			DataIntervalStart:      dagRun.GetDataIntervalStart(),
-			DataIntervalEnd:        dagRun.GetDataIntervalEnd(),
-			State:                  string(dagRun.GetState()),
-			ExecutionDate:          dagRun.GetExecutionDate(),
-			StartDate:              dagRun.GetStartDate(),
-			EndDate:                dagRun.GetEndDate(),
-			RunType:                dagRun.GetRunType(),
-			LastSchedulingDecision: dagRun.GetLastSchedulingDecision(),
-			DurationDate:           dagRun.GetEndDate().Sub(dagRun.GetStartDate()).Seconds(),
+			WorkflowID:        &dbWorkflowID,
+			DagID:             &dagID,
+			WorkflowRunID:     dagRun.DagRunID,
+			DataIntervalStart: timeOrZero(dagRun.DataIntervalStart),
+			DataIntervalEnd:   timeOrZero(dagRun.DataIntervalEnd),
+			State:             dagRun.State,
+			// Airflow 3 renamed execution_date to logical_date. ExecutionDate is
+			// kept populated so existing API consumers keep working.
+			LogicalDate:            logicalDate.Format(time.RFC3339Nano),
+			ExecutionDate:          logicalDate,
+			StartDate:              timeOrZero(dagRun.StartDate),
+			EndDate:                timeOrZero(dagRun.EndDate),
+			RunType:                dagRun.RunType,
+			LastSchedulingDecision: timeOrZero(dagRun.LastSchedulingDecision),
+			// Airflow 3 reports duration directly instead of making us subtract.
+			DurationDate: floatOrZero(dagRun.Duration),
+			Conf:         dagRun.Conf,
+			Note:         stringOrEmpty(dagRun.Note),
 		})
 	}
 
@@ -74,33 +117,50 @@ func (s *WorkflowRuntimeService) GetWorkflowStatus(wfID string) ([]model.Workflo
 	enumStatus := client.GetAllowedDagStateEnumValues()
 	dagID := common.WorkflowDagID(workflow)
 	var statusList []model.WorkflowStatus
-	for _, v := range enumStatus {
-		resp, err := client.GetDagStatus(dagID, string(*v.Ptr()))
+	for _, state := range enumStatus {
+		resp, err := client.GetDagStatus(dagID, state)
 		if err != nil {
 			logger.Println(logger.ERROR, false,
 				"AIRFLOW: Error occurred while getting DAGRuns. (Error: "+err.Error()+").")
+			continue
 		}
 		statusList = append(statusList, model.WorkflowStatus{
-			State: string(*v.Ptr()),
-			Count: len(*resp.DagRuns),
+			State: state,
+			// total_entries is the count across all pages; counting the returned
+			// slice would stop at one page.
+			Count: resp.TotalEntries,
 		})
 	}
 
 	return statusList, nil
 }
 
-func (s *WorkflowRuntimeService) GetImportErrors() (af.ImportErrorCollection, error) {
+func (s *WorkflowRuntimeService) GetImportErrors() (model.ImportErrors, error) {
 	client, err := airflow.GetClient()
 	if err != nil {
-		return af.ImportErrorCollection{}, err
+		return model.ImportErrors{}, err
 	}
 
 	result, err := client.GetImportErrors()
 	if err != nil {
-		return af.ImportErrorCollection{}, errors.New("failed to get import errors: " + err.Error())
+		return model.ImportErrors{}, errors.New("failed to get import errors: " + err.Error())
 	}
 
-	return result, nil
+	importErrors := make([]model.ImportError, 0, len(result.ImportErrors))
+	for _, e := range result.ImportErrors {
+		importErrors = append(importErrors, model.ImportError{
+			ImportErrorID: e.ImportErrorID,
+			Timestamp:     timeOrZero(e.Timestamp),
+			Filename:      e.Filename,
+			BundleName:    stringOrEmpty(e.BundleName),
+			StackTrace:    e.StackTrace,
+		})
+	}
+
+	return model.ImportErrors{
+		ImportErrors: importErrors,
+		TotalEntries: result.TotalEntries,
+	}, nil
 }
 
 func (s *WorkflowRuntimeService) GetTaskLogs(wfID, wfRunID, taskID string, taskTryNum int) (*model.TaskLog, error) {
@@ -127,7 +187,7 @@ func (s *WorkflowRuntimeService) GetTaskLogs(wfID, wfRunID, taskID string, taskT
 		return nil, errors.New("failed to get the workflow logs: " + err.Error())
 	}
 
-	return &model.TaskLog{Content: logs.GetContent()}, nil
+	return &model.TaskLog{Content: logs}, nil
 }
 
 func (s *WorkflowRuntimeService) GetTaskLogDownload(wfID, wfRunID, taskID string, taskTryNum int) (string, []byte, error) {
@@ -164,14 +224,9 @@ func (s *WorkflowRuntimeService) GetEventLogs(wfID, wfRunID, taskID string) ([]m
 	if err != nil {
 		return nil, err
 	}
-	logs, err := client.GetEventLogs(common.WorkflowDagID(workflow), wfRunID, airflowTaskID)
+	eventLogs, err := client.GetEventLogs(common.WorkflowDagID(workflow), wfRunID, airflowTaskID)
 	if err != nil {
 		return nil, errors.New("failed to get the taskInstances: " + err.Error())
-	}
-
-	var eventLogs model.EventLogs
-	if err := json.Unmarshal(logs, &eventLogs); err != nil {
-		return nil, err
 	}
 
 	logList := make([]model.EventLog, 0, len(eventLogs.EventLogs))
@@ -179,8 +234,8 @@ func (s *WorkflowRuntimeService) GetEventLogs(wfID, wfRunID, taskID string) ([]m
 		mappedTaskID := ""
 		taskName := ""
 		isDeletedTask := false
-		if eventlog.TaskID != "" {
-			taskDBInfo, mappedDeleted, err := s.findTaskByAirflowTaskID(workflow, eventlog.TaskID)
+		if taskID := stringOrEmpty(eventlog.TaskID); taskID != "" {
+			taskDBInfo, mappedDeleted, err := s.findTaskByAirflowTaskID(workflow, taskID)
 			if err != nil {
 				return nil, errors.New("failed to get the taskInstances: " + err.Error())
 			}
@@ -189,18 +244,13 @@ func (s *WorkflowRuntimeService) GetEventLogs(wfID, wfRunID, taskID string) ([]m
 			isDeletedTask = mappedDeleted
 		}
 
-		workflowRunID := ""
-		if eventlog.RunID != "" {
-			workflowRunID = eventlog.RunID
-		}
-
 		logList = append(logList, model.EventLog{
 			WorkflowID:    wfID,
-			WorkflowRunID: workflowRunID,
+			WorkflowRunID: stringOrEmpty(eventlog.RunID),
 			TaskID:        mappedTaskID,
 			TaskName:      taskName,
 			IsDeletedTask: isDeletedTask,
-			Extra:         eventlog.Extra,
+			Extra:         stringOrEmpty(eventlog.Extra),
 			Event:         eventlog.Event,
 			When:          eventlog.When,
 		})
@@ -225,28 +275,26 @@ func (s *WorkflowRuntimeService) GetTaskInstances(wfID, wfRunID string) ([]model
 		return nil, errors.New("failed to get the taskInstances: " + err.Error())
 	}
 
-	layout := time.RFC3339Nano
 	taskInstances := make([]model.TaskInstance, 0)
 	dbWorkflowID := workflow.ID
 
-	for _, taskInstance := range *runList.TaskInstances {
-		taskDBInfo, isDeletedTask, err := s.findTaskByAirflowTaskID(workflow, taskInstance.GetTaskId())
+	for _, taskInstance := range runList.TaskInstances {
+		taskDBInfo, isDeletedTask, err := s.findTaskByAirflowTaskID(workflow, taskInstance.TaskID)
 		if err != nil {
 			return nil, errors.New("failed to get the taskInstances: " + err.Error())
 		}
 		taskID := taskDBInfo.ID
 
-		executionDate, err := time.Parse(layout, taskInstance.GetExecutionDate())
-		if err != nil {
-			continue
+		// Airflow 3 hands these back as typed timestamps, so there is no string
+		// parsing to fail. logical_date is null on manually triggered runs.
+		executionDate := effectiveLogicalDate(taskInstance.LogicalDate, taskInstance.RunAfter)
+		startDate := executionDate
+		if taskInstance.StartDate != nil {
+			startDate = *taskInstance.StartDate
 		}
-		startDate, err := time.Parse(layout, taskInstance.GetStartDate())
-		if err != nil {
-			startDate = executionDate
-		}
-		endDate, err := time.Parse(layout, taskInstance.GetEndDate())
-		if err != nil {
-			endDate = executionDate
+		endDate := executionDate
+		if taskInstance.EndDate != nil {
+			endDate = *taskInstance.EndDate
 		}
 
 		isSoftwareMigrationTask := false
@@ -259,14 +307,14 @@ func (s *WorkflowRuntimeService) GetTaskInstances(wfID, wfRunID string) ([]model
 					task.ID == taskID {
 					isSoftwareMigrationTask = true
 					xcomData, err := client.GetXComValue(
-						taskInstance.GetDagId(),
-						taskInstance.GetDagRunId(),
-						taskInstance.GetTaskId(),
+						taskInstance.DagID,
+						taskInstance.DagRunID,
+						taskInstance.TaskID,
 						"return_value",
 					)
 					if err != nil {
 						logger.Println(logger.WARN, false,
-							"Failed to get xcom data for task: "+taskInstance.GetTaskId()+" (Error: "+err.Error()+")")
+							"Failed to get xcom data for task: "+taskInstance.TaskID+" (Error: "+err.Error()+")")
 					} else if xcomData != nil {
 						if execID, ok := xcomData["execution_id"].(string); ok {
 							executionID = execID
@@ -277,19 +325,20 @@ func (s *WorkflowRuntimeService) GetTaskInstances(wfID, wfRunID string) ([]model
 			}
 		}
 
+		dagID := taskInstance.DagID
 		taskInstances = append(taskInstances, model.TaskInstance{
 			WorkflowID:                   &dbWorkflowID,
-			DagID:                        taskInstance.DagId,
+			DagID:                        &dagID,
 			IsDeletedTask:                isDeletedTask,
-			WorkflowRunID:                taskInstance.GetDagRunId(),
+			WorkflowRunID:                taskInstance.DagRunID,
 			TaskID:                       taskID,
 			TaskName:                     taskDBInfo.Name,
-			State:                        string(taskInstance.GetState()),
+			State:                        stringOrEmpty(taskInstance.State),
 			ExecutionDate:                executionDate,
 			StartDate:                    startDate,
 			EndDate:                      endDate,
-			DurationDate:                 float64(taskInstance.GetDuration()),
-			TryNumber:                    int(taskInstance.GetTryNumber()),
+			DurationDate:                 floatOrZero(taskInstance.Duration),
+			TryNumber:                    taskInstance.TryNumber,
 			IsSoftwareMigrationTask:      isSoftwareMigrationTask,
 			SoftwareMigrationExecutionID: executionID,
 		})
@@ -325,23 +374,29 @@ func (s *WorkflowRuntimeService) ClearTaskInstances(wfID, wfRunID string, option
 
 	refs := make([]model.TaskInstanceReference, 0)
 	dbWorkflowID := workflow.ID
-	if clearList.TaskInstances == nil || len(*clearList.TaskInstances) == 0 {
-		return refs, nil
-	}
 
-	for _, taskInstance := range *clearList.TaskInstances {
-		taskDBInfo, _, err := s.findTaskByAirflowTaskID(workflow, taskInstance.GetTaskId())
+	for _, taskInstance := range clearList.TaskInstances {
+		taskDBInfo, _, err := s.findTaskByAirflowTaskID(workflow, taskInstance.TaskID)
 		if err != nil {
 			return nil, errors.New("failed to get the taskInstances: " + err.Error())
 		}
 		taskID := taskDBInfo.ID
+		dagID := taskInstance.DagID
+		dagRunID := taskInstance.DagRunID
+
+		var executionDate *string
+		if date := effectiveLogicalDate(taskInstance.LogicalDate, taskInstance.RunAfter); !date.IsZero() {
+			formatted := date.Format(time.RFC3339Nano)
+			executionDate = &formatted
+		}
+
 		refs = append(refs, model.TaskInstanceReference{
 			WorkflowID:    &dbWorkflowID,
-			DagID:         taskInstance.DagId,
-			WorkflowRunID: taskInstance.DagRunId,
+			DagID:         &dagID,
+			WorkflowRunID: &dagRunID,
 			TaskId:        &taskID,
 			TaskName:      taskDBInfo.Name,
-			ExecutionDate: taskInstance.ExecutionDate,
+			ExecutionDate: executionDate,
 		})
 	}
 

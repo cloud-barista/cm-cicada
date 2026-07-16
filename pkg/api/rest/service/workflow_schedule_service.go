@@ -164,21 +164,22 @@ func (s *WorkflowScheduleService) syncOverdueOnceSchedule(workflowID string) {
 		return
 	}
 	runs, err := client.GetDAGRuns(common.WorkflowDagID(workflow))
-	if err != nil || runs.DagRuns == nil {
+	if err != nil {
 		return
 	}
 
 	target := row.RunAt.UTC()
 	const tolerance = time.Second
-	for _, run := range *runs.DagRuns {
-		if run.GetRunType() != "scheduled" {
+	for _, run := range runs.DagRuns {
+		if run.RunType != "scheduled" {
 			continue
 		}
-		ld := run.GetLogicalDate()
-		if ld.IsZero() {
+		// logical_date is nullable in Airflow 3; a run without one cannot be
+		// matched against a scheduled time.
+		if run.LogicalDate == nil || run.LogicalDate.IsZero() {
 			continue
 		}
-		diff := ld.UTC().Sub(target)
+		diff := run.LogicalDate.UTC().Sub(target)
 		if diff < 0 {
 			diff = -diff
 		}

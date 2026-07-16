@@ -3,7 +3,6 @@ module github.com/cloud-barista/cm-cicada
 go 1.26.2
 
 require (
-	github.com/apache/airflow-client-go/airflow v0.0.0-20230210234754-8ce0b39cfbb2
 	github.com/cloud-barista/cm-beetle/imdl v0.1.10
 	github.com/google/uuid v1.6.0
 	github.com/jollaman999/utils v1.0.10
@@ -35,6 +34,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kr/fs v0.1.0 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
@@ -51,11 +51,11 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
-	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.48.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )

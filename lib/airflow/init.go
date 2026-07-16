@@ -2,21 +2,21 @@ package airflow
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/apache/airflow-client-go/airflow"
+	"github.com/cloud-barista/cm-cicada/lib/airflow/client"
 	"github.com/cloud-barista/cm-cicada/lib/config"
 	"github.com/jollaman999/utils/logger"
 )
 
+// Client wraps the Airflow API client with cm-cicada's per-DAG serialization
+// and model mapping.
 type Client struct {
-	*airflow.APIClient
+	api *client.Client
 }
 
 var airflowClient *Client
@@ -34,30 +34,28 @@ func GetClient() (*Client, error) {
 	return airflowClient, nil
 }
 
-func ping(url string) error {
-	timeout, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
-	client := http.Client{
-		Timeout: time.Duration(timeout) * time.Second,
-	}
-	_, err := client.Get(url + "/health")
-	return err
+func timeout() time.Duration {
+	seconds, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
+	return time.Duration(seconds) * time.Second
 }
 
-func checkPing(url string) error {
+func checkPing(api *client.Client) error {
 	var err error
 	var i int
-	timeout, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
 
 	retry, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.InitRetry)
 	for i = 0; i < retry; i++ {
 		logger.Println(logger.INFO, false, "Pinging Airflow Server... "+
 			"(Trying: "+strconv.Itoa(i+1)+"/"+strconv.Itoa(retry)+")")
-		err = ping(url)
+
+		ctx, cancel := context.WithTimeout(context.Background(), timeout())
+		err = api.Health(ctx)
+		cancel()
+
 		if err == nil {
 			break
-		} else {
-			time.Sleep(time.Duration(timeout) * time.Second)
 		}
+		time.Sleep(timeout())
 	}
 
 	if err != nil {
@@ -81,14 +79,12 @@ func registerConnections() {
 	}
 }
 
+// Context returns a request context bound to the configured timeout.
+//
+// Airflow 3 authenticates with a JWT that the client fetches and renews on its
+// own, so unlike the Airflow 2 client there are no credentials in the context.
 func Context() (context.Context, func()) {
-	cred := airflow.BasicAuth{
-		UserName: config.CMCicadaConfig.CMCicada.AirflowServer.Username,
-		Password: config.CMCicadaConfig.CMCicada.AirflowServer.Password,
-	}
-	timeout, _ := strconv.Atoi(config.CMCicadaConfig.CMCicada.AirflowServer.Timeout)
-
-	return context.WithTimeout(context.WithValue(context.Background(), airflow.ContextBasicAuth, cred), time.Duration(timeout)*time.Second)
+	return context.WithTimeout(context.Background(), timeout())
 }
 
 func Init() {
@@ -97,35 +93,25 @@ func Init() {
 	}
 	defer initLock.Unlock()
 
-	conf := airflow.NewConfiguration()
-	conf.Host = config.CMCicadaConfig.CMCicada.AirflowServer.Address
 	useTLS, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.AirflowServer.UseTLS)
-	if useTLS {
-		skipTLSVerify, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.AirflowServer.SkipTLSVerify)
-		conf.HTTPClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: skipTLSVerify,
-				},
-			},
-		}
-		conf.Scheme = "https"
-	} else {
-		conf.Scheme = "http"
-	}
+	skipTLSVerify, _ := strconv.ParseBool(config.CMCicadaConfig.CMCicada.AirflowServer.SkipTLSVerify)
 
-	err := checkPing(conf.Scheme + "://" + conf.Host)
+	api := client.New(client.Config{
+		Address:       config.CMCicadaConfig.CMCicada.AirflowServer.Address,
+		Username:      config.CMCicadaConfig.CMCicada.AirflowServer.Username,
+		Password:      config.CMCicadaConfig.CMCicada.AirflowServer.Password,
+		UseTLS:        useTLS,
+		SkipTLSVerify: skipTLSVerify,
+		Timeout:       timeout(),
+	})
+
+	err := checkPing(api)
 	if err != nil {
 		logger.Println(logger.ERROR, true, err.Error())
 		return
 	}
 
-	cli := airflow.NewAPIClient(conf)
-	conn := Client{
-		cli,
-	}
-
-	airflowClient = &conn
+	airflowClient = &Client{api: api}
 
 	registerConnections()
 }

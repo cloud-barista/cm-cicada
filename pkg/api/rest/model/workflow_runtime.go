@@ -58,6 +58,20 @@ type TaskLog struct {
 	Content string `json:"content,omitempty"`
 }
 
+// ImportError is a DAG import failure reported by Airflow's DAG processor.
+type ImportError struct {
+	ImportErrorID int       `json:"import_error_id"`
+	Timestamp     time.Time `json:"timestamp,omitempty"`
+	Filename      string    `json:"filename,omitempty"`
+	BundleName    string    `json:"bundle_name,omitempty"`
+	StackTrace    string    `json:"stack_trace,omitempty"`
+}
+
+type ImportErrors struct {
+	ImportErrors []ImportError `json:"import_errors"`
+	TotalEntries int           `json:"total_entries"`
+}
+
 type EventLogs struct {
 	EventLogs    []EventLog `json:"event_logs"`
 	TotalEntries int        `json:"total_entries"`
