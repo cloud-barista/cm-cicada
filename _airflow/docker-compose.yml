@@ -29,30 +29,41 @@ services:
         build: .
         restart: always
         environment:
-            - AIRFLOW__SMTP__SMTP_HOST=${SMTP_HOST}
-            - AIRFLOW__SMTP__SMTP_USER=${SMTP_USER}
-            - AIRFLOW__SMTP__SMTP_PASSWORD=${SMTP_PASSWORD}
-            - AIRFLOW__SMTP__SMTP_PORT=${SMTP_PORT}
-            - AIRFLOW__SMTP__SMTP_MAIL_FROM=${SMTP_MAIL_FROM}
+            # Airflow 3의 EmailOperator는 smtp 프로바이더 것이고, SmtpHook은 [smtp] 설정을
+            # 전혀 읽지 않고 smtp_default "커넥션"만 본다. 따라서 기존 AIRFLOW__SMTP__* 는
+            # 아무 효과가 없어서 커넥션 정의로 바꾼다.
+            # disable_ssl=true 는 기존 동작(smtp_ssl=False + starttls=True, 587 포트)을 그대로
+            # 재현하기 위한 것이다. 빼면 587에 implicit SSL로 붙으려다 실패한다.
+            - AIRFLOW_CONN_SMTP_DEFAULT={"conn_type":"smtp","host":"${SMTP_HOST}","login":"${SMTP_USER}","password":"${SMTP_PASSWORD}","port":${SMTP_PORT},"extra":{"from_email":"${SMTP_MAIL_FROM}","disable_ssl":true}}
+            # monitor_dag가 Airflow REST API(/api/v2)를 호출할 때 쓰는 커넥션.
+            # Airflow 3에서는 태스크가 메타DB에 직접 접근할 수 없어서 API를 거쳐야 한다.
+            - AIRFLOW_CONN_AIRFLOW_API={"conn_type":"http","host":"localhost","port":8080,"schema":"http","login":"airflow","password":"airflow_pass"}
         command: >
             /bin/bash -c "
                 # Wait for MySQL
                 sleep 10
 
                 # Clean up pid
-                rm -f airflow-webserver.pid
+                rm -f airflow-api-server.pid
 
-                # Set up metadata database
-                airflow db upgrade
+                # Set up metadata database (Airflow 3에서 db upgrade -> db migrate)
+                airflow db migrate
 
-                # Create default user
-                airflow users create --username airflow --password airflow_pass --email ish@innogrid.com --firstname SuHyeon --lastname Im --role Admin
+                # FAB 인증 매니저 테이블. Airflow 3에서 FAB이 프로바이더로 분리되면서
+                # 메타DB 마이그레이션도 따로 돌려야 한다.
+                airflow fab-db migrate
+
+                # Create default user (재시작 시 이미 존재하면 무시)
+                airflow users create --username airflow --password airflow_pass --email ish@innogrid.com --firstname SuHyeon --lastname Im --role Admin || true
 
                 # Start airflow
+                # Airflow 3에서는 DAG 파서가 항상 별도 프로세스다. dag-processor가 없으면
+                # DAG이 아예 파싱되지 않는다.
                 airflow scheduler &
+                airflow dag-processor &
                 airflow celery worker &
                 airflow celery flower &
-                airflow webserver
+                airflow api-server
 
                 # Keep the server on no matter what
                 sleep infinity

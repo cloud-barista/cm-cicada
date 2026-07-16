@@ -1,5 +1,5 @@
 from typing import Any
-from airflow.models.baseoperator import BaseOperator
+from airflow.sdk import BaseOperator
 from airflow.providers.http.hooks.http import HttpHook
 from jsonpath_ng.ext import parse as jsonpath_parse
 

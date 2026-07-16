@@ -3,7 +3,6 @@
 {% set workflow_id = result.get('workflow_id', dag_id) %}
 {% set workflow_key = result.get('dag_id', dag_id) %}
 {% set workflow_name = result.get('dag_name', '') %}
-{% set exec_date = dag_run.execution_date | urlencode %}
 {% set failed_tasks = result.get('failed_tasks') %}
 
 <h3>📋 워크플로우 실행 상태 보고서</h3>

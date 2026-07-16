@@ -21,7 +21,7 @@ task_types:
   - id: bash
     label: Bash 명령 실행
     category: utility
-    operator_class: airflow.operators.bash.BashOperator
+    operator_class: airflow.providers.standard.operators.bash.BashOperator
     task_schema:
       bash_command: { type: string, required: true }
 
@@ -37,7 +37,7 @@ task_types:
   - id: trigger_workflow
     label: 다른 워크플로우 트리거
     category: orchestration
-    operator_class: airflow.operators.trigger_dagrun.TriggerDagRunOperator
+    operator_class: airflow.providers.standard.operators.trigger_dagrun.TriggerDagRunOperator
     component_schema:
       trigger_dag_id: { type: string, required: true }
     task_schema:
