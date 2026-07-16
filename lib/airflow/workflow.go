@@ -12,30 +12,51 @@ import (
 	"github.com/jollaman999/utils/logger"
 )
 
-var dagRequests = make(map[string]*sync.Mutex)
+// dagLock serializes requests for a single DAG. waiters counts the callers
+// holding or queued on it, so the map entry only goes away once the last one
+// is done.
+type dagLock struct {
+	mu      sync.Mutex
+	waiters int
+}
+
+var dagRequests = make(map[string]*dagLock)
 var dagRequestsLock = sync.Mutex{}
 
+// callDagRequestLock serializes requests for one DAG and returns the function
+// that releases it. Different DAGs never block each other.
+//
+// The entry is reference counted rather than deleted on unlock: dropping it
+// while another caller still held or awaited it handed two callers separate
+// mutexes for the same DAG, which defeated the exclusion entirely. Every access
+// to the map is made under dagRequestsLock, since reading it while another
+// goroutine deletes is a data race and can crash the process.
 func callDagRequestLock(workflowID string) func() {
 	dagRequestsLock.Lock()
-	_, exist := dagRequests[workflowID]
+	entry, exist := dagRequests[workflowID]
 	if !exist {
-		dagRequests[workflowID] = new(sync.Mutex)
+		entry = &dagLock{}
+		dagRequests[workflowID] = entry
 	}
+	entry.waiters++
 	dagRequestsLock.Unlock()
 
-	dagRequests[workflowID].Lock()
+	entry.mu.Lock()
 
+	// The release is idempotent so a double call cannot unlock a mutex this
+	// caller no longer owns, matching the previous guard.
+	var once sync.Once
 	return func() {
-		_, exist := dagRequests[workflowID]
-		if !exist {
-			return
-		}
+		once.Do(func() {
+			entry.mu.Unlock()
 
-		dagRequests[workflowID].Unlock()
-
-		dagRequestsLock.Lock()
-		delete(dagRequests, workflowID)
-		dagRequestsLock.Unlock()
+			dagRequestsLock.Lock()
+			entry.waiters--
+			if entry.waiters == 0 {
+				delete(dagRequests, workflowID)
+			}
+			dagRequestsLock.Unlock()
+		})
 	}
 }
 
