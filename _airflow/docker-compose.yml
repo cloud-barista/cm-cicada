@@ -38,6 +38,9 @@ services:
             # monitor_dag가 Airflow REST API(/api/v2)를 호출할 때 쓰는 커넥션.
             # Airflow 3에서는 태스크가 메타DB에 직접 접근할 수 없어서 API를 거쳐야 한다.
             - AIRFLOW_CONN_AIRFLOW_API={"conn_type":"http","host":"localhost","port":8080,"schema":"http","login":"airflow","password":"airflow_pass"}
+            # Task Execution API용 JWT 서명 키. 평문을 airflow.cfg에 커밋하지 않기 위해
+            # 환경변수로 주입한다(.env 참고). 배포처(cm-mayfly 등)에서 자체 값으로 덮어쓴다.
+            - AIRFLOW__API_AUTH__JWT_SECRET=${AIRFLOW_JWT_SECRET}
         command: >
             /bin/bash -c "
                 # Wait for MySQL
