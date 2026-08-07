@@ -35,7 +35,13 @@
           {
             "name": "send_result_via_email",
             "task_component": "trigger_email",
-            "spec": {},
+            "spec": {
+              "conf": {
+                "source_workflow_id": "{{ dag.dag_id }}",
+                "source_workflow_run_id": "{{ dag_run.run_id }}",
+                "to_email": "test@test.com"
+              }
+            },
             "dependencies": [
               "run_software_migration"
             ]
