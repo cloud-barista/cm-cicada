@@ -97,6 +97,51 @@ cm-cicada 워크플로에서 어떤 task의 HTTP 응답을 **다음 task의 요�
 
 ---
 
+## 넘길 수 있는 항목 확인하기 (`response_schema`)
+
+`<task>.<jsonpath>` 로 무엇을 뽑을 수 있는지는 **그 task의 응답 구조**에 달려 있습니다.
+Swagger에서 자동 생성된 `http` task component는 부팅 시 대상 API의 **성공 응답(2xx) 본문
+스키마**를 함께 읽어 `spec.response_schema` 에 넣어 두므로, task component를 조회하면
+어떤 필드를 참조할 수 있는지 바로 볼 수 있습니다.
+
+```
+GET /cicada/task_component/{id}
+GET /cicada/task_component/name/{name}
+```
+
+```json
+{
+  "name": "beetle_task_recommend_infra",
+  "type": "http",
+  "spec": {
+    "api_connection_id": "beetle_api",
+    "method": "POST",
+    "endpoint": "/beetle/api/recommendation/infra",
+    "request_body": "...",
+    "body_params_schema": { "...": "요청 본문 스키마" },
+    "response_schema": {
+      "type": "object",
+      "properties": {
+        "targetInfra": { "type": "object", "properties": { "name": { "type": "string" }, "...": {} } },
+        "cloudInfraModel": { "type": "object", "properties": {} }
+      }
+    }
+  }
+}
+```
+
+- `response_schema.properties` 의 키가 곧 `<task>.<key>` 로 참조 가능한 항목입니다
+  (위 예에서는 `<task>.targetInfra`, `<task>.targetInfra.name`, `<task>.cloudInfraModel` 등).
+- 응답이 배열이면 `response_schema.type` 이 `array`, 원소 구조는 `items` 에 담깁니다.
+  이때는 `<task>.$[*].field` 처럼 JSONPath로 접근합니다.
+- Swagger의 `$ref` 는 (중첩 포함) 실제 구조로 풀어서 저장합니다. 응답에 본문 스키마가 없으면
+  (예: `204`) `response_schema` 는 생략됩니다.
+
+> Swagger 문서는 부팅 시점에 라이브로 읽으므로, 대상 모듈이 떠 있을 때 최신 스키마로 갱신됩니다.
+> 손으로 만든 component에는 `response_schema` 가 없을 수 있습니다.
+
+---
+
 ## 우선순위 정리
 
 `http` task가 본문을 결정하는 순서:
@@ -114,3 +159,5 @@ cm-cicada 워크플로에서 어떤 task의 HTTP 응답을 **다음 task의 요�
   (`parseTaskReference` / `hasTemplateRef` / `resolveTemplateXcomTaskIDs`)
 - 추출/치환 구현: [`_airflow/airflow-home/operators/json_http_request_operator.py`](../_airflow/airflow-home/operators/json_http_request_operator.py)
   (JSONPath 처리는 `jsonpath-ng` 사용)
+- `response_schema` 생성: [`lib/airflow/bootstrap/swagger.go`](../lib/airflow/bootstrap/swagger.go)
+  의 `processEndpoint` (`successResponse` / `resolveResponseSchema`)

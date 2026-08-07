@@ -69,6 +69,15 @@ type Operation struct {
 	OperationID string      `yaml:"operationId"`
 	Description string      `yaml:"description"`
 	Parameters  []Parameter `yaml:"parameters"`
+	// Responses maps status code (e.g. "200") -> response definition. Used to
+	// derive the response_schema of the generated task component.
+	Responses map[string]Response `yaml:"responses,omitempty"`
+}
+
+// Response is a Swagger 2.0 response object. Only the body schema is consumed.
+type Response struct {
+	Description string       `yaml:"description,omitempty"`
+	Schema      *SchemaModel `yaml:"schema,omitempty"`
 }
 
 type ParameterSchema struct {
@@ -346,6 +355,43 @@ func parameterToMap(p Parameter) map[string]any {
 	return m
 }
 
+// successResponse picks the response that describes a successful call: the
+// first 2xx in ascending status order, falling back to "default". Returns the
+// response and true if one with a body schema is found.
+func successResponse(responses map[string]Response) (Response, bool) {
+	// Prefer the lowest 2xx code (200 before 201 before 204...).
+	best := ""
+	for code, resp := range responses {
+		if len(code) == 3 && code[0] == '2' && resp.Schema != nil {
+			if best == "" || code < best {
+				best = code
+			}
+		}
+	}
+	if best != "" {
+		return responses[best], true
+	}
+	if resp, ok := responses["default"]; ok && resp.Schema != nil {
+		return resp, true
+	}
+	return Response{}, false
+}
+
+// resolveResponseSchema resolves a response body schema into a fully-expanded
+// SchemaModel, following $ref both for a direct object and for an array of
+// objects. Inline schemas are returned as-is.
+func resolveResponseSchema(schema *SchemaModel, definitions map[string]SchemaModel) SchemaModel {
+	switch {
+	case schema.Ref != "":
+		return resolveSchemaRef(schema.Ref, definitions)
+	case schema.Type == "array" && schema.Items != nil && schema.Items.Ref != "":
+		resolvedItem := resolveSchemaRef(schema.Items.Ref, definitions)
+		return SchemaModel{Type: "array", Items: &resolvedItem}
+	default:
+		return *schema
+	}
+}
+
 // processEndpoint walks a SwaggerSpec, locates the target endpoint+method, and
 // builds a TaskComponent of type "http" with the resolved endpoint, method,
 // connection id, generated request body example, and parameter schemas
@@ -406,6 +452,14 @@ func processEndpoint(connectionID string, spec *SwaggerSpec, targetEndpoint, tar
 			}
 			if len(querySchema) > 0 {
 				specMap["query_params_schema"] = querySchema
+			}
+
+			// Response body schema of the successful call, so a query on the
+			// task component exposes what fields downstream tasks can pull via
+			// request_body "<task>.<jsonpath>" references.
+			if resp, ok := successResponse(operation.Responses); ok {
+				resolved := resolveResponseSchema(resp.Schema, spec.Definitions)
+				specMap["response_schema"] = schemaToMap(resolved)
 			}
 
 			return &model.TaskComponent{
