@@ -7,6 +7,7 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -210,6 +211,11 @@ func readCMCicadaConfigFile() error {
 			"or 'conf' directory where placed in the path of '" + common.ModuleROOT + "' environment variable")
 	}
 
+	data, err = expandEnvRefs(data)
+	if err != nil {
+		return err
+	}
+
 	err = yaml.Unmarshal(data, &CMCicadaConfig)
 	if err != nil {
 		return err
@@ -221,6 +227,39 @@ func readCMCicadaConfigFile() error {
 	}
 
 	return nil
+}
+
+// envRefPattern matches a braced ${VAR} environment reference (the bare $VAR form
+// is intentionally left alone so a literal '$' in a value is not touched).
+var envRefPattern = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}`)
+
+// expandEnvRefs replaces every ${VAR} reference in the raw config with the value of
+// environment variable VAR, so credentials — each Airflow connection's login and
+// password, the Airflow server login — can be supplied the way the rest of the
+// stack is wired via cm-mayfly instead of being written into this tracked file as
+// literals. A reference to an unset variable is an error rather than an empty
+// substitution: an empty credential still yields a valid-looking file whose service
+// comes up healthy and then fails every workflow with an unhelpful "Unauthorized".
+func expandEnvRefs(data []byte) ([]byte, error) {
+	var missing []string
+	seen := make(map[string]bool)
+
+	out := envRefPattern.ReplaceAllFunc(data, func(match []byte) []byte {
+		key := string(envRefPattern.FindSubmatch(match)[1])
+		if v, ok := os.LookupEnv(key); ok {
+			return []byte(v)
+		}
+		if !seen[key] {
+			seen[key] = true
+			missing = append(missing, key)
+		}
+		return match
+	})
+
+	if len(missing) > 0 {
+		return nil, errors.New("config error: referenced environment variable(s) not set: " + strings.Join(missing, ", "))
+	}
+	return out, nil
 }
 
 func prepareCMCicadaConfig() error {
