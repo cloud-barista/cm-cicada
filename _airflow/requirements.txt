@@ -204,7 +204,7 @@ sql_metadata==3.0.1
 SQLAlchemy==2.0.51
 SQLAlchemy-Utils==0.42.1
 sqlglot==30.12.0
-sqlparse==0.5.5
+sqlparse==0.6.0
 starlette==1.3.1
 structlog==26.1.0
 svcs==25.1.0
