@@ -2,7 +2,7 @@ package client
 
 import "time"
 
-// Types mirror the Airflow 3.3.0 v2 schemas, limited to the fields cm-cicada
+// Types mirror the Airflow 3.3.2 v2 schemas, limited to the fields cm-cicada
 // reads. Nullable fields are pointers so "absent" stays distinguishable from
 // the zero value.
 //
