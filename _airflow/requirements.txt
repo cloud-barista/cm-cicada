@@ -137,7 +137,7 @@ methodtools==0.4.7
 more-itertools==11.1.0
 msgpack==1.2.2
 msgspec==0.21.1
-multidict==6.8.0
+multidict==6.9.1
 mysql-connector-python==26.7.0
 mysqlclient==2.2.8
 natsort==8.4.0
