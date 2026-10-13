@@ -237,7 +237,7 @@ func (c *Client) ClearTaskInstance(dagID string, dagRunID string, option model.T
 		IncludePast:       false,
 		OnlyFailed:        option.OnlyFailed,
 		OnlyRunning:       option.OnlyRunning,
-		ResetDagRuns:      option.ResetDagRuns,
+		ResetDagRuns:      option.ResetDagRunsOrDefault(),
 	}
 
 	response, err := c.api.ClearTaskInstances(ctx, dagID, clearTask)

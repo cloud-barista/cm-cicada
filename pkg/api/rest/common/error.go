@@ -44,7 +44,7 @@ func ValidateTaskClearOptions(opt model.TaskClearOption) error {
 	}
 
 	// dry_run 이 true인데 reset_dag_runs 도 true인 경우, 실제 reset은 발생하지 않음 (경고 또는 에러)
-	if opt.DryRun && opt.ResetDagRuns {
+	if opt.DryRun && opt.ResetDagRuns != nil && *opt.ResetDagRuns {
 		return errors.New("dry_run이 true이면 reset_dag_runs는 의미가 없습니다")
 	}
 

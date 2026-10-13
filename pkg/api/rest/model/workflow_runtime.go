@@ -100,7 +100,20 @@ type TaskClearOption struct {
 	IncludeUpstream bool `json:"includeUpstream"`
 	OnlyFailed      bool `json:"onlyFailed"`
 	OnlyRunning     bool `json:"onlyRunning"`
-	ResetDagRuns    bool `json:"resetDagRuns"`
+	// ResetDagRuns is a pointer so an omitted field can be told apart from an
+	// explicit false; see ResetDagRunsOrDefault.
+	ResetDagRuns *bool `json:"resetDagRuns,omitempty"`
+}
+
+// ResetDagRunsOrDefault returns the reset_dag_runs value to send to Airflow.
+// Airflow defaults reset_dag_runs to true, which puts a finished run back in
+// the queue so the cleared tasks actually run again. When the caller omits the
+// field, follow that default, except on a dry run where nothing is reset.
+func (o TaskClearOption) ResetDagRunsOrDefault() bool {
+	if o.ResetDagRuns != nil {
+		return *o.ResetDagRuns
+	}
+	return !o.DryRun
 }
 
 type WorkflowStatus struct {
