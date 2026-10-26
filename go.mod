@@ -6,7 +6,7 @@ require (
 	github.com/cloud-barista/cm-beetle/imdl v0.1.16
 	github.com/google/uuid v1.6.0
 	github.com/jollaman999/utils v1.0.10
-	github.com/labstack/echo/v4 v4.16.0
+	github.com/labstack/echo/v4 v4.16.1
 	github.com/melbahja/goph v1.5.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/swaggo/echo-swagger v1.5.2
