@@ -135,7 +135,7 @@ mdit-py-plugins==0.6.1
 mdurl==0.1.2
 methodtools==0.4.7
 more-itertools==11.1.0
-msgpack==1.2.2
+msgpack==1.2.3
 msgspec==0.21.1
 multidict==6.9.1
 mysql-connector-python==26.7.0
