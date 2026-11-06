@@ -15,7 +15,7 @@ on:
       - "assets/**"
       - "scripts/**"
       - "docs/**"
-      - "_airflow"
+      - "_airflow/**"
 
 jobs:
   # The job key (i.e., ID) is "build-source-code"
