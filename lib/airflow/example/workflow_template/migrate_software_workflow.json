@@ -14,6 +14,9 @@
             "spec": {
               "path_params": {
                 "id": "1ae898ed-592f-4385-a772-52545ce82ae5"
+              },
+              "query_params": {
+                "modelStage": "target"
               }
             },
             "dependencies": []

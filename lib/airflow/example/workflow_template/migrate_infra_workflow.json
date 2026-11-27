@@ -14,6 +14,9 @@
             "spec": {
               "path_params": {
                 "id": "89d6cc4b-555d-4004-838b-18709b0aeb2c"
+              },
+              "query_params": {
+                "modelType": "cloud"
               }
             },
             "dependencies": []

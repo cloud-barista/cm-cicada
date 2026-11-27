@@ -1,11 +1,11 @@
 {
   "name": "damselfly_task_get_target_software_model",
-  "description": "Get software migration model from Damselfly",
+  "description": "Get target software migration model from Damselfly",
   "type": "http",
   "spec": {
     "api_connection_id": "damselfly_api",
     "swagger_yaml_endpoint": "/damselfly/api/doc.yaml",
     "method": "GET",
-    "endpoint": "/softwaremodel/source/{id}"
+    "endpoint": "/software-model/{id}"
   }
 }
